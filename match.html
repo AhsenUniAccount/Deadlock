@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Match details • Deadlock Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="common.js" defer></script>
+    <script src="match-stats.js" defer></script>
+    <script src="souls-chart.js" defer></script>
+    <script src="analysis-stats.js" defer></script>
+    <script src="match-analysis.js" defer></script>
+    <script src="match.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a class="brand" href="index.html">DEADLOCK<span>TRACKER</span></a
+        ><span class="connection">Match statistics</span>
+      </header>
+      <section id="match-page" aria-labelledby="match-title">
+        <div class="match-page-header">
+          <div>
+            <p class="eyebrow">MATCH BREAKDOWN</p>
+            <h1 id="match-title">Match details</h1>
+          </div>
+          <a class="secondary-button" href="index.html">Player search</a>
+        </div>
+        <p
+          id="match-status"
+          class="results-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <button id="retry-match" class="secondary-button" type="button" hidden>
+          Retry match
+        </button>
+        <div id="match-content" hidden>
+          <section class="mvp-section" aria-labelledby="mvp-heading">
+            <div class="section-heading">
+              <p class="eyebrow">01 / MATCH HIGHLIGHTS</p>
+              <h2 id="mvp-heading">Match MVPs</h2>
+              <p class="match-help">
+                MVP rankings reported by the game through the API, across both
+                teams.
+              </p>
+            </div>
+            <div id="match-mvps" class="team-mvps"></div>
+          </section>
+          <nav class="match-contents" aria-label="Match contents">
+            <strong>Contents</strong>
+            <a href="#souls-graph">Player analysis</a>
+            <a href="#kda-tables">KDA table</a>
+            <a href="#items-purchased">Items</a>
+            <a href="#lane-comparison">Lane comparison</a>
+            <a href="#match-analysis">Analysis</a>
+            <a href="#kill-timeline">Kill timeline</a>
+          </nav>
+          <details id="souls-graph" class="souls-panel match-details" open>
+            <summary id="souls-heading">Player analysis</summary>
+            <p id="souls-note" class="match-help"></p>
+            <div class="analysis-body">
+              <p id="souls-perspective-label">Player perspective</p>
+              <details id="souls-perspective" class="hero-picker">
+                <summary
+                  aria-labelledby="souls-perspective-label"
+                  id="souls-perspective-current"
+                >
+                  Choose a player
+                </summary>
+                <div
+                  id="souls-perspective-options"
+                  class="hero-picker-options"
+                ></div>
+              </details>
+            </div>
+            <div class="perspective-kda" role="status" aria-live="polite">
+              <span>Final K / D / A</span>
+              <strong id="souls-player-kda"></strong>
+            </div>
+            <div class="chart-scroll">
+              <svg
+                id="souls-chart"
+                viewBox="0 0 1000 400"
+                role="img"
+                aria-labelledby="souls-chart-title souls-chart-description"
+              >
+                <title id="souls-chart-title">
+                  Souls per player over game time
+                </title>
+                <desc id="souls-chart-description">
+                  One line per player. X axis: elapsed game time. Y axis: souls.
+                  Choose a player perspective and hover over snapshots or events
+                  for details.
+                </desc>
+              </svg>
+            </div>
+            <div class="analysis-body">
+              <label
+                ><input id="show-souls-events" type="checkbox" checked /> Show
+                highlighted player’s kills, deaths and purchases</label
+              >
+              <div class="event-key" aria-label="Graph event key">
+                <span
+                  ><i class="event-symbol event-kill" aria-hidden="true"></i
+                  >Kills</span
+                >
+                <span
+                  ><i class="event-symbol event-death" aria-hidden="true">×</i
+                  >Deaths</span
+                >
+                <span
+                  ><svg
+                    class="event-symbol event-purchase"
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M2 3h2l2 10h9l3-7H5 M7 16h.01 M14 16h.01"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    /></svg
+                  >Purchases</span
+                >
+              </div>
+              <p class="match-help">
+                Small dots on the lines are souls snapshots.
+              </p>
+              <p id="souls-event-detail" role="status"></p>
+            </div>
+          </details>
+          <details id="kda-tables" class="match-details">
+            <summary id="scoreboards-heading">KDA table</summary>
+            <p class="match-help">Select a player to highlight their items and souls line. Souls are final net worth, including spent souls.</p>
+            <div id="match-scoreboard" class="team-scoreboards"></div>
+          </details>
+          <details
+            id="items-purchased"
+            class="match-details all-purchases-section"
+          >
+            <summary>Items</summary>
+            <p class="match-help">
+              Purchases in game-time order, including items later sold or
+              replaced. Select an item’s details to see its purchase and removal
+              times.
+            </p>
+            <div id="all-player-purchases"></div>
+          </details>
+          <details id="lane-comparison" class="match-details">
+            <summary>Lane comparison</summary>
+            <div class="analysis-body">
+              <p class="match-help">
+                Choose any two opposing players. This selection is independent
+                of the scoreboard highlight; lanes are not inferred.
+              </p>
+              <label for="lane-player">First player</label
+              ><select id="lane-player"></select>
+              <label for="analysis-opponent">Opposing player</label
+              ><select id="analysis-opponent"></select>
+              <label for="lane-time">Compare at game time</label
+              ><input
+                id="lane-time"
+                type="range"
+                min="0"
+                max="1"
+                value="600"
+              /><output id="lane-time-label" for="lane-time"></output>
+              <div id="opponent-comparison"></div>
+            </div>
+          </details>
+          <details id="match-analysis" class="match-details">
+            <summary>Match analysis</summary>
+            <div class="analysis-body">
+              <h3>Team souls advantage</h3>
+              <p class="match-help">
+                The Hidden King minus The ArchMother. Positive: Hidden King
+                ahead. Negative: ArchMother ahead. Only snapshots shared by
+                every player are included.
+              </p>
+              <div class="chart-scroll">
+                <svg
+                  id="advantage-chart"
+                  viewBox="0 0 1000 300"
+                  role="img"
+                  aria-label="Team souls advantage over game time"
+                ></svg>
+              </div>
+              <p id="advantage-note" class="match-help"></p>
+            </div>
+          </details>
+          <details id="kill-timeline" class="match-details">
+            <summary>Kill timeline</summary>
+            <p id="kill-timeline-note" class="match-help"></p>
+            <ol id="kill-events" class="kill-events"></ol>
+          </details>
+        </div>
+      </section>
+      <noscript>Please enable JavaScript to load match details.</noscript>
+    </main>
+  </body>
+</html>

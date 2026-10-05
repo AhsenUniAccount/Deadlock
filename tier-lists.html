@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Tier lists • Deadlock Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="common.js" defer></script>
+    <script src="tier-stats.js" defer></script>
+    <script src="tier-lists.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Deadlock player tracker home"
+          >DEADLOCK<span>TRACKER</span></a
+        >
+        <nav aria-label="Page navigation">
+          <a href="index.html#page-heading">Overview</a
+          ><a class="nav-current" href="tier-lists.html" aria-current="page"
+            >Tier lists</a
+          >
+        </nav>
+        <span class="connection">Community tracker</span>
+      </header>
+      <div class="page-heading">
+        <p class="eyebrow">PLAYERBASE ANALYTICS</p>
+        <h1>Hero tier lists</h1>
+        <p class="intro">Compare heroes by win rate across recorded matches.</p>
+      </div>
+      <form id="tier-filters" class="search-panel tier-filters">
+        <div class="field">
+          <label for="tier-days">Time window</label
+          ><select id="tier-days">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tier-mode">Match mode</label
+          ><select id="tier-mode">
+            <option value="ranked,unranked">Ranked + unranked</option>
+            <option value="ranked">Ranked only</option>
+            <option value="unranked">Unranked only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tier-minimum">Minimum scored matches</label
+          ><select id="tier-minimum">
+            <option value="1">All sample sizes</option>
+            <option value="100">100 matches</option>
+            <option value="1000" selected>1,000 matches</option>
+            <option value="10000">10,000 matches</option>
+          </select>
+        </div>
+        <button type="submit">Apply filters</button>
+      </form>
+      <section class="panel" aria-labelledby="ranking-heading">
+        <div class="toolbar">
+          <h2 id="ranking-heading">Heroes ranked by win rate</h2>
+          <span id="tier-count" class="scope"></span>
+        </div>
+        <p
+          id="tier-status"
+          class="results-status"
+          role="status"
+          aria-live="polite"
+        >
+          Loading aggregate hero statistics…
+        </p>
+        <button id="tier-retry" class="secondary-button" type="button" hidden>
+          Retry loading
+        </button>
+        <div
+          class="table-scroll"
+          role="region"
+          aria-label="Hero win-rate rankings"
+          tabindex="0"
+        >
+          <table class="tier-table">
+            <caption id="tier-caption" class="sr-only">
+              Hero rankings across recorded matches
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Hero</th>
+                <th scope="col" aria-sort="descending">Win rate</th>
+                <th scope="col">Scored matches</th>
+                <th scope="col">Wins</th>
+                <th scope="col">Losses</th>
+              </tr>
+            </thead>
+            <tbody id="tier-results"></tbody>
+          </table>
+        </div>
+        <p class="explanation">
+          Win rate = wins ÷ (wins + losses). Ranked by the unrounded rate; equal
+          rates are ordered by sample size, then hero ID. Unscored matches are
+          excluded. Normal game mode, all ranks. A high win rate is a
+          statistical result, not a guarantee of hero strength.
+        </p>
+      </section>
+      <aside class="data-note">
+        <p>
+          <strong>Recorded population</strong
+          ><span
+            >Aggregate data from
+            <a
+              href="https://api.deadlock-api.com/docs"
+              target="_blank"
+              rel="noreferrer"
+              >Deadlock API</a
+            >. Coverage may be incomplete or delayed. Time windows can span
+            balance patches; hero names and portraits use the current
+            catalog.</span
+          >
+        </p>
+      </aside>
+      <footer>
+        <span
+          >Deadlock Tracker <span class="footer-divider">/</span> Community
+          project</span
+        ><span>No sign-in needed</span>
+      </footer>
+      <noscript
+        >Please enable JavaScript and connect to the internet to load hero
+        rankings.</noscript
+      >
+    </main>
+  </body>
+</html>

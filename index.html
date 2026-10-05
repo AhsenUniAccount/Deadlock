@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Deadlock • Player tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="stats.js" defer></script>
+    <script src="common.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Deadlock player tracker home"
+          >DEADLOCK<span>TRACKER</span></a
+        >
+        <nav aria-label="Page navigation">
+          <a class="nav-current" href="#page-heading">Overview</a
+          ><a href="tier-lists.html">Tier lists</a>
+        </nav>
+        <span class="connection">Community tracker</span>
+      </header>
+
+      <div class="page-heading">
+        <p class="eyebrow">PLAYER INSIGHTS</p>
+        <h1 id="page-heading">Player statistics</h1>
+        <p class="intro">
+          Find a player. Explore their recent matches, favourite heroes, and
+          performance.
+        </p>
+      </div>
+
+      <section class="player-overview" aria-label="Player search and summary">
+        <div class="search-panel" aria-labelledby="roster-heading">
+          <h2 id="roster-heading">Find a player</h2>
+          <div class="search-fields">
+            <form id="search-form">
+              <label for="search-query">Steam name or account ID</label>
+              <div class="search-controls">
+                <div class="search-combobox">
+                  <input
+                    id="search-query"
+                    type="search"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-controls="player-suggestions"
+                    aria-describedby="search-status"
+                    placeholder="Start typing a player name…"
+                    required
+                    maxlength="100"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                  <div
+                    id="player-suggestions"
+                    class="player-suggestions"
+                    role="listbox"
+                    aria-label="Matching Steam players"
+                    hidden
+                  ></div>
+                </div>
+                <button type="submit">Search</button>
+              </div>
+            </form>
+            <div class="field">
+              <span class="field-label" id="selected-label"
+                >Selected player</span
+              >
+              <div
+                id="selected-player"
+                class="selected-player"
+                aria-labelledby="selected-label"
+              >
+                No player selected
+              </div>
+            </div>
+          </div>
+          <p
+            id="search-status"
+            class="search-caption"
+            role="status"
+            aria-live="polite"
+          >
+            Type at least 2 characters, then choose a player. Use ↑ and ↓ to
+            browse, Enter to select.
+          </p>
+        </div>
+        <aside class="record" aria-label="Recent player record">
+          <span>Recent win rate</span><strong id="overall-rate">—</strong>
+          <p id="record-detail">No player selected</p>
+          <span class="record-scope">Based on up to 20 recorded matches</span>
+        </aside>
+      </section>
+
+      <section class="panel" aria-labelledby="results-heading">
+        <div class="toolbar">
+          <div><h2 id="results-heading">Hero performance</h2></div>
+          <span id="results-scope" class="scope"
+            >Latest 20 recorded matches</span
+          >
+        </div>
+        <p
+          id="summary"
+          class="results-status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Find a player to retrieve their recent statistics.
+        </p>
+        <div
+          class="table-scroll"
+          role="region"
+          aria-label="Hero performance results"
+          tabindex="0"
+        >
+          <table>
+            <caption id="table-caption" class="sr-only">
+              Hero results for the selected player
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Hero</th>
+                <th scope="col">Matches</th>
+                <th scope="col">Wins</th>
+                <th scope="col">Losses</th>
+                <th scope="col">Other</th>
+                <th scope="col">Win rate</th>
+              </tr>
+            </thead>
+            <tbody id="hero-results"></tbody>
+          </table>
+        </div>
+        <p class="explanation">
+          Win rate = wins ÷ scored matches (wins + losses). Invalid, penalized,
+          and unscored outcomes appear under Other and are excluded from win
+          rates.
+        </p>
+      </section>
+      <section class="panel recent-panel" aria-labelledby="recent-heading">
+        <div class="toolbar">
+          <div><h2 id="recent-heading">Recent matches</h2></div>
+          <span id="kda-summary" class="scope">Kills / deaths / assists</span>
+        </div>
+        <form
+          id="match-search-form"
+          class="match-search-form"
+          action="match.html"
+          method="get"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <label for="match-id">Open a match by ID</label>
+          <div class="search-controls">
+            <input
+              id="match-id"
+              name="id"
+              inputmode="numeric"
+              pattern="[0-9]+"
+              placeholder="Match ID"
+              required
+              aria-describedby="match-id-status"
+            /><button type="submit">Open match</button>
+          </div>
+          <span id="match-id-status" role="status"></span>
+        </form>
+        <div
+          class="table-scroll"
+          role="region"
+          aria-label="Recent match results"
+          tabindex="0"
+        >
+          <table>
+            <caption class="sr-only">
+              Latest recorded matches for the selected player
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Hero / match</th>
+                <th scope="col">Played</th>
+                <th scope="col">Result</th>
+                <th scope="col">K / D / A</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Details</th>
+              </tr>
+            </thead>
+            <tbody id="recent-results"></tbody>
+          </table>
+        </div>
+      </section>
+      <aside class="data-note">
+        <p>
+          <strong>Community data</strong
+          ><span
+            >Provided by
+            <a
+              href="https://api.deadlock-api.com/docs"
+              target="_blank"
+              rel="noreferrer"
+              >Deadlock API</a
+            >, an unofficial service. Recorded matches may be incomplete or
+            delayed. Searches are sent to this service.</span
+          >
+        </p>
+      </aside>
+      <footer>
+        <span
+          >Deadlock Tracker <span class="footer-divider">/</span> Community
+          project</span
+        ><span>No sign-in needed</span>
+      </footer>
+      <noscript
+        >Please enable JavaScript and connect to the internet to retrieve player
+        statistics.</noscript
+      >
+    </main>
+  </body>
+</html>
