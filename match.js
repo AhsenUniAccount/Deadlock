@@ -179,6 +179,7 @@ function renderMatch() {
   ]) {
     const section = document.createElement("section");
     section.className = "team-scoreboard";
+    section.dataset.team = String(team);
     const title = cell("h3", teamName(team));
     title.id = `scoreboard-team-${team ?? "unknown"}`;
     section.setAttribute("aria-labelledby", title.id);
@@ -360,6 +361,7 @@ function renderMatchHighlights() {
   for (const player of mvps) {
     const card = document.createElement("section");
     card.className = "mvp-team match-mvp";
+    card.dataset.team = String(player.team);
     card.append(
       cell("h3", `#${player.mvpRank} MVP`),
       matchIdentity(player).identity,
@@ -387,6 +389,7 @@ function renderAllPurchases() {
   ]) {
     const group = document.createElement("section");
     group.className = "purchase-team";
+    group.dataset.team = String(team);
     group.append(cell("h3", teamName(team)));
     for (const player of matchView.match.players.filter(
       (person) => person.team === team,

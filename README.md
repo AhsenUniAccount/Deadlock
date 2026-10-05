@@ -77,6 +77,9 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 
 ## Files
 
+- `deadlock-theme.css`: shared visual theme (period-style headings, squared panels, team accents and report stamps), loaded after the base styles.
+- `city-silhouette.svg`, `tracker-seal.svg`: original decorative header assets, stored locally.
+
 - `index.html`: search form and results structure.
 - `tier-lists.html`, `tier-lists.js`: aggregate hero ranking page and filters.
 - `tier-stats.js`: validated win-rate ranking and sample-size filtering.

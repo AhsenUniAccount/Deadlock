@@ -368,10 +368,15 @@ function renderResults(player, { totals, heroes, recent }, names) {
     const duration = Number.isFinite(match.match_duration_s)
       ? `${Math.floor(match.match_duration_s / 60)}:${String(match.match_duration_s % 60).padStart(2, "0")}`
       : "—";
+    // Keep the outcome explicit in text as well as its coloured report stamp.
+    const outcomeCell = cell("td", "");
+    const stamp = cell("span", outcome);
+    stamp.className = `outcome-stamp outcome-${outcome.toLowerCase()}`;
+    outcomeCell.append(stamp);
     row.append(
       hero,
       cell("td", dateTime(match.start_time)),
-      cell("td", outcome),
+      outcomeCell,
       cell("td", kda),
       cell("td", duration),
     );

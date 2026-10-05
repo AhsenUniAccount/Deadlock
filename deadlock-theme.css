@@ -1,0 +1,319 @@
+/* Visual layer shared by all pages. Chart colours retain their statistical meaning. */
+:root {
+  --surface: #222321;
+  --line: #444640;
+  --muted: #b2b0a5;
+  --accent: #d7bf83;
+  --display:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% 0, #36362c66, transparent 620px), #171918;
+}
+/* Decorative city silhouette stays behind the header, away from tables and plots. */
+main {
+  background: url("city-silhouette.svg") no-repeat right 88px;
+  background-size: 700px 190px;
+}
+.masthead {
+  border-bottom: 3px double #686454;
+}
+.brand {
+  font-family: var(--display);
+  font-weight: 900;
+  letter-spacing: -0.065em;
+}
+.brand::before {
+  content: "";
+  width: 28px;
+  height: 34px;
+  flex-shrink: 0;
+  background: url("tracker-seal.svg") center / contain no-repeat;
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  font-size: clamp(34px, 4.5vw, 50px);
+}
+h2,
+.section-heading h2,
+.team-scoreboard-header h3,
+.purchase-team > h3 {
+  font-family: var(--display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+h2 {
+  font-size: 21px;
+}
+.eyebrow {
+  letter-spacing: 0.2em;
+  color: #bfb7a2;
+}
+.page-heading,
+.match-page-header {
+  padding-top: 36px;
+}
+.search-panel,
+.record,
+.panel,
+.match-details,
+.mvp-team,
+.player-purchases,
+.purchase-card,
+.hero-picker > summary,
+.hero-picker-options,
+.hero-picker-options button,
+.player-suggestions,
+.player-option,
+input,
+select,
+button,
+.secondary-button,
+.souls-player-tooltip {
+  border-radius: 3px;
+}
+.search-panel,
+.record,
+.panel,
+.match-details,
+.mvp-team,
+.player-purchases {
+  border-color: var(--line);
+}
+.search-panel,
+.record {
+  border-top: 3px double #797362;
+}
+.panel > .toolbar {
+  border-bottom: 3px double var(--line);
+}
+.record {
+  background: #292a24;
+}
+.record > strong {
+  font-family: var(--display);
+  font-size: 56px;
+  font-weight: 800;
+}
+.selected-player {
+  background: #272a26;
+  border-color: #606157;
+  min-height: 52px;
+}
+.selected-player .avatar {
+  width: 40px;
+  height: 40px;
+}
+.selected-player .profile-identity > span {
+  font-size: 16px;
+  font-weight: 650;
+}
+button {
+  letter-spacing: 0.02em;
+}
+.secondary-button {
+  border-color: #66675e;
+  background: #242623;
+  color: #eee9dc;
+}
+.secondary-button:hover {
+  background: #343730;
+}
+.hero-picker-options button {
+  border-color: #444640;
+}
+.hero-picker-options button:hover,
+.hero-picker-options button[aria-pressed="true"] {
+  background: #353933;
+  border-color: #7b8076;
+}
+.hero-picker > summary::after {
+  border-color: #b2b0a5;
+}
+.hero-portrait,
+.item-portrait {
+  border-radius: 2px;
+  border: 1px solid #626459;
+  background: #30352d;
+}
+.hero-portrait img,
+.item-portrait img {
+  border-radius: 0;
+}
+thead {
+  background: #1b1e1b;
+}
+thead th {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  color: #c4bfae;
+}
+tbody td,
+.perspective-kda strong,
+.mvp-kda strong {
+  font-variant-numeric: tabular-nums;
+}
+.rate-track,
+.rate-fill {
+  border-radius: 0;
+}
+.rate-fill {
+  background: #aaa98a;
+}
+/* Outcome stamps retain visible text so colour is not the only signal. */
+.outcome-stamp {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.outcome-win {
+  color: #a8c5a0;
+}
+.outcome-loss {
+  color: #d39b90;
+}
+.outcome-other {
+  color: #b2b0a5;
+}
+#tier-results td:first-child {
+  text-align: left;
+  width: 64px;
+  font: 800 25px var(--display);
+  color: #d7bf83;
+}
+#tier-results .hero-portrait {
+  width: 38px;
+  height: 43px;
+}
+/* Team accents express faction identity; they never override graph team colours. */
+[data-team="0"] {
+  --team-ink: #d3ad6d;
+  --team-wash: #ad7d2620;
+}
+[data-team="1"] {
+  --team-ink: #93b8d3;
+  --team-wash: #457fa220;
+}
+.team-scoreboard-header {
+  border-top: 3px double var(--team-ink, #686454);
+  background: linear-gradient(
+    90deg,
+    var(--team-wash, transparent),
+    transparent
+  );
+}
+.team-scoreboard-header h3 {
+  color: var(--team-ink, #eee9dc);
+}
+.team-scoreboard-header h3::before {
+  content: "◇";
+  margin-right: 10px;
+  font-size: 21px;
+}
+.purchase-team > h3 {
+  color: var(--team-ink, #eee9dc);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+.match-mvp {
+  border-top: 3px solid var(--team-ink, #d7bf83);
+  background:
+    linear-gradient(145deg, var(--team-wash, transparent), transparent 70%),
+    #20231f;
+  position: relative;
+  overflow: hidden;
+}
+.match-mvp h3 {
+  font: 800 15px var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--team-ink, #d7bf83);
+}
+.match-mvp .hero-identity {
+  align-items: center;
+  font-size: 18px;
+  gap: 14px;
+}
+.match-mvp .hero-identity > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.match-mvp .hero-portrait {
+  width: 70px;
+  height: 82px;
+  flex-shrink: 0;
+  border-color: var(--team-ink, #686454);
+}
+.match-mvp .mvp-kda {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.match-mvp .mvp-kda strong {
+  font-size: 28px;
+}
+.match-mvp > p {
+  color: var(--team-ink, #b2b0a5);
+}
+.match-details > summary {
+  color: #eee9dc;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 750;
+}
+.match-details[open] > summary {
+  border-bottom: 3px double var(--line);
+}
+.match-contents {
+  border-block: 3px double var(--line);
+}
+.perspective-kda {
+  border-left: 3px solid #77796b;
+  padding-left: 18px;
+}
+.purchase-card {
+  background: #232620;
+  border-color: #454a3d;
+}
+.purchase-card summary strong {
+  color: #e5dfce;
+}
+.purchase-card small,
+.purchase-status {
+  color: #aaa99c;
+}
+.souls-player-tooltip {
+  border-color: #74756b;
+  background: #20231f;
+}
+:focus-visible {
+  outline-color: #c0c5bb;
+}
+@media (max-width: 640px) {
+  main {
+    background-size: 450px 150px;
+  }
+  .brand::before {
+    width: 20px;
+    height: 26px;
+  }
+  .brand {
+    gap: 7px;
+  }
+  .team-scoreboard-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .match-mvp .hero-portrait {
+    width: 56px;
+    height: 66px;
+  }
+}
