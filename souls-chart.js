@@ -16,6 +16,7 @@ const SoulsChart = (() => {
   let visible = new Set();
   let endTime = 1;
   const svgNS = "http://www.w3.org/2000/svg";
+  // Create SVG elements in the SVG namespace, with optional attributes and text.
   function node(tag, attributes = {}, text) {
     const element = document.createElementNS(svgNS, tag);
     for (const [key, value] of Object.entries(attributes))
@@ -23,9 +24,11 @@ const SoulsChart = (() => {
     if (text !== undefined) element.textContent = text;
     return element;
   }
+  // Format elapsed game seconds as minutes:seconds for axes and event labels.
   function time(seconds) {
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   }
+  // Resolve a readable player/hero label from the shared identity maps.
   function name(player) {
     return `${view.profiles.get(player.accountId)?.personaname || `Account ${player.accountId}`} · ${view.heroes.get(player.heroId)?.name || `Hero ${player.heroId}`}`;
   }
@@ -38,9 +41,11 @@ const SoulsChart = (() => {
   tooltip.hidden = true;
   document.body.append(tooltip);
 
+  // Dismiss floating hover content when focus, scrolling or disclosure state changes.
   function hideTooltip() {
     tooltip.hidden = true;
   }
+  // Show a player’s username and hero portrait when their line or snapshot is inspected.
   function showPlayerTooltip(player, event) {
     const hero = view.heroes.get(player.heroId);
     const heroName = hero?.name || `Hero ${player.heroId}`;
@@ -59,6 +64,7 @@ const SoulsChart = (() => {
     );
     positionTooltip(event);
   }
+  // Keep pointer and keyboard-triggered tooltips inside the viewport.
   function positionTooltip(event) {
     tooltip.hidden = false;
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -69,6 +75,7 @@ const SoulsChart = (() => {
     tooltip.style.left = `${Math.max(8, Math.min(x + 14, window.innerWidth - tooltip.offsetWidth - 8))}px`;
     tooltip.style.top = `${Math.max(8, Math.min(y + 14, window.innerHeight - tooltip.offsetHeight - 8))}px`;
   }
+  // Give line and snapshot targets matching hover and keyboard-focus behavior.
   function attachPlayerTooltip(element, player) {
     element.addEventListener("pointermove", (event) =>
       showPlayerTooltip(player, event),
@@ -88,6 +95,7 @@ const SoulsChart = (() => {
     .querySelector("#souls-graph")
     .addEventListener("toggle", hideTooltip);
 
+  // Build the portrait and two-line identity used by the perspective selector.
   function playerIdentity(player) {
     const hero = view.heroes.get(player.heroId);
     const heroName = hero?.name || `Hero ${player.heroId}`;
@@ -106,6 +114,7 @@ const SoulsChart = (() => {
       text,
     ];
   }
+  // Refresh dropdown choices and the selected player’s final K/D/A above the graph.
   function renderPerspective() {
     const current = document.querySelector("#souls-perspective-current");
     const options = document.querySelector("#souls-perspective-options");
@@ -146,6 +155,7 @@ const SoulsChart = (() => {
       options.append(button);
     }
   }
+  // Describe the selected kill, death or purchase, including the other player or item.
   function showEventTooltip(eventData, pointerEvent) {
     const text = document.createElement("span");
     text.append(
@@ -196,6 +206,7 @@ const SoulsChart = (() => {
     }
     positionTooltip(pointerEvent);
   }
+  // Attach accessible hover/focus tooltips to an event marker.
   function attachEventTooltip(element, eventData) {
     element.setAttribute("aria-describedby", tooltip.id);
     element.addEventListener("pointermove", (event) =>
@@ -216,6 +227,7 @@ const SoulsChart = (() => {
       }
     });
 
+  // Accept the latest match view, include every available timeline and refresh the chart.
   function render(nextView) {
     view = nextView;
     document.querySelector("#souls-event-detail").textContent = "";
@@ -238,6 +250,7 @@ const SoulsChart = (() => {
     renderPerspective();
     draw();
   }
+  // Draw axes, player lines, snapshots and optional selected-player event markers.
   function draw() {
     hideTooltip();
     const svg = document.querySelector("#souls-chart");
@@ -507,6 +520,7 @@ const SoulsChart = (() => {
     return [...kills, ...deaths, ...buys].sort((a, b) => a.time - b.time);
   }
 
+  // Reveal the graph and announce a selected event’s timestamp below it.
   function jump(seconds, label = "Selected event") {
     if (!view) return;
     document.querySelector("#souls-graph").open = true;

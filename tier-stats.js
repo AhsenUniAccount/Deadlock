@@ -1,6 +1,7 @@
 "use strict";
 
 const DeadlockTierStats = (() => {
+  // Validate aggregate counts, filter by scored sample size and rank by unrounded win rate.
   function rankHeroes(data, minimumMatches = 1000) {
     if (!Array.isArray(data))
       throw new Error("Unexpected hero statistics response.");

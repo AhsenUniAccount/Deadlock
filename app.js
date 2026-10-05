@@ -23,6 +23,7 @@ let searchTimer;
 let composing = false;
 let suggestionsDismissed = false;
 
+// Clear statistics when the search changes so the previous player’s results cannot linger.
 function resetResults(message) {
   resultsBody.replaceChildren();
   recentBody.replaceChildren();
@@ -37,6 +38,7 @@ function resetResults(message) {
     "Hero results for the selected player";
 }
 
+// Build the avatar, display name and account ID shared by suggestions and the selected profile.
 function profileContent(profile) {
   const identity = document.createElement("span");
   identity.className = "profile-identity";
@@ -53,6 +55,7 @@ function profileContent(profile) {
   ];
 }
 
+// Hide the suggestion list and reset its keyboard-accessibility state.
 function closeSuggestions() {
   suggestions.hidden = true;
   searchInput.setAttribute("aria-expanded", "false");
@@ -62,12 +65,14 @@ function closeSuggestions() {
   activeIndex = -1;
 }
 
+// Show current suggestions unless the user explicitly dismissed them.
 function openSuggestions() {
   if (!profiles.length || suggestionsDismissed) return;
   suggestions.hidden = false;
   searchInput.setAttribute("aria-expanded", "true");
 }
 
+// Move keyboard selection without moving focus away from the search field.
 function setActive(index) {
   activeIndex = index;
   for (let i = 0; i < suggestions.children.length; i++) {
@@ -82,6 +87,7 @@ function setActive(index) {
   }
 }
 
+// Rebuild clickable account suggestions from the latest search response.
 function setPlayerOptions() {
   closeSuggestions();
   suggestions.replaceChildren();
@@ -99,6 +105,7 @@ function setPlayerOptions() {
   openSuggestions();
 }
 
+// Commit a chosen account, stop pending searches and load its recent statistics.
 async function choosePlayer(profile) {
   clearTimeout(searchTimer);
   searchController?.abort();
@@ -125,6 +132,7 @@ function prepareSearch() {
   setPlayerOptions();
 }
 
+// Resolve numeric IDs locally or search indexed Steam names; ignore cancelled responses.
 async function searchPlayers(explicit = false) {
   const query = searchInput.value.trim();
   prepareSearch();
@@ -183,6 +191,7 @@ async function searchPlayers(explicit = false) {
   }
 }
 
+// Debounce typing for 300 ms, avoiding requests for short or unfinished IME input.
 function scheduleSearch() {
   prepareSearch(); // Invalidate old requests immediately, before the debounce delay.
   suggestionsDismissed = false;
@@ -298,7 +307,9 @@ async function loadPlayer() {
   }
 }
 
+// Populate overview totals, hero win rates and links to individual recent matches.
 function renderResults(player, { totals, heroes, recent }, names) {
+  // Build a hero portrait/name cell, optionally linking it to the match page.
   function heroCell(id, matchId) {
     const metadata = names.get(id);
     const name = metadata?.name || `Hero ${id}`;

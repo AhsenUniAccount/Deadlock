@@ -47,6 +47,7 @@ async function request(
   return result;
 }
 
+// Convert network and timeout errors into messages suitable for the page.
 function errorMessage(error) {
   if (error.name === "TimeoutError")
     return "The API took too long to respond. Please try again.";
@@ -55,6 +56,7 @@ function errorMessage(error) {
   return error.message;
 }
 
+// Build a reusable avatar or hero image with an initial as its loading/error fallback.
 function portrait(url, name, className = "avatar") {
   const wrapper = document.createElement("span");
   wrapper.className = className;
@@ -75,6 +77,7 @@ function portrait(url, name, className = "avatar") {
   return wrapper;
 }
 
+// Format API Unix seconds in the viewer’s local timezone.
 function dateTime(timestamp) {
   return new Date(timestamp * 1000).toLocaleString([], {
     year: "numeric",
@@ -85,6 +88,7 @@ function dateTime(timestamp) {
   });
 }
 
+// Create text-only DOM content; API strings are never interpreted as HTML.
 function cell(tag, text) {
   const element = document.createElement(tag);
   element.textContent = text;

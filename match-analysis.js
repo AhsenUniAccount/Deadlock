@@ -13,6 +13,7 @@ const MatchAnalysis = (() => {
       : "—";
   const formatNumber = (n) =>
     Number.isFinite(n) ? Math.round(n).toLocaleString() : "—";
+  // Replace a comparison table using accessible headings and text-only cells.
   function renderTable(target, headers, rows) {
     const wrap = document.createElement("div");
     wrap.className = "table-scroll";
@@ -138,6 +139,7 @@ const MatchAnalysis = (() => {
     picker.replaceChildren(summary, choices);
   }
 
+  // Keep the first player selected while restricting the second choice to the opposing team.
   function renderLaneSelectors() {
     const newMatch = laneMatchId !== view.match.id;
     const firstSlot = newMatch ? view.selectedSlot : byId("lane-player").value;
@@ -191,6 +193,7 @@ const MatchAnalysis = (() => {
   byId("show-objective-events").addEventListener("change", () => {
     if (view) drawAdvantage();
   });
+  // Overlay friendly structure losses and neutral Mid Boss deaths on the team advantage chart.
   function drawObjectives(svg, el, x) {
     if (!byId("show-objective-events").checked) return;
     const team = view.match.players.find(
@@ -243,6 +246,7 @@ const MatchAnalysis = (() => {
     }
   }
 
+  // Plot Hidden King minus ArchMother souls; objective events can still render without snapshots.
   function drawAdvantage() {
     hideObjectiveTooltip();
     const points = AnalysisStats.advantage(view.match),
@@ -330,6 +334,7 @@ const MatchAnalysis = (() => {
     });
     drawObjectives(svg, el, x);
   }
+  // Compare the chosen opposing players at a time using observed souls, kills/deaths and first buys.
   function renderOpponentComparison() {
     const time = Number(byId("lane-time").value),
       player = view.match.players.find(

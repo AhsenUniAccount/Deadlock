@@ -1,11 +1,14 @@
 "use strict";
 
+// Aggregate ranking page: request/render logic here, pure ranking rules in tier-stats.js.
+
 const tierForm = document.querySelector("#tier-filters");
 const tierStatus = document.querySelector("#tier-status");
 const tierBody = document.querySelector("#tier-results");
 const tierRetry = document.querySelector("#tier-retry");
 let tierController;
 
+// Load the selected aggregate window and hero assets, then render rankings or a retryable error.
 async function loadTiers() {
   tierController?.abort();
   const controller = new AbortController();

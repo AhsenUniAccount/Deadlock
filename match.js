@@ -1,7 +1,7 @@
 "use strict";
 
 // Standalone match-page controller. Data normalization lives in match-stats.js;
-// charts and historical comparisons have their own rendering modules.
+// player timelines, lane comparisons and team analysis have separate rendering modules.
 const matchParameters = new URLSearchParams(window.location.search);
 const selectedAccountId = Number(matchParameters.get("player"));
 let heroNames;
@@ -13,9 +13,11 @@ let currentMatchId;
 let matchView;
 let itemCatalog;
 
+// Show unavailable counters as a dash while preserving genuine zero values.
 function displayCount(value) {
   return Number.isFinite(value) ? value.toLocaleString() : "—";
 }
+// Translate numeric API team IDs into the names used throughout the match page.
 function teamName(team) {
   return team === 0
     ? "The Hidden King"
@@ -23,6 +25,7 @@ function teamName(team) {
       ? "The ArchMother"
       : `Team ${team ?? "unknown"}`;
 }
+// Format elapsed match seconds without assuming a duration was supplied.
 function matchDuration(seconds) {
   return Number.isFinite(seconds)
     ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
@@ -133,6 +136,7 @@ async function openMatch(id) {
   }
 }
 
+// Build a player’s portrait and name using account/hero IDs when enrichment is missing.
 function matchIdentity(player) {
   const profile = matchView.profiles.get(player.accountId);
   const hero = matchView.heroes.get(player.heroId);
@@ -162,6 +166,7 @@ function matchIdentity(player) {
   return { identity, name, heroName };
 }
 
+// Rebuild the team scoreboards and refresh each match section from the shared view.
 function renderMatch() {
   renderMatchHighlights();
   renderAllPurchases();
@@ -341,6 +346,7 @@ function renderPurchases(player, grid, status) {
   }
 }
 
+// Show only the API’s top-three MVP ranks, with each player’s final K/D/A.
 function renderMatchHighlights() {
   const container = document.querySelector("#match-mvps");
   container.replaceChildren();
@@ -372,6 +378,7 @@ function renderMatchHighlights() {
   }
 }
 
+// Render a purchase-history card for every player and mark the selected perspective.
 function renderAllPurchases() {
   const container = document.querySelector("#all-player-purchases");
   container.replaceChildren();

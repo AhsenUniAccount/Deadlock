@@ -2,10 +2,12 @@
 
 // Shared calculations use the API's player_match_outcome, not the winning team's ID.
 const DeadlockStats = (() => {
+  // Display a win percentage, keeping an empty scored sample distinct from zero wins.
   function formatWinRate(wins, scored) {
     return scored === 0 ? "—" : `${((wins / scored) * 100).toFixed(1)}%`;
   }
 
+  // Recognize numeric IDs; BigInt preserves SteamID64 precision during conversion.
   function accountIdFromQuery(query) {
     if (!/^\d+$/.test(query)) return null;
     let id = BigInt(query);
@@ -15,6 +17,7 @@ const DeadlockStats = (() => {
     return Number(id);
   }
 
+  // Validate one account’s history, deduplicate and select recent games, then total outcomes by hero.
   function summarize(history, accountId, limit = 20) {
     if (!Array.isArray(history))
       throw new Error("The API returned an unexpected match-history format.");

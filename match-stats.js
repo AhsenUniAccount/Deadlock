@@ -6,6 +6,7 @@ const DeadlockMatchStats = (() => {
   const count = (value) =>
     Number.isSafeInteger(value) && value >= 0 ? value : null;
 
+  // Validate the requested match and normalize its roster, snapshots and objective events for the UI.
   function summarizeMatch(metadata, expectedId) {
     const info = metadata?.match_info;
     if (
@@ -142,6 +143,7 @@ const DeadlockMatchStats = (() => {
     return events.sort((a, b) => a.time - b.time);
   }
 
+  // Select catalog-confirmed shop purchases and retain buy/removal times, including repeat buys.
   function purchases(player, catalog) {
     if (!Array.isArray(player.items)) return null;
     return player.items
@@ -172,6 +174,7 @@ const DeadlockMatchStats = (() => {
     }
     return [...samples.values()].sort((a, b) => a.time - b.time);
   }
+  // Join each recorded death to its killer by player slot; preserve unknown sources and times.
   function killTimeline(match) {
     const bySlot = new Map(
       match.players.map((player) => [player.slot, player]),

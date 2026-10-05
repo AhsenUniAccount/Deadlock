@@ -8,12 +8,14 @@ const AnalysisStats = (() => {
   // Use the last observed value, not interpolation. Callers display its timestamp.
   const at = (player, time) =>
     player.soulSamples.filter((point) => point.time <= time).at(-1) || null;
+  // Retained calculation helper; the current UI does not show historical averages.
   const mean = (values) => {
     const valid = values.filter(Number.isFinite);
     return valid.length
       ? valid.reduce((a, b) => a + b, 0) / valid.length
       : null;
   };
+  // Calculate team net-worth difference only at timestamps recorded for every roster member.
   function advantage(match) {
     // Sum only simultaneous snapshots for every member of both teams.
     if (
@@ -62,7 +64,8 @@ const AnalysisStats = (() => {
     return result;
   }
   // Prevent look-ahead: exclude this match and games played after it.
-  // Bound metadata requests to five unique games to limit API usage.
+  // Retained for tests/future comparisons; the current UI does not load historical comparisons.
+  // Limit the candidate list to five unique games.
   function candidates(history, player, match) {
     return [
       ...new Map(
