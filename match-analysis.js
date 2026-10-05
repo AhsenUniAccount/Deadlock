@@ -154,8 +154,15 @@ const MatchAnalysis = (() => {
       players.filter((player) => first && player.team !== first.team),
       opponentSlot,
     );
-    byId("lane-time").max = String(view.match.duration || Math.max(1,
-      ...view.match.players.flatMap(player => player.soulSamples.map(sample => sample.time))));
+    byId("lane-time").max = String(
+      view.match.duration ||
+        Math.max(
+          1,
+          ...view.match.players.flatMap((player) =>
+            player.soulSamples.map((sample) => sample.time),
+          ),
+        ),
+    );
     if (newMatch)
       byId("lane-time").value = String(
         Math.min(600, Number(byId("lane-time").max)),
@@ -163,7 +170,81 @@ const MatchAnalysis = (() => {
     laneMatchId = view.match.id;
   }
 
+  // Match-wide objective markers share the player graph's tooltip styling.
+  const objectiveTooltip = document.createElement("div");
+  objectiveTooltip.id = "objective-tooltip";
+  objectiveTooltip.className = "souls-player-tooltip";
+  objectiveTooltip.setAttribute("role", "tooltip");
+  objectiveTooltip.hidden = true;
+  document.body.append(objectiveTooltip);
+  const hideObjectiveTooltip = () => {
+    objectiveTooltip.hidden = true;
+  };
+  window.addEventListener("scroll", hideObjectiveTooltip, true);
+  window.addEventListener("resize", hideObjectiveTooltip);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") hideObjectiveTooltip();
+  });
+  byId("advantage-chart")
+    .closest("details")
+    .addEventListener("toggle", hideObjectiveTooltip);
+  byId("show-objective-events").addEventListener("change", () => {
+    if (view) drawAdvantage();
+  });
+  function drawObjectives(svg, el, x) {
+    if (!byId("show-objective-events").checked) return;
+    const team = view.match.players.find(
+      (p) => p.slot === view.selectedSlot,
+    )?.team;
+    for (const event of view.match.objectives || []) {
+      if (event.kind !== "midboss" && event.team !== team) continue;
+      const boss = event.kind === "midboss";
+      const label = `${formatTime(event.time)} · ${boss ? "Mid Boss killed" : `Friendly ${event.type} destroyed · ${team === 0 ? "The Hidden King" : "The ArchMother"}`}`;
+      const cx = x(event.time),
+        cy = boss ? 250 : 18;
+      const marker = el("g", {
+        tabindex: 0,
+        "aria-label": label,
+        "aria-describedby": objectiveTooltip.id,
+        "data-event-kind": event.kind,
+      });
+      marker.append(el("circle", { cx, cy, r: 12, fill: "transparent" }));
+      marker.append(
+        boss
+          ? el("image", {
+              href: "rejuvenator.svg",
+              x: cx - 11,
+              y: cy - 11,
+              width: 22,
+              height: 22,
+            })
+          : el("path", {
+              d: `M ${cx - 5} ${cy - 5} L ${cx + 5} ${cy + 5} M ${cx + 5} ${cy - 5} L ${cx - 5} ${cy + 5}`,
+              stroke: "#f08a8a",
+              "stroke-width": 2.5,
+              "stroke-linecap": "round",
+            }),
+      );
+      marker.append(el("title", {}, label));
+      const show = (e) => {
+        objectiveTooltip.replaceChildren(cell("strong", label));
+        objectiveTooltip.hidden = false;
+        const bounds = marker.getBoundingClientRect();
+        const px = Number.isFinite(e.clientX) ? e.clientX : bounds.left;
+        const py = Number.isFinite(e.clientY) ? e.clientY : bounds.top;
+        objectiveTooltip.style.left = `${Math.max(8, Math.min(px + 14, window.innerWidth - objectiveTooltip.offsetWidth - 8))}px`;
+        objectiveTooltip.style.top = `${Math.max(8, Math.min(py + 14, window.innerHeight - objectiveTooltip.offsetHeight - 8))}px`;
+      };
+      marker.addEventListener("pointermove", show);
+      marker.addEventListener("focus", show);
+      marker.addEventListener("pointerleave", hideObjectiveTooltip);
+      marker.addEventListener("blur", hideObjectiveTooltip);
+      svg.append(marker);
+    }
+  }
+
   function drawAdvantage() {
+    hideObjectiveTooltip();
     const points = AnalysisStats.advantage(view.match),
       svg = byId("advantage-chart"),
       ns = "http://www.w3.org/2000/svg";
@@ -177,9 +258,16 @@ const MatchAnalysis = (() => {
     byId("advantage-note").textContent = points.length
       ? `${points.length} simultaneous team snapshots. Lines between snapshots are not measured values.`
       : "No complete simultaneous team snapshots are available.";
-    if (!points.length) return;
     const max = Math.max(1000, ...points.map((p) => Math.abs(p.souls))),
-      end = Math.max(1, view.match.duration || points.at(-1).time);
+      end = Math.max(
+        1,
+        view.match.duration ||
+          points.at(-1)?.time ||
+          Math.max(
+            1,
+            ...(view.match.objectives || []).map((event) => event.time),
+          ),
+      );
     const x = (t) => 85 + (t / end) * 870,
       y = (n) => 140 - (n / max) * 105;
     [-1, -0.5, 0, 0.5, 1].forEach((f) => {
@@ -240,6 +328,7 @@ const MatchAnalysis = (() => {
       );
       svg.append(dot);
     });
+    drawObjectives(svg, el, x);
   }
   function renderOpponentComparison() {
     const time = Number(byId("lane-time").value),

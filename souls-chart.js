@@ -148,14 +148,6 @@ const SoulsChart = (() => {
   }
   function showEventTooltip(eventData, pointerEvent) {
     const text = document.createElement("span");
-    if (eventData.kind === "objective" || eventData.kind === "midboss") {
-      text.append(
-        cell("strong", `${time(eventData.time)} · ${eventData.label}`),
-      );
-      tooltip.replaceChildren(text);
-      positionTooltip(pointerEvent);
-      return;
-    }
     text.append(
       cell(
         "strong",
@@ -390,105 +382,80 @@ const SoulsChart = (() => {
           svg.append(dot);
         }
       });
-    {
-      events()
-        .filter((event) =>
-          event.kind === "objective" || event.kind === "midboss"
-            ? document.querySelector("#show-objective-events").checked
-            : document.querySelector("#show-souls-events").checked,
-        )
-        .forEach((event) => {
-          // Separate event rows keep a kill and a purchase at the same time distinct.
-          // Group each symbol with its hit area for one accessible click target.
-          const marker = node("g", { "data-event-kind": event.kind });
-          const centerX = x(event.time);
-          const centerY =
-            event.kind === "midboss"
-              ? 324
-              : event.kind === "objective"
-                ? 80
-                : event.kind === "kill"
-                  ? 24
-                  : event.kind === "death"
-                    ? 42
-                    : 60;
-          if (event.kind === "midboss") {
-            // Keep neutral boss deaths on their own row along the bottom of the plot.
-            marker.append(
-              node("image", {
-                href: "rejuvenator.svg",
-                x: centerX - 11,
-                y: centerY - 11,
-                width: 22,
-                height: 22,
-              }),
-            );
-          } else if (event.kind === "purchase") {
-            // Vector cart stays crisp at chart scale; the invisible box keeps it easy to click.
-            marker.append(
-              node("rect", {
-                x: centerX - 9,
-                y: centerY - 9,
-                width: 18,
-                height: 18,
-                fill: "transparent",
-              }),
-            );
-            marker.append(
-              node("path", {
-                d: "M2 3h2l2 10h9l3-7H5 M7 16h.01 M14 16h.01",
-                transform: `translate(${centerX - 10} ${centerY - 10})`,
-                fill: "none",
-                stroke: "#d7bf83",
-                "stroke-width": 2,
-                "stroke-linecap": "round",
-                "stroke-linejoin": "round",
-              }),
-            );
-          } else {
-            // Invisible interiors preserve a generous hit target for hollow symbols.
-            marker.append(
-              node("circle", {
-                cx: centerX,
-                cy: centerY,
-                r: 7,
-                fill: "transparent",
-                stroke: event.kind === "kill" ? "#86d99b" : "none",
-                "stroke-width": 2,
-              }),
-            );
-            if (event.kind === "death" || event.kind === "objective") {
-              marker.append(
-                node("path", {
-                  d: `M ${centerX - 5} ${centerY - 5} L ${centerX + 5} ${centerY + 5} M ${centerX + 5} ${centerY - 5} L ${centerX - 5} ${centerY + 5}`,
-                  stroke: "#f08a8a",
-                  "stroke-width": 2.5,
-                  "stroke-linecap": "round",
-                  "pointer-events": "none",
-                }),
-              );
-            }
-          }
-          marker.setAttribute("role", "button");
-          marker.setAttribute("tabindex", "0");
-          marker.setAttribute(
-            "aria-label",
-            `${time(event.time)} · ${event.label}`,
+    if (document.querySelector("#show-souls-events").checked) {
+      events().forEach((event) => {
+        // Separate event rows keep a kill and a purchase at the same time distinct.
+        // Group each symbol with its hit area for one accessible click target.
+        const marker = node("g", { "data-event-kind": event.kind });
+        const centerX = x(event.time);
+        const centerY =
+          event.kind === "kill" ? 24 : event.kind === "death" ? 42 : 60;
+        if (event.kind === "purchase") {
+          // Vector cart stays crisp at chart scale; the invisible box keeps it easy to click.
+          marker.append(
+            node("rect", {
+              x: centerX - 9,
+              y: centerY - 9,
+              width: 18,
+              height: 18,
+              fill: "transparent",
+            }),
           );
           marker.append(
-            node("title", {}, `${time(event.time)} · ${event.label}`),
+            node("path", {
+              d: "M2 3h2l2 10h9l3-7H5 M7 16h.01 M14 16h.01",
+              transform: `translate(${centerX - 10} ${centerY - 10})`,
+              fill: "none",
+              stroke: "#d7bf83",
+              "stroke-width": 2,
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round",
+            }),
           );
-          attachEventTooltip(marker, event);
-          const activate = () => jump(event.time, event.label);
-          marker.addEventListener("click", activate);
-          marker.addEventListener("keydown", (e) => {
-            if (["Enter", " "].includes(e.key)) {
-              e.preventDefault();
-              activate();
-            }
-          });
-          svg.append(marker);
+        } else {
+          // Invisible interiors preserve a generous hit target for hollow symbols.
+          marker.append(
+            node("circle", {
+              cx: centerX,
+              cy: centerY,
+              r: 7,
+              fill: "transparent",
+              stroke: event.kind === "kill" ? "#86d99b" : "none",
+              "stroke-width": 2,
+            }),
+          );
+          if (event.kind === "death") {
+            marker.append(
+              node("path", {
+                d: `M ${centerX - 5} ${centerY - 5} L ${centerX + 5} ${centerY + 5} M ${centerX + 5} ${centerY - 5} L ${centerX - 5} ${centerY + 5}`,
+                stroke: "#f08a8a",
+                "stroke-width": 2.5,
+                "stroke-linecap": "round",
+                "pointer-events": "none",
+              }),
+            );
+          }
+        }
+        marker.setAttribute("role", "button");
+        marker.setAttribute("tabindex", "0");
+        marker.setAttribute(
+          "aria-label",
+          `${time(event.time)} · ${event.label}`,
+        );
+        marker.append(
+          node("title", {}, `${time(event.time)} · ${event.label}`),
+        );
+        attachEventTooltip(marker, event);
+        const activate = () => jump(event.time, event.label);
+        marker.addEventListener("click", activate);
+        marker.addEventListener("keydown", (e) => {
+          if (["Enter", " "].includes(e.key)) {
+            e.preventDefault();
+            activate();
+          }
         });
+        svg.append(marker);
+      });
     }
     if (!visible.size)
       svg.append(
@@ -537,19 +504,9 @@ const SoulsChart = (() => {
             label: `Bought ${view.items.get(p.id)?.name || `Item ${p.id}`}`,
           }))
       : [];
-    const objectives = (view.match.objectives || [])
-      .filter((event) => event.kind === "midboss" || event.team === player.team)
-      .map((event) => ({
-        ...event,
-        label:
-          event.kind === "midboss"
-            ? "Mid Boss killed"
-            : `Friendly ${event.type} destroyed`,
-      }));
-    return [...kills, ...deaths, ...buys, ...objectives].sort(
-      (a, b) => a.time - b.time,
-    );
+    return [...kills, ...deaths, ...buys].sort((a, b) => a.time - b.time);
   }
+
   function jump(seconds, label = "Selected event") {
     if (!view) return;
     document.querySelector("#souls-graph").open = true;
@@ -564,11 +521,6 @@ const SoulsChart = (() => {
       if (view) {
         draw();
       }
-    });
-  document
-    .querySelector("#show-objective-events")
-    .addEventListener("change", () => {
-      if (view) draw();
     });
   return { render, jump };
 })();
