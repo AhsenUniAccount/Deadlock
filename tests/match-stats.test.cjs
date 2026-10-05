@@ -203,3 +203,30 @@ test("kill timeline orders deaths by game time, resolves sparse slots and retain
   );
   assert.deepEqual(killTimeline(summarizeMatch(metadata([player(0)]), 55)), []);
 });
+
+test("objective events preserve owning teams and ignore surviving or invalid structures", () => {
+  const { objectiveTimeline } = require("../match-stats.js");
+  const events = objectiveTimeline({
+    duration_s: 1000,
+    objectives: [
+      { team_objective_id: 1, team: 0, destroyed_time_s: 100 },
+      { team_objective_id: 5, team: 1, destroyed_time_s: 200 },
+      { team_objective_id: 10, team: 0, destroyed_time_s: 300 },
+      { legacy_objective_id: 28, destroyed_time_s: 400 },
+      { team_objective_id: 7, team: 1, destroyed_time_s: 0 },
+      { team_objective_id: 9, team: 0, destroyed_time_s: 500 },
+      { team_objective_id: 1, team: null, destroyed_time_s: 500 },
+      { team_objective_id: 1, team: 0, destroyed_time_s: 1001 },
+      null,
+    ],
+    mid_boss: [{ destroyed_time_s: 250 }, { destroyed_time_s: 0 }, null],
+  });
+  assert.deepEqual(events, [
+    { time: 100, kind: "objective", team: 0, type: "Guardian" },
+    { time: 200, kind: "objective", team: 1, type: "Walker" },
+    { time: 250, kind: "midboss", type: "Mid Boss" },
+    { time: 300, kind: "objective", team: 0, type: "Shrine" },
+    { time: 400, kind: "objective", team: 1, type: "Base Guardian" },
+  ]);
+  assert.deepEqual(objectiveTimeline({}), []);
+});

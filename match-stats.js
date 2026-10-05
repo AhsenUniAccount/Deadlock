@@ -83,7 +83,63 @@ const DeadlockMatchStats = (() => {
       winningTeam: info.winning_team,
       players,
       incomplete,
+      objectives: objectiveTimeline(info),
     };
+  }
+
+  // Structure teams identify their owner, not the team that destroyed them.
+  // IDs follow ECitadelTeamObjective in Valve's match metadata protobuf.
+  function objectiveTimeline(info) {
+    const validTime = (value) =>
+      count(value) !== null &&
+      value > 0 &&
+      (!Number.isFinite(info.duration_s) || value <= info.duration_s);
+    const events = [];
+    for (const objective of Array.isArray(info.objectives)
+      ? info.objectives
+      : []) {
+      if (!objective || !validTime(objective.destroyed_time_s)) continue;
+      let id = objective.team_objective_id;
+      let team = objective.team;
+      // Older matches encode the owning team in a single legacy objective ID.
+      if (
+        id == null &&
+        Number.isInteger(objective.legacy_objective_id) &&
+        objective.legacy_objective_id >= 0 &&
+        objective.legacy_objective_id < 32
+      ) {
+        id = objective.legacy_objective_id % 16;
+        team = Math.floor(objective.legacy_objective_id / 16);
+      }
+      if (!Number.isInteger(id) || ![0, 1].includes(team)) continue;
+      const type =
+        id >= 1 && id <= 4
+          ? "Guardian"
+          : id >= 5 && id <= 8
+            ? "Walker"
+            : id === 10 || id === 11
+              ? "Shrine"
+              : id >= 12 && id <= 15
+                ? "Base Guardian"
+                : null;
+      if (type)
+        events.push({
+          time: objective.destroyed_time_s,
+          kind: "objective",
+          team,
+          type,
+        });
+    }
+    for (const boss of Array.isArray(info.mid_boss) ? info.mid_boss : []) {
+      if (boss && validTime(boss.destroyed_time_s)) {
+        events.push({
+          time: boss.destroyed_time_s,
+          kind: "midboss",
+          type: "Mid Boss",
+        });
+      }
+    }
+    return events.sort((a, b) => a.time - b.time);
   }
 
   function purchases(player, catalog) {
@@ -154,6 +210,13 @@ const DeadlockMatchStats = (() => {
       )
       .sort((a, b) => a.mvpRank - b.mvpRank || a.slot - b.slot);
   }
-  return { summarizeMatch, purchases, soulSamples, matchMvps, killTimeline };
+  return {
+    objectiveTimeline,
+    summarizeMatch,
+    purchases,
+    soulSamples,
+    matchMvps,
+    killTimeline,
+  };
 })();
 if (typeof module !== "undefined") module.exports = DeadlockMatchStats;

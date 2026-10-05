@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Rejuvenator-inspired winged crystal, drawn locally for crisp chart markers. -->
+  <path d="M9 9 2 5 4 12 9 15M15 9 22 5 20 12 15 15" fill="#86d99b" stroke="#1b241e" stroke-width="1"/>
+  <path d="m12 2 5 10-5 10-5-10Z" fill="#86d99b" stroke="#1b241e" stroke-width="1"/>
+  <path d="m12 4 0 15m-4-7 4 2 4-2" fill="none" stroke="#c8f6d3" stroke-width="1"/>
+</svg>

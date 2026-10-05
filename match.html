@@ -101,6 +101,10 @@
                 ><input id="show-souls-events" type="checkbox" checked /> Show
                 highlighted player’s kills, deaths and purchases</label
               >
+              <label
+                ><input id="show-objective-events" type="checkbox" checked />
+                Show friendly objectives and Mid Boss deaths</label
+              >
               <div class="event-key" aria-label="Graph event key">
                 <span
                   ><i class="event-symbol event-kill" aria-hidden="true"></i
@@ -126,6 +130,18 @@
                     /></svg
                   >Purchases</span
                 >
+                <span
+                  ><i class="event-symbol event-death" aria-hidden="true">×</i
+                  >Friendly structure destroyed (upper row)</span
+                >
+                <span
+                  ><img
+                    src="rejuvenator.svg"
+                    width="20"
+                    height="20"
+                    alt=""
+                  />Mid Boss killed (bottom row)</span
+                >
               </div>
               <p class="match-help">
                 Small dots on the lines are souls snapshots.
@@ -135,7 +151,10 @@
           </details>
           <details id="kda-tables" class="match-details">
             <summary id="scoreboards-heading">KDA table</summary>
-            <p class="match-help">Select a player to highlight their items and souls line. Souls are final net worth, including spent souls.</p>
+            <p class="match-help">
+              Select a player to highlight their items and souls line. Souls are
+              final net worth, including spent souls.
+            </p>
             <div id="match-scoreboard" class="team-scoreboards"></div>
           </details>
           <details
