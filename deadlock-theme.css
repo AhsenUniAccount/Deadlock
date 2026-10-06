@@ -1,4 +1,19 @@
 /* Visual layer shared by all pages. Chart colours retain their statistical meaning. */
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+}
+.page-title-row h1 {
+  margin-bottom: 0;
+}
+.author-credit {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
 :root {
   --surface: #222321;
   --line: #444640;
