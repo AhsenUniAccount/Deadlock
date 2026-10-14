@@ -1043,6 +1043,220 @@ a.secondary-button {
     min-width: 640px;
   }
 }
+
+/* Cloudflare Pages custom not-found page. */
+.not-found-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #171817;
+}
+.not-found-header {
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(24px, 4.5vw, 70px);
+  border-bottom: 1px solid #5d5948;
+  background: #171817;
+}
+.not-found-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: #f2e7ce;
+  font-family: var(--display, Georgia, serif);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+.not-found-brand-mark {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border: 1px solid #b39a5a;
+  border-radius: 50%;
+  background: url("tracker-seal.svg") center / 30px 34px no-repeat;
+}
+.not-found-nav {
+  color: #eee9dc;
+  font-size: 15px;
+  text-decoration: none;
+}
+.not-found-nav:hover,
+.not-found-nav:focus-visible {
+  color: #d7bf83;
+}
+.not-found-main {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  width: min(100%, 1536px);
+  min-height: calc(100vh - 78px);
+  margin: 0 auto;
+  padding: 28px clamp(30px, 5vw, 78px) 0;
+  overflow: hidden;
+  background: none;
+}
+.not-found-copy {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 48px;
+}
+.not-found-copy h1 {
+  margin: 0 0 4px;
+  color: #f2e4c7;
+  font-family: var(--display, Georgia, serif);
+  font-size: clamp(72px, 10vw, 148px);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+.not-found-code {
+  margin: 0;
+  color: #9a885e;
+  font-family: var(--display, Georgia, serif);
+  font-size: clamp(54px, 7vw, 102px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+.not-found-message {
+  margin: 22px 0 0;
+  color: #c9c3b6;
+  font-family: var(--display, Georgia, serif);
+  font-size: clamp(20px, 2.25vw, 32px);
+  line-height: 1.4;
+}
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 74px;
+}
+.not-found-button {
+  display: inline-flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28px;
+  border: 1px solid #a28d5a;
+  border-radius: 4px;
+  color: #f2e7ce;
+  font-family: var(--display, Georgia, serif);
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+.not-found-button:hover,
+.not-found-button:focus-visible {
+  border-color: #e0c47c;
+  background: #d7bf8318;
+}
+.not-found-art {
+  position: relative;
+  display: flex;
+  height: min(88vh, 930px);
+  align-self: end;
+  align-items: end;
+  justify-content: center;
+  min-width: 0;
+}
+.not-found-art::before {
+  position: absolute;
+  top: 9%;
+  left: 50%;
+  width: min(68vw, 690px);
+  aspect-ratio: 1;
+  border: 1px solid #b39a5a20;
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 49.9%, #b39a5a14 50%, transparent 50.1%),
+    linear-gradient(0deg, transparent 49.9%, #b39a5a14 50%, transparent 50.1%),
+    radial-gradient(circle, transparent 41%, #b39a5a17 41.2%, transparent 41.5% 53%, #b39a5a17 53.2%, transparent 53.5%);
+  content: "";
+  transform: translateX(-50%);
+}
+.not-found-art img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 650px);
+  max-height: min(88vh, 930px);
+  object-fit: contain;
+  object-position: center bottom;
+}
+@media (max-width: 760px) {
+  .not-found-header {
+    height: 68px;
+    padding-inline: 20px;
+  }
+  .not-found-brand {
+    gap: 10px;
+    font-size: 17px;
+  }
+  .not-found-brand-mark {
+    width: 34px;
+    height: 34px;
+    background-size: 24px 28px;
+  }
+  .not-found-nav {
+    font-size: 13px;
+  }
+  .not-found-main {
+    grid-template-columns: 1fr;
+    min-height: calc(100vh - 68px);
+    padding: 54px 24px 0;
+  }
+  .not-found-copy {
+    padding-bottom: 0;
+  }
+  .not-found-copy h1 {
+    font-size: clamp(66px, 14vw, 104px);
+  }
+  .not-found-code {
+    font-size: clamp(50px, 10vw, 76px);
+  }
+  .not-found-message {
+    margin-top: 16px;
+  }
+  .not-found-actions {
+    gap: 10px;
+    margin-top: 26px;
+  }
+  .not-found-button {
+    min-height: 50px;
+    padding-inline: 16px;
+    font-size: 15px;
+  }
+  .not-found-art {
+    height: min(53vh, 520px);
+    margin-top: -24px;
+  }
+  .not-found-art img {
+    width: auto;
+    max-width: 100%;
+    max-height: 53vh;
+  }
+  .not-found-art::before {
+    top: 2%;
+    width: min(92vw, 440px);
+  }
+}
+@media (max-width: 420px) {
+  .not-found-actions {
+    margin-top: 22px;
+  }
+  .not-found-button {
+    min-height: 46px;
+    padding-inline: 12px;
+    font-size: 14px;
+  }
+}
 .team-scoreboard + .team-scoreboard {
   margin-top: 24px;
 }

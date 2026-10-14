@@ -81,6 +81,7 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 - `city-silhouette.svg`, `tracker-seal.svg`: original decorative header assets, stored locally.
 
 - `index.html`: search form and results structure.
+- `404.html`, `404-character.png`: custom Cloudflare Pages not-found page and its character artwork.
 - `tier-lists.html`, `tier-lists.js`: aggregate hero scatter plot, filters, and rendering.
 - `tier-stats.js`: validated hero counts, pick-rate, and win-rate calculations.
 - `tests/tier-stats.test.cjs`: ranking, ties, unscored results, and validation checks.
