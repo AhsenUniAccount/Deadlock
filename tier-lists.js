@@ -32,7 +32,10 @@ function showTooltip(hero, name, icon, event) {
     cell("span", `Pick rate ${(hero.pickRate * 100).toFixed(2)}%`),
     cell("span", `Win rate ${(hero.rate * 100).toFixed(2)}%`),
   );
-  heading.append(portrait(icon, name, "hero-chart-tooltip-portrait"), details);
+  heading.append(
+    portrait(icon, name, "hero-portrait hero-chart-tooltip-portrait"),
+    details,
+  );
   tierTooltip.replaceChildren(
     heading,
     cell("small", `${hero.matches.toLocaleString()} picks · ${hero.scored.toLocaleString()} scored matches`),
