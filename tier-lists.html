@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#171918" />
-    <title>Tier lists • Deadlock Tracker</title>
+    <title>Hero meta • Deadlock Tracker</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
     <script src="common.js" defer></script>
@@ -23,15 +23,17 @@
         <nav aria-label="Page navigation">
           <a href="index.html#page-heading">Overview</a
           ><a class="nav-current" href="tier-lists.html" aria-current="page"
-            >Tier lists</a
+            >Hero meta</a
           >
         </nav>
         <span class="connection">Community tracker</span>
       </header>
       <div class="page-heading">
         <p class="eyebrow">PLAYERBASE ANALYTICS</p>
-        <h1>Hero tier lists</h1>
-        <p class="intro">Compare heroes by win rate across recorded matches.</p>
+        <h1>Hero meta</h1>
+        <p class="intro">
+          See which heroes are picked most often and how often they win.
+        </p>
       </div>
       <form id="tier-filters" class="search-panel tier-filters">
         <div class="field">
@@ -43,11 +45,26 @@
           </select>
         </div>
         <div class="field">
-          <label for="tier-mode">Match mode</label
+          <label for="tier-mode">Queue</label
           ><select id="tier-mode">
-            <option value="ranked,unranked">Ranked + unranked</option>
-            <option value="ranked">Ranked only</option>
-            <option value="unranked">Unranked only</option>
+            <option value="ranked" selected>Ranked</option>
+            <option value="unranked">Unranked</option>
+          </select>
+        </div>
+        <div class="field" id="tier-rank-field">
+          <label for="tier-rank">Rank and above</label
+          ><select id="tier-rank">
+            <option value="10">Initiate and above</option>
+            <option value="20">Seeker and above</option>
+            <option value="30">Alchemist and above</option>
+            <option value="40">Arcanist and above</option>
+            <option value="50">Ritualist and above</option>
+            <option value="60">Emissary and above</option>
+            <option value="70">Archon and above</option>
+            <option value="81" selected>Oracle and above</option>
+            <option value="91">Phantom and above</option>
+            <option value="101">Ascendant and above</option>
+            <option value="111">Eternus</option>
           </select>
         </div>
         <div class="field">
@@ -63,7 +80,7 @@
       </form>
       <section class="panel" aria-labelledby="ranking-heading">
         <div class="toolbar">
-          <h2 id="ranking-heading">Heroes ranked by win rate</h2>
+          <h2 id="ranking-heading">Pick rate vs. win rate</h2>
           <span id="tier-count" class="scope"></span>
         </div>
         <p
@@ -78,33 +95,37 @@
           Retry loading
         </button>
         <div
-          class="table-scroll"
+          class="hero-chart-scroll"
           role="region"
-          aria-label="Hero win-rate rankings"
+          aria-label="Hero pick rate plotted against win rate"
           tabindex="0"
         >
-          <table class="tier-table">
-            <caption id="tier-caption" class="sr-only">
-              Hero rankings across recorded matches
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Rank</th>
-                <th scope="col">Hero</th>
-                <th scope="col" aria-sort="descending">Win rate</th>
-                <th scope="col">Scored matches</th>
-                <th scope="col">Wins</th>
-                <th scope="col">Losses</th>
-              </tr>
-            </thead>
-            <tbody id="tier-results"></tbody>
-          </table>
+          <svg
+            id="tier-chart"
+            class="hero-scatter"
+            viewBox="0 0 1000 600"
+            role="group"
+            aria-labelledby="tier-chart-title tier-chart-description"
+          >
+            <title id="tier-chart-title">Hero pick rate and win rate</title>
+            <desc id="tier-chart-description">
+              Each hero is plotted by its share of all recorded hero picks and
+              its win rate. Focus or hover over a marker for details.
+            </desc>
+          </svg>
         </div>
+        <div
+          id="tier-chart-tooltip"
+          class="hero-chart-tooltip"
+          role="tooltip"
+          hidden
+        ></div>
+        <p id="tier-caption" class="chart-caption"></p>
         <p class="explanation">
-          Win rate = wins ÷ (wins + losses). Ranked by the unrounded rate; equal
-          rates are ordered by sample size, then hero ID. Unscored matches are
-          excluded. Normal game mode, all ranks. A high win rate is a
-          statistical result, not a guarantee of hero strength.
+          Pick rate is a hero’s share of all recorded hero picks. Win rate =
+          wins ÷ (wins + losses); unscored matches are excluded from win rate.
+          Ranked filters use the average badge of both teams in a match. A high
+          win rate is a statistical result, not a guarantee of hero strength.
         </p>
       </section>
       <aside class="data-note">
@@ -131,7 +152,7 @@
       </footer>
       <noscript
         >Please enable JavaScript and connect to the internet to load hero
-        rankings.</noscript
+          statistics.</noscript
       >
     </main>
   </body>

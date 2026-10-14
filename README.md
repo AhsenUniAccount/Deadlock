@@ -20,13 +20,13 @@ Win rates use `player_match_outcome`: 1 is a win and 2 is a loss. Invalid, penal
 
 The API is unofficial and is not endorsed by Valve. Its recorded history may be incomplete or delayed. According to its match-history documentation, accounts that are not friends with one of its bots receive stored history only. This tracker does not request bot access or force a refresh. If the API responds with rate-limited stored history, the page labels that fallback.
 
-## Tier lists
+## Hero meta chart
 
-Open **Tier lists** beside Overview to rank heroes by aggregate win rate. The default is the last 30 days, normal game mode, ranked and unranked matches, all ranks, and at least 1,000 scored matches per hero. Choose 7/30/90 days, match mode, and minimum sample size, then select **Apply filters**.
+Open **Hero meta** beside Overview to compare hero pick rate with win rate. The default is the last 30 days, normal game mode, ranked matches at Oracle and above, and at least 1,000 scored matches per hero. Choose 7/30/90 days, Ranked or Unranked, a ranked threshold, and minimum sample size, then select **Apply filters**. The rank selector is hidden for Unranked.
 
-The page calls `/v1/analytics/hero-stats` with `bucket=no_bucket` and explicit time/mode filters. Time windows end at the current hour for cache reuse. It sorts by wins divided by wins plus losses before rounding to two decimal places; equal rates use scored-match count and then hero ID as tie-breakers. The minimum-sample filter applies to scored matches, not all returned matches. No individual account filter is applied. Unscored matches do not affect the denominator, and heroes without scored results are omitted.
+The page calls `/v1/analytics/hero-stats` with `bucket=no_bucket` and explicit time/mode filters. Ranked thresholds use `min_average_badge`, which filters on the average badge level of both teams in a match. Pick rate is a hero's matches divided by the sum of matches across all heroes in the filtered API response; heroes excluded by the minimum-sample display filter still count in this denominator. Win rate is wins divided by wins plus losses. Unscored matches do not affect win rate, and heroes without scored results are omitted. No individual account filter is applied.
 
-These are rankings across the API's recorded matches, not guaranteed full-playerbase coverage or a subjective S–F tier assessment. Windows can span patches. Missing hero metadata falls back to IDs, while API failures and empty results are explicitly labelled. Requests use the shared timeout/cancellation and five-minute local cache.
+These stats cover the API's recorded matches and are not guaranteed full-playerbase coverage. Windows can span patches. Missing hero metadata falls back to initials, while API failures and empty results are explicitly labelled. Requests use the shared timeout/cancellation and five-minute local cache.
 
 ## Individual match breakdowns
 
@@ -81,8 +81,8 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 - `city-silhouette.svg`, `tracker-seal.svg`: original decorative header assets, stored locally.
 
 - `index.html`: search form and results structure.
-- `tier-lists.html`, `tier-lists.js`: aggregate hero ranking page and filters.
-- `tier-stats.js`: validated win-rate ranking and sample-size filtering.
+- `tier-lists.html`, `tier-lists.js`: aggregate hero scatter plot, filters, and rendering.
+- `tier-stats.js`: validated hero counts, pick-rate, and win-rate calculations.
 - `tests/tier-stats.test.cjs`: ranking, ties, unscored results, and validation checks.
 - `styles.css`: responsive dashboard styling using system fonts; profile avatars and hero portraits load from image URLs supplied by the API.
 - `stats.js`: ID conversion and match aggregation.
@@ -155,6 +155,6 @@ Run `node --test tests/*.test.cjs` after changing calculations or request behavi
 - Overview: `app.js` searches profiles, loads history and renders `stats.js` summaries.
 - Match: `match.js` validates the URL match ID, loads metadata through `match-stats.js`, then enriches names, heroes and items independently. Its shared view contains the normalized match, identity/catalog maps and `selectedSlot`.
 - Player selection: the scoreboard and `souls-chart.js` dropdown both use `selectMatchPlayer()` in `match.js`. This refreshes selection and the two chart modules without another metadata request. Lane selectors keep their own opposing pair.
-- Tier lists: `tier-lists.js` fetches aggregates and assets, then delegates validation and sorting to `tier-stats.js`.
+- Hero meta: `tier-lists.js` fetches aggregates and assets, then delegates count validation and rate calculations to `tier-stats.js`.
 
 Function comments describe purpose and non-obvious constraints rather than each statement. When changing a calculation, preserve the distinction between unavailable (`null`) and a measured zero, and add a focused test for the changed rule. The current tests cover calculations and overview interactions; they do not replace the browser checks above for SVG layout and tooltips.

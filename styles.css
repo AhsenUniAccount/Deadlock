@@ -876,10 +876,10 @@ a.secondary-button {
   }
 }
 
-/* Aggregate hero rankings. */
+/* Aggregate hero pick-rate and win-rate chart. */
 .tier-filters {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1.35fr 1fr auto;
   align-items: end;
   gap: 18px;
   margin-bottom: 24px;
@@ -887,21 +887,129 @@ a.secondary-button {
 .tier-filters button {
   min-height: 42px;
 }
-.tier-table th:nth-child(2) {
-  text-align: left;
+.tier-filters [hidden] {
+  display: none;
 }
-.tier-table td:first-child {
-  text-align: left;
-  width: 60px;
-  color: #d7bf83;
-  font-weight: 600;
+.hero-chart-scroll {
+  overflow-x: auto;
+  padding: 0 12px 12px;
+  scrollbar-color: #59604e #202320;
 }
-.tier-table td:nth-child(3) {
+.hero-scatter {
+  display: block;
+  width: 100%;
+  min-width: 680px;
+  height: auto;
+  overflow: visible;
+}
+.chart-zone {
+  stroke: #42473d;
+  stroke-width: 1;
+}
+.chart-zone-strong {
+  fill: #61765718;
+}
+.chart-zone-weak {
+  fill: #98635412;
+}
+.chart-grid {
+  stroke: #42473d;
+  stroke-width: 1;
+  opacity: 0.72;
+}
+.chart-threshold {
+  stroke: #d7bf83;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 6;
+  opacity: 0.8;
+}
+.chart-axis {
+  stroke: #858878;
+  stroke-width: 1.5;
+}
+.chart-tick {
+  fill: #b9b9aa;
+  font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.chart-axis-label {
+  fill: #e1cc94;
+  font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 1.5px;
+}
+.chart-zone-label {
+  fill: #c5bd9d;
+  font: 700 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0.8px;
+  opacity: 0.82;
+}
+.hero-point {
+  cursor: pointer;
+  outline: none;
+}
+.hero-point-backdrop {
+  fill: #171918;
+  stroke: #e1cc94;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 2px 3px #000b);
+}
+.hero-point-image {
+  pointer-events: none;
+}
+.hero-point-initial {
+  fill: #f2e7ce;
+  font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  pointer-events: none;
+}
+.hero-point:hover .hero-point-backdrop,
+.hero-point:focus .hero-point-backdrop {
+  stroke: #fff0b8;
+  stroke-width: 4;
+}
+.chart-caption {
+  margin: 0 24px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.hero-chart-tooltip {
+  position: fixed;
+  z-index: 20;
+  display: grid;
+  gap: 4px;
+  max-width: 260px;
+  padding: 10px 12px;
+  border: 1px solid #66634f;
+  background: #171918f5;
+  color: #eee9dc;
+  box-shadow: 0 8px 28px #0009;
+  pointer-events: none;
+  font-size: 12px;
+}
+.hero-chart-tooltip[hidden] {
+  display: none;
+}
+.hero-chart-tooltip strong {
   color: #e1cc94;
+  font-size: 14px;
 }
-.tier-table td:last-child {
-  color: #bdc4b6;
-  width: auto;
+.hero-chart-tooltip-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-chart-tooltip-details {
+  display: grid;
+  gap: 3px;
+}
+.hero-chart-tooltip-portrait {
+  width: 42px;
+  height: 48px;
+}
+.hero-chart-tooltip-portrait img {
+  object-fit: contain;
+}
+.hero-chart-tooltip small {
+  color: var(--muted);
 }
 #tier-retry {
   margin: 0 24px 20px;
@@ -917,7 +1025,7 @@ a.secondary-button {
     font-size: 10px;
   }
   .tier-filters {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 640px) {
@@ -927,6 +1035,12 @@ a.secondary-button {
   .tier-filters {
     gap: 16px;
     grid-template-columns: 1fr;
+  }
+  .hero-chart-scroll {
+    padding-inline: 0;
+  }
+  .hero-scatter {
+    min-width: 640px;
   }
 }
 .team-scoreboard + .team-scoreboard {

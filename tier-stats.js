@@ -1,8 +1,8 @@
 "use strict";
 
 const DeadlockTierStats = (() => {
-  // Validate aggregate counts, filter by scored sample size and rank by unrounded win rate.
-  function rankHeroes(data, minimumMatches = 1000) {
+  // Validate aggregate counts and express each hero's picks as a share of all picks.
+  function chartHeroes(data, minimumMatches = 1000) {
     if (!Array.isArray(data))
       throw new Error("Unexpected hero statistics response.");
     const seen = new Set();
@@ -31,10 +31,21 @@ const DeadlockTierStats = (() => {
         rate: scored ? row.wins / scored : null,
       };
     });
+    const totalPicks = heroes.reduce((sum, hero) => sum + hero.matches, 0);
     return heroes
       .filter((hero) => hero.scored >= minimumMatches && hero.rate !== null)
-      .sort((a, b) => b.rate - a.rate || b.scored - a.scored || a.id - b.id);
+      .map((hero) => ({
+        ...hero,
+        pickRate: totalPicks ? hero.matches / totalPicks : 0,
+      }))
+      .sort((a, b) => a.pickRate - b.pickRate || a.id - b.id);
   }
-  return { rankHeroes };
+  // Retain the ranking helper for callers that still consume the previous table model.
+  function rankHeroes(data, minimumMatches = 1000) {
+    return chartHeroes(data, minimumMatches).sort(
+      (a, b) => b.rate - a.rate || b.scored - a.scored || a.id - b.id,
+    );
+  }
+  return { chartHeroes, rankHeroes };
 })();
 if (typeof module !== "undefined") module.exports = DeadlockTierStats;
