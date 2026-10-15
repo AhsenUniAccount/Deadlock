@@ -32,6 +32,11 @@ async function request(
           : `The Deadlock API could not complete the request (${response.status}). Please try again later.`,
     );
     error.status = response.status;
+    const retryAfter = response.headers?.get?.("Retry-After");
+    const retrySeconds = retryAfter && /^\d+$/.test(retryAfter)
+      ? Number(retryAfter)
+      : retryAfter ? Math.max(0, (Date.parse(retryAfter) - Date.now()) / 1000) : null;
+    error.retryAfter = Number.isFinite(retrySeconds) ? retrySeconds : null;
     throw error;
   }
   if (

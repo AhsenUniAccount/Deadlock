@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Deadlock Live Match Scouting | Deadlock Tracker</title>
+    <meta name="description" content="Scout a Deadlock lobby with player ranks, hero history, recent form, strategic focus priorities, and explained build evidence." />
+    <link rel="canonical" href="https://deadstats.ahsenjauhar.workers.dev/live" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="deadlock-theme.css" />
+    <link rel="stylesheet" href="live.css" />
+    <script src="common.js" defer></script>
+    <script src="live-stats.js" defer></script>
+    <script src="live-data.js" defer></script>
+    <script src="live.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a class="brand" href="index.html">DEADLOCK<span>TRACKER</span></a>
+        <nav aria-label="Page navigation">
+          <a href="index.html">Overview</a><a href="tier-lists.html">Hero meta</a><a class="nav-current" href="live.html" aria-current="page">Live scouting</a>
+        </nav>
+        <span class="connection">Community tracker</span>
+      </header>
+      <div class="page-heading">
+        <p class="eyebrow">LOBBY INTELLIGENCE / PREVIEW</p>
+        <h1>Live match scouting</h1>
+        <p class="intro">Compare the lobby’s hero experience, rank context, and recent form. Inspect the evidence behind each focus priority and build candidate.</p>
+      </div>
+      <section class="search-panel" aria-labelledby="live-find-heading">
+        <h2 id="live-find-heading">Find a match</h2>
+        <form id="live-discover-form" class="live-inputs">
+          <div class="field"><label for="live-account">Your Steam account ID (optional)</label><input id="live-account" inputmode="numeric" placeholder="SteamID3 account number" pattern="[0-9]+" /></div>
+          <button type="submit" class="secondary-button">Discover matches</button>
+        </form>
+        <p id="live-discovery-status" class="match-help" role="status">Discovery covers normal games in the public Watch list, not every player’s current match.</p>
+        <div class="live-inputs"><div class="field"><label for="live-available">Available matches</label><select id="live-available"><option value="">Discover matches to choose a lobby</option></select></div><button id="live-open-available" type="button" class="secondary-button">Open selected</button></div>
+        <form id="live-match-form" class="live-inputs">
+          <div class="field"><label for="live-match-id">Or enter a match ID</label><input id="live-match-id" inputmode="numeric" pattern="[0-9]+" required placeholder="Match ID" /></div>
+          <div class="field"><label for="live-team">Your team</label><select id="live-team"><option value="0">The Hidden King (Amber)</option><option value="1">The ArchMother (Sapphire)</option></select></div>
+          <button type="submit">Load scouting</button>
+        </form>
+        <p class="match-help">For a match outside the Watch list, we try its public broadcast. An ID does not guarantee spectator access. Opening an uncached broadcast is limited by the API to 6 requests per hour per IP.</p>
+      </section>
+      <section id="live-session" class="panel live-session" aria-labelledby="live-title">
+        <div class="match-page-header"><div><p class="eyebrow">MATCH STATUS</p><h2 id="live-title">No match selected</h2></div><button id="live-reconnect" class="secondary-button" type="button" disabled>Reconnect feed</button></div>
+        <p id="live-status" class="results-status" role="status" aria-live="polite">Choose a lobby or enter a match ID to begin.</p>
+        <dl class="live-status-grid"><div><dt>Broadcast</dt><dd id="live-feed-state">Unavailable</dd></div><div><dt>Match clock</dt><dd id="live-clock">—</dd></div><div><dt>Last successful update</dt><dd id="live-updated">—</dd></div><div><dt>Roster</dt><dd id="live-roster-count">—</dd></div></dl>
+        <p id="live-feed-note" class="match-help">Historical scouting and broadcast observations are shown separately.</p>
+      </section>
+      <div id="live-content" hidden>
+        <nav class="match-contents" aria-label="Scouting contents"><strong>Contents</strong><a href="#live-threats">Top threats</a><a href="#live-roster">Lobby roster</a><a href="#live-focus">Focus plan</a><a href="#live-builds">Build plan</a><a href="#live-method">Method &amp; sources</a></nav>
+        <section id="live-threats" class="panel live-section" aria-labelledby="live-threats-heading">
+          <div class="section-heading"><p class="eyebrow">01 / HISTORICAL SCOUTING</p><h2 id="live-threats-heading">Opponent watchlist</h2><p class="match-help">Prototype scouting index, not a win probability. Close scores and overlapping intervals should be treated as ties.</p></div>
+          <p id="live-evidence-status" class="match-help" role="status">Loading historical evidence…</p>
+          <div id="live-threat-cards" class="live-threat-grid"></div>
+        </section>
+        <details id="live-roster" class="souls-panel match-details" open>
+          <summary>Lobby roster &amp; last three games</summary>
+          <div class="analysis-body"><div class="live-inputs"><div class="field"><label for="live-team-filter">Show players</label><select id="live-team-filter"><option value="all">Both teams</option><option value="friendly">Friendly team</option><option value="opponent">Opposing team</option></select></div><div class="field"><label for="live-sort">Sort</label><select id="live-sort"><option value="team">Team and hero</option><option value="threat">Scouting score</option></select></div></div><div id="live-roster-list" class="live-roster-grid"></div></div>
+        </details>
+        <details id="live-focus" class="souls-panel match-details" open>
+          <summary>Focus plan</summary><div class="analysis-body"><p class="match-help">Strategic focus priorities. Positions, lanes, and engagement access are not verified, so these are not immediate fight callouts.</p><p id="live-focus-summary"></p><div id="live-focus-list" class="live-plan-grid"></div></div>
+        </details>
+        <details id="live-builds" class="souls-panel match-details" open>
+          <summary>Build plan</summary><div class="analysis-body"><p id="live-build-scope" class="match-help"></p><p class="match-help">Inventory is unavailable from the verified feed. These are strategic candidates; use “Mark owned” to remove items you already have. Recorded associations do not establish that an item caused a win.</p><div id="live-build-list" class="live-plan-grid"></div></div>
+        </details>
+        <details id="live-method" class="souls-panel match-details">
+          <summary>Method, confidence &amp; sources</summary><div class="analysis-body live-method">
+            <h3>Scouting index v0.1</h3><p>Hero-specific strength contributes 50%, rank context 30%, and recent form 20%. Supported components are reweighted when a component is missing. Fewer than 10 matching hero games, or an unavailable hero baseline, prevents a top-threat recommendation. Evidence labels describe coverage, not validated prediction accuracy.</p>
+            <p>Hero wins are shrunk toward the same-hero population using 20 prior matches. Where rank is known, both the player record and population use a matching average-match-rank band. Rank context uses a player-count percentile distribution. Three-game form is compared with the hero’s population in a matching 10-minute duration band, then shrunk with 10 baseline games.</p>
+            <p>Scouting uses completed history before this lobby and excludes the current match. Population analytics stop two hours before the lobby to avoid using overlapping unfinished games. Missing rank, history, or baselines stay unavailable. Aggregate statistics may span patches when a reliable patch window cannot be established.</p>
+            <h3>Focus and builds</h3><p>Focus candidates need at least 100 hero-pair observations and a shrunken lower interval above the expected hero baseline by 2 percentage points. Assignments coordinate around at most two supported targets. Whole-match matchup results describe co-occurrence, not a direct duel advantage. Manual focus choices are labeled as your overrides.</p>
+            <p>Core evidence follows the most-used qualifying published build, when its current item path can be resolved. Item candidates require at least 100 recorded purchases and 20 players. Situational candidates use opponent-conditioned purchase frequency and are not verified mechanical counters. Current-catalog and manually owned-item checks apply to every displayed item.</p>
+            <h3>Feed limits</h3><p>Discovery is limited to the public Watch list. The optional broadcast query provides observed KDA and souls; its server-side delay and inventory encoding are unverified. Current pressure therefore remains unavailable. A recent receipt does not prove that an observation is current.</p>
+            <p>Weights and thresholds are provisional. A two-match retrospective pilot produced precision@3 of 55.6% (random reference 50%) across three eligible team comparisons. The hero win-rate component’s Brier score was 0.294 versus 0.250 for a constant 50% estimate. This tiny, selected sample does not validate the weights or establish predictive value. The scouting index itself is not calibrated as a probability. <a href="docs/live-backtest-results.json">Inspect pilot results and limitations</a>.</p>
+            <h3>Sources &amp; retrieval times</h3><ul id="live-source-list"></ul><p><a href="https://api.deadlock-api.com/docs" target="_blank" rel="noreferrer">Deadlock API reference</a> · <a href="https://api.deadlock-api.com/openapi.json" target="_blank" rel="noreferrer">Current API specification</a></p>
+          </div>
+        </details>
+      </div>
+      <footer><span>Deadlock Tracker / Community project</span><span>Scouting preview · No sign-in needed</span></footer>
+      <noscript>Enable JavaScript to discover matches and load scouting data.</noscript>
+    </main>
+  </body>
+</html>

@@ -77,6 +77,13 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 
 ## Files
 
+- `live.html`, `live.css`, `live.js`: live scouting page, match discovery, broadcast observations, roster, focus overrides, and build evidence.
+- `live-data.js`: public API batching/caching, cohort queries and bounded SSE transport.
+- `live-stats.js`: pure scouting, rank percentile, recommendation guards and stream state normalization.
+- `docs/LIVE_MATCH_ANALYSIS.md`: verified API contract, provisional model, failure behavior, backtest and implementation limits.
+- `scripts/backtest-live.cjs`, `docs/live-backtest-results.json`: reproducible retrospective diagnostic and initial pilot results.
+- `sitemap.xml`, `robots.txt`: crawl discovery for the canonical Overview, Hero Meta and Live Scouting pages on `deadstats.ahsenjauhar.workers.dev`.
+
 - `deadlock-theme.css`: shared visual theme (period-style headings, squared panels, team accents and report stamps), loaded after the base styles.
 - `city-silhouette.svg`, `tracker-seal.svg`: original decorative header assets, stored locally.
 

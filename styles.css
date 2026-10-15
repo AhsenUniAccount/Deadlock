@@ -684,6 +684,11 @@ footer {
   border-bottom: 1px solid #363b34;
   z-index: 1;
 }
+.live-match-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 #match-status {
   padding-top: 18px;
 }

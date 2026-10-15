@@ -1,0 +1,229 @@
+{
+  "generatedAt": "2026-10-15T06:20:06.446Z",
+  "model": "scouting-v0.1",
+  "weights": [
+    0.5,
+    0.3,
+    0.2
+  ],
+  "purpose": "Small retrospective smoke backtest, not model validation or causal evidence.",
+  "target": "Top three opponents by post-match log KDA residual against the same-hero, rank-band population. This is a performance proxy, not ground truth danger.",
+  "calibrationTarget": "Adjusted historical hero win-rate component versus the eventual match result. The combined scouting index is not a probability and has no probability calibration.",
+  "caveats": [
+    "Small selected sample; players and outcomes within a match are correlated.",
+    "Retrospective aggregates can contain late-ingested records that were not available at the time.",
+    "Rank distribution and all aggregate features are bounded before the target match; current rank is rejected when it is from a later match.",
+    "Patch calendar-date windows do not establish exact client-version coverage.",
+    "No tuning or validation claim is justified by this diagnostic."
+  ],
+  "matches": [
+    {
+      "id": 117202274,
+      "startTime": 1792039993,
+      "scoredPlayers": 7,
+      "unavailableRequests": 0
+    },
+    {
+      "id": 117181625,
+      "startTime": 1792037202,
+      "scoredPlayers": 6,
+      "unavailableRequests": 0
+    }
+  ],
+  "rankings": [
+    {
+      "matchId": 117202274,
+      "friendlyTeam": 0,
+      "precisionAt3": 0.3333333333333333,
+      "ndcgAt3": 0.6510164199941776,
+      "eligibleOpponents": 3
+    },
+    {
+      "matchId": 117202274,
+      "friendlyTeam": 1,
+      "precisionAt3": 0.3333333333333333,
+      "ndcgAt3": 0.6958407807074236,
+      "eligibleOpponents": 4
+    },
+    {
+      "matchId": 117181625,
+      "friendlyTeam": 0,
+      "precisionAt3": 1,
+      "ndcgAt3": 0.9882623149956333,
+      "eligibleOpponents": 4
+    }
+  ],
+  "calibration": [
+    {
+      "matchId": 117202274,
+      "prediction": 0.5500626653669406,
+      "outcome": 0
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.5249439223146597,
+      "outcome": 0
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.474165001427348,
+      "outcome": 1
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.5191542159954505,
+      "outcome": 1
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.6458333333333334,
+      "outcome": 1
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.4503358077059032,
+      "outcome": 1
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.5046280204431056,
+      "outcome": 1
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.4923864282555127,
+      "outcome": 0
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.5315123518778871,
+      "outcome": 0
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.5489038152338879,
+      "outcome": 0
+    },
+    {
+      "matchId": 117202274,
+      "prediction": 0.2870945479641132,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.4659622748546306,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.4896023905354312,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.5500626653669406,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.5671345995045417,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.433562652646494,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.5370099343622494,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.39541503192553273,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.2811594202898551,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.5547832464840985,
+      "outcome": 1
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.4589096357768557,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.5598281949223054,
+      "outcome": 0
+    },
+    {
+      "matchId": 117181625,
+      "prediction": 0.4473183116470961,
+      "outcome": 1
+    }
+  ],
+  "failures": [
+    {
+      "matchId": 117181625,
+      "team": 1,
+      "reason": "Insufficient complete truth proxy or three eligible predictions."
+    }
+  ],
+  "summary": {
+    "completedMatches": 2,
+    "rankingComparisons": 3,
+    "meanPrecisionAt3": 0.5555555555555555,
+    "randomPrecisionAt3": 0.5,
+    "meanNdcgAt3": 0.7783731718990782,
+    "calibrationObservations": 23,
+    "heroWinRateBrier": 0.29398136649068113,
+    "constantHalfBrier": 0.25,
+    "reliabilityBins": [
+      {
+        "range": [
+          0,
+          0.4
+        ],
+        "n": 3,
+        "predicted": 0.3212230000598337,
+        "observed": 1
+      },
+      {
+        "range": [
+          0.4,
+          0.5
+        ],
+        "n": 8,
+        "predicted": 0.464030312856159,
+        "observed": 0.625
+      },
+      {
+        "range": [
+          0.5,
+          0.6
+        ],
+        "n": 11,
+        "predicted": 0.5407294210792788,
+        "observed": 0.2727272727272727
+      },
+      {
+        "range": [
+          0.6,
+          1
+        ],
+        "n": 1,
+        "predicted": 0.6458333333333334,
+        "observed": 1
+      }
+    ],
+    "networkRequests": 69
+  }
+}
