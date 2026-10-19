@@ -117,6 +117,8 @@ async function choosePlayer(profile) {
   searchController?.abort();
   searchForm.setAttribute("aria-busy", "false");
   selectedProfile = profile;
+  // "compact" stays on while searching again, so the search bar never jumps.
+  document.body?.classList.add("has-player", "compact");
   selectedPlayer.replaceChildren(...profileContent(profile));
   searchInput.value = profile.personaname;
   closeSuggestions();
@@ -136,6 +138,8 @@ function prepareSearch() {
   searchForm.setAttribute("aria-busy", "false");
   profiles = [];
   selectedProfile = null;
+  // Back to the landing layout until a player is chosen.
+  document.body?.classList.remove("has-player");
   selectedPlayer.replaceChildren();
   selectedPlayer.textContent = "No player selected";
   setPlayerOptions();
@@ -473,5 +477,17 @@ function renderResults(player, { totals, heroes }, names) {
   document.querySelector("#results-scope").textContent =
     `${totals.matches} recorded matches · ${heroes.length} heroes`;
 }
+
+// Share the profile URL (?player=ID) as-is.
+const copyProfile = document.querySelector("#copy-profile");
+copyProfile.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    copyProfile.textContent = "Link copied ✓";
+  } catch {
+    copyProfile.textContent = "Copy failed";
+  }
+  setTimeout(() => (copyProfile.textContent = "Copy profile link"), 2000);
+});
 
 openFromUrl();

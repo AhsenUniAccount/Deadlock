@@ -107,6 +107,7 @@ The Worker uses the same `common.js` request helper for the AI coach. Any privat
 - `player-trends.js`: per-match takeaways, recent-game patterns and same-rank hero comparisons, from match history and hero-stats aggregates.
 - `player-percentiles.js`: places a player's average game on the per-game quantile curve of all games at their rank.
 - `profile-view.js`: renders the profile's percentile cards, patterns and hero comparison.
+- `home.css`: front-page layout: centred hero search, feature previews before a search (`landing-only`), and the profile header after one (`player-only`, toggled by the `has-player` body class; `compact` shrinks the hero after the first search).
 - `history.html`, `history.js`: match history tab (latest 50 matches with takeaways), opened from the profile.
 - `tests/player-percentiles.test.js`: interpolation, clamping and lower-is-better metrics.
 - `tests/player-trends.test.js`: takeaway rules and scored-game filtering.

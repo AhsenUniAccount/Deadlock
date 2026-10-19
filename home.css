@@ -1,0 +1,362 @@
+/* Front page: centred hero search, feature previews before a search, and a
+   profile header once a player is chosen. Loaded after the shared styles. */
+
+body.home:not(.has-player) .player-only,
+body.home.has-player .landing-only {
+  display: none !important;
+}
+
+/* Hero */
+.home-hero {
+  max-width: 860px;
+  margin: 48px auto 36px;
+  text-align: center;
+}
+.home-hero .eyebrow {
+  margin: 0 0 14px;
+  letter-spacing: 0.28em;
+}
+.home-hero h1 {
+  margin: 0;
+  font-size: clamp(40px, 6.4vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.home-hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+  text-shadow: 0 0 40px #d7bf8333;
+}
+.home-hero .intro {
+  max-width: 640px;
+  margin: 18px auto 0;
+  color: #c9c4b4;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Pill search bar */
+.home-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 660px;
+  margin: 30px auto 0;
+  padding: 6px;
+  border: 1px solid #5d5c51;
+  border-radius: 999px;
+  background: #1f211e;
+  box-shadow:
+    0 18px 40px -24px #000,
+    0 0 0 6px #d7bf830d;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.home-search:focus-within {
+  border-color: var(--accent);
+  box-shadow:
+    0 18px 40px -24px #000,
+    0 0 0 6px #d7bf8326;
+}
+.home-search .search-combobox {
+  flex: 1;
+}
+.home-search input {
+  width: 100%;
+  height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #f2ede0;
+  font-size: 17px;
+  box-shadow: none;
+}
+.home-search input:focus,
+.home-search input:focus-visible {
+  outline: none;
+  background: transparent;
+  border: 0;
+}
+.home-search button {
+  height: 52px;
+  padding: 0 30px;
+  border-radius: 999px;
+  font-size: 15px;
+}
+.home-search .player-suggestions {
+  top: calc(100% + 14px);
+  left: -6px;
+  width: calc(100% + 12px);
+  max-width: none;
+  text-align: left;
+  border-radius: 14px;
+}
+.home-hero .search-caption {
+  margin: 14px 0 0;
+  padding: 0;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* Feature previews */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #262723, #1f201d);
+}
+.feature-kicker {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.feature-card h2 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.25;
+}
+.feature-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.feature-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.sample-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border-left: 3px solid #a8c5a0;
+  background: #2b2c28;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sample-row.negative {
+  border-left-color: #d39b90;
+}
+.sample-row b {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.sample-row small {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 400;
+}
+.sample-stat {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 12px 14px;
+  border-top: 3px solid #a8c5a0;
+  background: #2b2c28;
+}
+.sample-stat span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sample-stat b {
+  font-size: 26px;
+}
+.sample-stat i {
+  position: relative;
+  height: 6px;
+  background: #3a3c36;
+}
+.sample-stat i::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--fill);
+  background: #a8c5a0;
+}
+.sample-stat small {
+  grid-column: 1 / -1;
+  color: #e0d5b7;
+  font-weight: 650;
+}
+.feature-ai {
+  border-color: #5b4a86;
+  background:
+    radial-gradient(ellipse at 0% 0%, #7a5fbf2e, transparent 60%),
+    linear-gradient(180deg, #24202c, #1d1b22);
+}
+.feature-ai .feature-kicker {
+  color: #b9a0ee;
+}
+.sample-ai {
+  align-self: flex-start;
+  padding: 10px 20px;
+  border: 1px solid #cbb8f6;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #c3adf3, #8f73d6);
+  color: #1c1529;
+  font-size: 13px;
+  font-weight: 650;
+  box-shadow: 0 8px 20px -10px #9b7fe0;
+}
+
+/* Profile header */
+.profile-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px 32px;
+  margin-bottom: 24px;
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse at 0% 0%, #3b3a2c66, transparent 60%),
+    #212320;
+}
+.profile-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+.profile-card-identity .avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  font-size: 28px;
+}
+.profile-card-identity .profile-identity > span {
+  color: #f2ede0;
+  font-family: var(--display, serif);
+  font-size: 30px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.profile-card-identity .profile-identity small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.profile-record {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.profile-label,
+.profile-record .record-scope {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.profile-record strong {
+  font-family: var(--display, serif);
+  font-size: 44px;
+  line-height: 1.05;
+  color: var(--accent);
+}
+.profile-record p {
+  margin: 2px 0;
+  font-size: 13px;
+}
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  min-width: 200px;
+}
+.profile-rank {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border: 1px solid #6d6a58;
+  border-radius: 999px;
+  color: #e0d5b7;
+  font-size: 12px;
+  font-weight: 600;
+}
+.profile-rank:empty {
+  display: none;
+}
+.profile-actions .history-button {
+  margin-top: 0;
+}
+.profile-actions .secondary-button {
+  min-height: 40px;
+}
+
+@media (max-width: 860px) {
+  .feature-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .profile-actions {
+    min-width: 0;
+  }
+}
+@media (max-width: 640px) {
+  .home-hero {
+    margin-top: 28px;
+  }
+  .home-hero .intro {
+    font-size: 15px;
+  }
+  .home-search input {
+    height: 46px;
+    padding: 0 14px;
+    font-size: 16px;
+  }
+  .home-search button {
+    height: 46px;
+    padding: 0 18px;
+  }
+  .profile-card-identity .avatar {
+    width: 56px;
+    height: 56px;
+  }
+  .profile-card-identity .profile-identity > span {
+    font-size: 24px;
+  }
+}
+
+/* After the first player loads, the hero shrinks so the profile is in view. */
+body.home.compact .home-hero {
+  margin: 20px auto 24px;
+}
+body.home.compact .home-hero .eyebrow,
+body.home.compact .home-hero .intro {
+  display: none;
+}
+body.home.compact .home-hero h1 {
+  font-size: clamp(28px, 3.4vw, 40px);
+}
+body.home.compact .home-search {
+  margin-top: 18px;
+}

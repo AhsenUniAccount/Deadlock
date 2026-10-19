@@ -25,9 +25,10 @@
     <meta name="twitter:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
+    <link rel="stylesheet" href="home.css" />
     <script type="module" src="app.js"></script>
   </head>
-  <body>
+  <body class="home">
     <main>
       <header class="masthead">
         <a
@@ -43,29 +44,18 @@
         <span class="connection">Community tracker</span>
       </header>
 
-      <div class="page-heading">
-        <p class="eyebrow">PLAYER INSIGHTS</p>
-        <div class="page-title-row">
-          <h1 id="page-heading">Find out why you won or lost</h1>
-          <small class="author-credit">by ahsen jauhar</small>
-        </div>
+      <section class="home-hero" aria-labelledby="page-heading">
+        <p class="eyebrow">DEADLOCK MATCH ANALYSIS</p>
+        <h1 id="page-heading">Find out why you <em>won or lost</em>.</h1>
         <p class="intro">
-          Search your Steam name to get a plain-English summary of your last
-          Deadlock match: your lane, the swings, your deaths and what decided
-          it. Then dig into recent games and hero win rates. Data comes from the
-          community Deadlock API and may be incomplete or delayed.
+          Search your Steam name for a plain-English breakdown of your last
+          match, your stats against players at your rank, and the patterns
+          behind your wins and losses.
         </p>
-      </div>
-
-      <section class="player-overview" aria-label="Player search and summary">
-        <div class="search-panel" aria-labelledby="roster-heading">
-          <h2 id="roster-heading">Find a player</h2>
-          <div class="search-fields">
-            <form id="search-form">
-              <label for="search-query">Steam name or account ID</label>
-              <div class="search-controls">
-                <div class="search-combobox">
-                  <input
+        <form id="search-form" class="home-search" role="search">
+          <label for="search-query" class="sr-only">Steam name or account ID</label>
+          <div class="search-combobox">
+            <input
                     id="search-query"
                     type="search"
                     role="combobox"
@@ -73,51 +63,89 @@
                     aria-expanded="false"
                     aria-controls="player-suggestions"
                     aria-describedby="search-status"
-                    placeholder="Start typing a player name…"
+                    placeholder="Search a Steam name or account ID…"
                     required
                     maxlength="100"
                     autocomplete="off"
                     spellcheck="false"
                   />
-                  <div
-                    id="player-suggestions"
-                    class="player-suggestions"
-                    role="listbox"
-                    aria-label="Matching Steam players"
-                    hidden
-                  ></div>
-                </div>
-                <button type="submit">Search</button>
-              </div>
-            </form>
-            <div class="field">
-              <span class="field-label" id="selected-label"
-                >Selected player</span
-              >
-              <div
-                id="selected-player"
-                class="selected-player"
-                aria-labelledby="selected-label"
-              >
-                No player selected
-              </div>
-            </div>
+            <div
+              id="player-suggestions"
+              class="player-suggestions"
+              role="listbox"
+              aria-label="Matching Steam players"
+              hidden
+            ></div>
           </div>
-          <p
-            id="search-status"
-            class="search-caption"
-            role="status"
-            aria-live="polite"
-          >
-            Type at least 2 characters, then choose a player. Use ↑ and ↓ to
-            browse, Enter to select.
+          <button type="submit">Search</button>
+        </form>
+        <p
+          id="search-status"
+          class="search-caption"
+          role="status"
+          aria-live="polite"
+        >
+          Type at least 2 characters, then choose a player. Use ↑ and ↓ to
+          browse, Enter to select.
+        </p>
+      </section>
+
+      <section class="feature-grid landing-only" aria-label="What you get">
+        <article class="feature-card">
+          <span class="feature-kicker">Match summary</span>
+          <h2>Why your last game went the way it did</h2>
+          <p>
+            Your lane, the lead swings, your deaths and the structures that
+            fell, in plain English.
           </p>
+          <div class="feature-sample" aria-hidden="true">
+            <span class="sample-row positive"
+              ><b>9:00</b> Won your lane <small>+2,593 souls</small></span
+            >
+            <span class="sample-row negative"
+              ><b>25:00</b> Lead slipped away <small>−12,731</small></span
+            >
+          </div>
+        </article>
+        <article class="feature-card">
+          <span class="feature-kicker">Percentiles</span>
+          <h2>How you stack up at your rank</h2>
+          <p>
+            Souls, damage, KDA, accuracy and more, placed against every game
+            played at your rank.
+          </p>
+          <div class="feature-sample" aria-hidden="true">
+            <span class="sample-stat"
+              ><span>KDA</span><b>6.95</b><i style="--fill: 77%"></i
+              ><small>Top 23%</small></span
+            >
+          </div>
+        </article>
+        <article class="feature-card feature-ai">
+          <span class="feature-kicker">✦ AI coach</span>
+          <h2>A coach's read on your match</h2>
+          <p>
+            Key moments, what went well and what to work on, written from your
+            match data.
+          </p>
+          <div class="feature-sample" aria-hidden="true">
+            <span class="sample-ai">✦ Explain with AI</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="profile-header player-only" aria-label="Selected player">
+        <div id="selected-player" class="profile-card-identity">
+          No player selected
         </div>
-        <aside class="record" aria-label="Recent player record">
-          <span>Recent win rate</span><strong id="overall-rate">—</strong>
+        <div class="profile-record">
+          <span class="profile-label">Recent win rate</span>
+          <strong id="overall-rate">—</strong>
           <p id="record-detail">No player selected</p>
-          <span class="record-scope">Based on up to 20 recorded matches</span>
-          <span id="player-rank" class="record-scope"></span>
+          <span class="record-scope">Last 20 recorded matches</span>
+        </div>
+        <div class="profile-actions">
+          <span id="player-rank" class="profile-rank"></span>
           <a
             id="history-link"
             class="history-button"
@@ -126,7 +154,10 @@
             hidden
             >Match history ↗</a
           >
-        </aside>
+          <button id="copy-profile" class="secondary-button" type="button">
+            Copy profile link
+          </button>
+        </div>
       </section>
 
       <section
@@ -210,7 +241,7 @@
         <div id="compare-list" class="compare-list"></div>
       </section>
 
-      <section class="panel" aria-labelledby="results-heading">
+      <section class="panel player-only" aria-labelledby="results-heading">
         <div class="toolbar">
           <div><h2 id="results-heading">Hero performance</h2></div>
           <span id="results-scope" class="scope"
@@ -273,7 +304,7 @@
       <footer>
         <span
           >Deadlock Tracker <span class="footer-divider">/</span> Community
-          project</span
+          project by ahsen jauhar</span
         ><span>No sign-in needed</span>
       </footer>
       <noscript
