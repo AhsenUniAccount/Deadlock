@@ -107,6 +107,7 @@ The Worker uses the same `common.js` request helper for the AI coach. Any privat
 - `player-trends.js`: per-match takeaways, recent-game patterns and same-rank hero comparisons, from match history and hero-stats aggregates.
 - `player-percentiles.js`: places a player's average game on the per-game quantile curve of all games at their rank.
 - `profile-view.js`: renders the profile's percentile cards, patterns and hero comparison.
+- `privacy.html`: privacy policy (what the site shows, who processes requests, what is stored, Valve disclaimer), linked from every footer. Update it when data handling changes, such as adding analytics or switching the AI provider.
 - `site.css`: shared look on every page (DeadStats brand, centred headings with a brass highlight, pill controls, rounded cards).
 - `home.css`: front-page layout: centred hero search, feature previews before a search (`landing-only`), and the profile header after one (`player-only`, toggled by the `has-player` body class; `compact` shrinks the hero after the first search).
 - `history.html`, `history.js`: match history tab (latest 50 matches with takeaways), opened from the profile.

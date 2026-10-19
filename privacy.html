@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Privacy Policy | DeadStats</title>
+    <meta
+      name="description"
+      content="How DeadStats handles data: what it shows, which services process requests, and what is stored."
+    />
+    <link rel="canonical" href="https://deadstats.ahsenjauhar.workers.dev/privacy" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:site_name" content="DeadStats" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Privacy Policy | DeadStats" />
+    <meta property="og:description" content="How DeadStats handles data: what it shows, which services process requests, and what is stored." />
+    <meta property="og:url" content="https://deadstats.ahsenjauhar.workers.dev/privacy" />
+    <meta property="og:image" content="https://deadstats.ahsenjauhar.workers.dev/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy Policy | DeadStats" />
+    <meta name="twitter:description" content="How DeadStats handles data: what it shows, which services process requests, and what is stored." />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="deadlock-theme.css" />
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="DeadStats home"
+          ><strong>DEAD<b>STATS</b></strong><span>FOR DEADLOCK</span></a
+        >
+        <nav aria-label="Page navigation">
+          <a href="index.html#page-heading">Overview</a
+          ><a href="tier-lists.html" aria-current="page"
+            >Hero meta</a
+          ><a href="live.html">Live scouting</a>
+        </nav>
+        <span class="connection">Community tracker</span>
+      </header>
+      <div class="page-heading">
+        <p class="eyebrow">LAST UPDATED 20 OCTOBER 2026</p>
+        <h1>Privacy <em>policy</em></h1>
+        <p class="intro">
+          DeadStats is a free community site for Deadlock statistics. This page
+          explains, in plain English, what data the site shows, which services
+          handle your requests, and what is stored.
+        </p>
+      </div>
+
+      <article class="panel policy">
+        <section>
+          <h2>1. What DeadStats shows</h2>
+          <p>
+            DeadStats displays public Deadlock match data from the community-run
+            <a href="https://api.deadlock-api.com/docs" target="_blank" rel="noreferrer">Deadlock API</a>.
+            That data includes Steam account IDs, Steam display names, avatars,
+            match history, results and in-game statistics for any player the API
+            has recorded, whether or not they have visited this site.
+          </p>
+          <p>
+            There are no accounts, sign-ins or forms on DeadStats. The only
+            things you type are player names, account IDs and match IDs, which
+            are used to look up data.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. Who processes your requests</h2>
+          <ul>
+            <li>
+              <strong>Deadlock API.</strong> Your browser sends searches (player
+              names, account IDs and match IDs) directly to the Deadlock API to
+              load statistics. That service is independent of DeadStats, and its
+              own policies apply to the requests it receives.
+            </li>
+            <li>
+              <strong>Cloudflare.</strong> The site is hosted on Cloudflare
+              Workers. Like any web host, Cloudflare processes your IP address and
+              standard request details to deliver pages and protect the site.
+              Requests for AI reviews are limited per IP address, and the Worker
+              keeps operational logs for troubleshooting.
+            </li>
+            <li>
+              <strong>AI coach.</strong> When you choose <em>Explain with AI</em>,
+              the site sends that match's statistics to an AI model run by
+              Cloudflare Workers AI. Players are described only by hero name;
+              Steam names, account IDs and avatars are not sent to the model.
+            </li>
+          </ul>
+          <p>
+            DeadStats does not sell data, show ads, or share data with
+            advertisers.
+          </p>
+        </section>
+
+        <section>
+          <h2>3. What is stored</h2>
+          <ul>
+            <li>
+              <strong>No cookies or tracking.</strong> DeadStats sets no cookies,
+              uses no analytics, and keeps nothing in your browser's storage.
+              Loaded statistics are held in memory only until you leave or reload
+              the page.
+            </li>
+            <li>
+              <strong>AI reviews</strong> are saved on Cloudflare for up to 180
+              days so the same review can be shown again without regenerating
+              it. A saved review contains the match statistics and the generated
+              text, identified by match ID and player slot, not by name.
+            </li>
+            <li>
+              <strong>A daily count</strong> of new AI reviews (a number only) is
+              kept for two days to stay within the free AI allowance.
+            </li>
+            <li>
+              <strong>Link previews</strong> for shared match links are cached by
+              Cloudflare for up to a day.
+            </li>
+            <li>
+              <strong>Copy summary</strong> and <strong>Copy profile link</strong>
+              only write to your clipboard when you press them.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Not affiliated with Valve</h2>
+          <p>
+            DeadStats is an unofficial fan project. It is not affiliated with,
+            endorsed by or sponsored by Valve Corporation. Deadlock and related
+            names and images are trademarks of Valve. Statistics come from a
+            community API and may be incomplete, delayed or inaccurate.
+          </p>
+        </section>
+      </article>
+
+      <footer>
+        <span
+          >DeadStats <span class="footer-divider">/</span> Community
+          project</span
+        ><a href="privacy.html">Privacy</a>
+      </footer>
+    </main>
+  </body>
+</html>
