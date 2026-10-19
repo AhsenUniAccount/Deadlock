@@ -58,23 +58,29 @@
               </p>
               <h3 id="summary-headline"></h3>
               <ol id="summary-points" class="ai-moments"></ol>
-              <h3>AI coach</h3>
-              <p class="match-help">
-                An AI model explains the match in plain language using the same
-                data. It cannot see positioning or ability use, and can be
-                wrong. A limited number of new explanations are available each
-                day.
-              </p>
-              <button id="ai-review-button" type="button">
-                Explain with AI
-              </button>
-              <p
-                id="ai-review-status"
-                class="results-status"
-                role="status"
-                aria-live="polite"
-              ></p>
-              <div id="ai-review-result" class="ai-review-result" hidden></div>
+              <section class="ai-coach" aria-labelledby="ai-coach-heading">
+                <div class="ai-coach-header">
+                  <span class="ai-coach-glyph" aria-hidden="true">✦</span>
+                  <h3 id="ai-coach-heading">AI coach</h3>
+                  <span class="ai-coach-tag">Experimental</span>
+                </div>
+                <p class="match-help">
+                  An AI model explains the match in plain language using the
+                  same data. It cannot see positioning or ability use, and can
+                  be wrong. A limited number of new explanations are available
+                  each day.
+                </p>
+                <button id="ai-review-button" class="ai-coach-button" type="button">
+                  Explain with AI
+                </button>
+                <p
+                  id="ai-review-status"
+                  class="results-status"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+                <div id="ai-review-result" class="ai-review-result" hidden></div>
+              </section>
             </div>
           </details>
           <nav class="match-contents" aria-label="Match contents">
