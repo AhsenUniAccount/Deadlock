@@ -1,31 +1,33 @@
 // Read-only retrospective diagnostic. No credentials; run with explicit completed match IDs.
-const fs = require("node:fs/promises");
-const os = require("node:os");
-const path = require("node:path");
-const crypto = require("node:crypto");
-const S = require("../live-stats.js");
-global.DeadlockLiveStats = S;
-global.errorMessage = (e) => e.message;
-global.API_BASE = "https://api.deadlock-api.com";
-const D = require("../live-data.js");
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
+import S from "../live-stats.js";
+import D from "../live-data.js";
+import { API_BASE } from "../common.js";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
 const cacheDir = path.join(os.tmpdir(), "deadlock-scout-backtest");
 let networkRequests = 0;
-global.request = async (endpoint, signal) => {
+const diskRequest = async (endpoint, signal) => {
   const name = path.join(cacheDir, crypto.createHash("sha256").update(endpoint).digest("hex") + ".json");
   try { return JSON.parse(await fs.readFile(name, "utf8")); } catch {}
   networkRequests++;
-  const response = await fetch(`${global.API_BASE}${endpoint}`, { signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]) });
+  const response = await fetch(`${API_BASE}${endpoint}`, { signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]) });
   if (!response.ok) { const e = new Error(`HTTP ${response.status}: ${endpoint.split("?")[0]}`); e.status = response.status; e.retryAfter = Number(response.headers.get("retry-after")) || null; throw e; }
   const result = { data: await response.json(), fetchedAt: new Date().toISOString() };
   await fs.writeFile(name, JSON.stringify(result));
   return result;
 };
+D.useTransport(diskRequest);
 const mean = S.average;
 const dcg = (order, truths) => order.reduce((sum, p, i) => sum + (truths.get(p.accountId) || 0) / Math.log2(i + 2), 0);
 
 async function main() {
   const ids = process.argv.slice(2).map(Number);
-  if (!ids.length || ids.length > 10 || ids.some((id) => !Number.isSafeInteger(id) || id <= 0)) throw new Error("Usage: node scripts/backtest-live.cjs MATCH_ID [MATCH_ID ...] (1–10 completed normal games)");
+  if (!ids.length || ids.length > 10 || ids.some((id) => !Number.isSafeInteger(id) || id <= 0)) throw new Error("Usage: node scripts/backtest-live.mjs MATCH_ID [MATCH_ID ...] (1–10 completed normal games)");
   await fs.mkdir(cacheDir, { recursive: true });
   const report = { generatedAt: new Date().toISOString(), model: "scouting-v0.1", weights: [.5, .3, .2],
     purpose: "Small retrospective smoke backtest, not model validation or causal evidence.",
@@ -35,7 +37,7 @@ async function main() {
   for (const id of ids) {
     const signal = AbortSignal.timeout(240000);
     try {
-      const raw = (await global.request(`/v1/matches/${id}/metadata`, signal)).data.match_info;
+      const raw = (await diskRequest(`/v1/matches/${id}/metadata`, signal)).data.match_info;
       if (!raw || raw.match_id !== id || ![0, 1].includes(raw.winning_team) || !raw.start_time || raw.players?.length !== 12) throw new Error("Missing completed 12-player metadata.");
       if (raw.game_mode !== 1 || ![1, 4].includes(raw.match_mode)) throw new Error("Backtest requires verified ranked/unranked normal mode.");
       const match = { match_id: id, start_time: raw.start_time, match_mode: raw.match_mode };
@@ -79,7 +81,7 @@ async function main() {
     meanNdcgAt3: mean(report.rankings.map((r) => r.ndcgAt3)), calibrationObservations: report.calibration.length,
     heroWinRateBrier: mean(report.calibration.map((r) => (r.prediction - r.outcome) ** 2)), constantHalfBrier: .25,
     reliabilityBins: bins.map(([lo, hi]) => { const rows = report.calibration.filter((r) => r.prediction >= lo && r.prediction < hi); return { range: [lo, Math.min(hi, 1)], n: rows.length, predicted: mean(rows.map((r) => r.prediction)), observed: mean(rows.map((r) => r.outcome)) }; }), networkRequests };
-  const target = path.join(__dirname, "../docs/live-backtest-results.json");
+  const target = path.join(here, "../docs/live-backtest-results.json");
   await fs.mkdir(path.dirname(target), { recursive: true }); await fs.writeFile(target, JSON.stringify(report, null, 2) + "\n");
   console.log(JSON.stringify(report.summary, null, 2));
   if (!report.matches.length) process.exitCode = 1;

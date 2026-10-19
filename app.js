@@ -1,4 +1,5 @@
-"use strict";
+import DeadlockStats from "./stats.js";
+import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
 
 // Overview page controller: search suggestions, selected profile, then match history.
 // Statistics stay in stats.js so they can be tested without a browser.

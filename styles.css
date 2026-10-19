@@ -1792,3 +1792,90 @@ a.secondary-button {
 .perspective-kda { padding: 0 24px 20px; }
 .perspective-kda > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .perspective-kda > strong { font-size: clamp(28px, 4vw, 36px); color: #eee9dc; font-variant-numeric: tabular-nums; }
+
+/* Match summary and AI coach: headline, timestamped points and coaching notes. */
+#match-summary {
+  scroll-margin-top: 20px;
+}
+#summary-headline,
+.ai-review-result .ai-headline {
+  font-size: 18px;
+  line-height: 1.35;
+  color: #e0d5b7;
+}
+.ai-review-result > p {
+  font-size: 14px;
+  color: #d8d3c4;
+}
+.ai-review-section h4 {
+  margin: 24px 0 10px;
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ai-moments,
+.ai-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ai-moments li {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  padding: 12px 0 12px 12px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid #6f7268;
+}
+.ai-moments li[data-impact="positive"] {
+  border-left-color: #a8c5a0;
+}
+.ai-moments li[data-impact="negative"] {
+  border-left-color: #d39b90;
+}
+.ai-moment-time {
+  align-self: start;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.ai-moments p,
+.ai-points p {
+  margin: 4px 0 0;
+}
+.ai-points li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ai-points small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.ai-source summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+}
+.ai-source pre {
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: #121412;
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .ai-moments li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .ai-moment-time {
+    justify-self: start;
+  }
+}

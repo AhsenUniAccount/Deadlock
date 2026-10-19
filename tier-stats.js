@@ -1,5 +1,3 @@
-"use strict";
-
 const DeadlockTierStats = (() => {
   // Validate aggregate counts and express each hero's picks as a share of all picks.
   function chartHeroes(data, minimumMatches = 1000) {
@@ -48,4 +46,4 @@ const DeadlockTierStats = (() => {
   }
   return { chartHeroes, rankHeroes };
 })();
-if (typeof module !== "undefined") module.exports = DeadlockTierStats;
+export default DeadlockTierStats;

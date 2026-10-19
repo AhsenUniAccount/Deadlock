@@ -1,5 +1,3 @@
-"use strict";
-
 // Pure API-to-view-model transformations, shared by the UI and Node tests.
 // null means unavailable; zero is a real measurement and must not be discarded.
 const DeadlockMatchStats = (() => {
@@ -50,7 +48,16 @@ const DeadlockMatchStats = (() => {
               ? raw.mvp_rank
               : null,
           items: Array.isArray(raw.items) ? raw.items : null,
+          // Lane IDs are shared by the players assigned to the same lane on both teams.
+          lane:
+            Number.isInteger(raw.assigned_lane) && raw.assigned_lane > 0
+              ? raw.assigned_lane
+              : null,
+          lastHits: count(raw.last_hits),
+          denies: count(raw.denies),
+          level: count(raw.level),
           soulSamples: soulSamples(raw.stats, info.duration_s),
+          statSamples: statSamples(raw.stats, info.duration_s),
           events,
           deathsComplete:
             Array.isArray(raw.death_details) &&
@@ -137,6 +144,8 @@ const DeadlockMatchStats = (() => {
           time: boss.destroyed_time_s,
           kind: "midboss",
           type: "Mid Boss",
+          // The team that picked up the Rejuvenator, which can differ from the killer.
+          claimedBy: [0, 1].includes(boss.team_claimed) ? boss.team_claimed : null,
         });
       }
     }
@@ -174,6 +183,37 @@ const DeadlockMatchStats = (() => {
     }
     return [...samples.values()].sort((a, b) => a.time - b.time);
   }
+  // Cumulative per-snapshot totals from the API. Each field is null when absent,
+  // so a missing counter is never read as zero.
+  const STAT_FIELDS = {
+    souls: "net_worth",
+    playerDamage: "player_damage",
+    damageTaken: "player_damage_taken",
+    healing: "player_healing",
+    creepKills: "creep_kills",
+    neutralKills: "neutral_kills",
+    soulsFromPlayers: "gold_player",
+    soulsFromLaneCreeps: "gold_lane_creep",
+    soulsFromNeutrals: "gold_neutral_creep",
+    soulsFromBosses: "gold_boss",
+    soulsLostToDeaths: "gold_death_loss",
+  };
+  function statSamples(stats, duration) {
+    const samples = new Map();
+    for (const point of Array.isArray(stats) ? stats : []) {
+      if (
+        !point ||
+        count(point.time_stamp_s) === null ||
+        (Number.isFinite(duration) && point.time_stamp_s > duration)
+      )
+        continue;
+      const sample = { time: point.time_stamp_s };
+      for (const [key, field] of Object.entries(STAT_FIELDS))
+        sample[key] = count(point[field]);
+      samples.set(point.time_stamp_s, sample);
+    }
+    return [...samples.values()].sort((a, b) => a.time - b.time);
+  }
   // Join each recorded death to its killer by player slot; preserve unknown sources and times.
   function killTimeline(match) {
     const bySlot = new Map(
@@ -184,9 +224,13 @@ const DeadlockMatchStats = (() => {
       for (const event of victim.events) {
         if (!event || typeof event !== "object") continue;
         const time = count(event.game_time_s);
+        const deadFor = Number.isFinite(event.death_duration_s)
+          ? event.death_duration_s
+          : null;
         events.push({
           victim,
           killer: bySlot.get(event.killer_player_slot) || null,
+          deadFor: deadFor !== null && deadFor >= 0 ? deadFor : null,
           time:
             time !== null &&
             (!Number.isFinite(match.duration) || time <= match.duration)
@@ -218,8 +262,9 @@ const DeadlockMatchStats = (() => {
     summarizeMatch,
     purchases,
     soulSamples,
+    statSamples,
     matchMvps,
     killTimeline,
   };
 })();
-if (typeof module !== "undefined") module.exports = DeadlockMatchStats;
+export default DeadlockMatchStats;

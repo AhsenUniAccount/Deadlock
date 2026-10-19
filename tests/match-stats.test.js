@@ -1,6 +1,8 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const { summarizeMatch, killTimeline } = require("../match-stats.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import M from "../match-stats.js";
+
+const { summarizeMatch, killTimeline } = M;
 const player = (slot, extra = {}) => ({
   player_slot: slot,
   account_id: 100 + slot,
@@ -104,7 +106,7 @@ test("rejects incorrect match IDs, duplicate slots, and malformed rosters", () =
 });
 
 test("purchases omit abilities, retain repeat buys, preserve time zero and removal times", () => {
-  const { purchases } = require("../match-stats.js");
+  const { purchases } = M;
   const catalog = new Map([
     [1, { type: "upgrade" }],
     [2, { type: "ability" }],
@@ -124,7 +126,7 @@ test("purchases omit abilities, retain repeat buys, preserve time zero and remov
 });
 
 test("souls timeline sorts snapshots, preserves decreases and zeroes, and excludes invalid samples", () => {
-  const { soulSamples } = require("../match-stats.js");
+  const { soulSamples } = M;
   assert.deepEqual(
     soulSamples(
       [
@@ -149,7 +151,7 @@ test("souls timeline sorts snapshots, preserves decreases and zeroes, and exclud
 });
 
 test("match MVPs use only API ranks across both teams, never calculated KDA", () => {
-  const { matchMvps } = require("../match-stats.js");
+  const { matchMvps } = M;
   const match = summarizeMatch(
     metadata([
       player(0, { mvp_rank: 3 }),
@@ -172,7 +174,7 @@ test("match MVPs use only API ranks across both teams, never calculated KDA", ()
 });
 
 test("kill timeline orders deaths by game time, resolves sparse slots and retains unknown sources and times", () => {
-  const { killTimeline } = require("../match-stats.js");
+  const { killTimeline } = M;
   const data = metadata([
     player(9, {
       death_details: [
@@ -205,7 +207,7 @@ test("kill timeline orders deaths by game time, resolves sparse slots and retain
 });
 
 test("objective events preserve owning teams and ignore surviving or invalid structures", () => {
-  const { objectiveTimeline } = require("../match-stats.js");
+  const { objectiveTimeline } = M;
   const events = objectiveTimeline({
     duration_s: 1000,
     objectives: [
@@ -219,14 +221,59 @@ test("objective events preserve owning teams and ignore surviving or invalid str
       { team_objective_id: 1, team: 0, destroyed_time_s: 1001 },
       null,
     ],
-    mid_boss: [{ destroyed_time_s: 250 }, { destroyed_time_s: 0 }, null],
+    mid_boss: [
+      { destroyed_time_s: 250 },
+      { destroyed_time_s: 0 },
+      null,
+      { destroyed_time_s: 600, team_killed: 1, team_claimed: 0 },
+    ],
   });
   assert.deepEqual(events, [
     { time: 100, kind: "objective", team: 0, type: "Guardian" },
     { time: 200, kind: "objective", team: 1, type: "Walker" },
-    { time: 250, kind: "midboss", type: "Mid Boss" },
+    { time: 250, kind: "midboss", type: "Mid Boss", claimedBy: null },
     { time: 300, kind: "objective", team: 0, type: "Shrine" },
     { time: 400, kind: "objective", team: 1, type: "Base Guardian" },
+    { time: 600, kind: "midboss", type: "Mid Boss", claimedBy: 0 },
   ]);
   assert.deepEqual(objectiveTimeline({}), []);
+});
+
+test("stat snapshots keep cumulative counters and leave missing fields null", () => {
+  const { statSamples } = M;
+  assert.deepEqual(
+    statSamples(
+      [
+        { time_stamp_s: 360, net_worth: 4000, player_damage: 900 },
+        { time_stamp_s: 180, net_worth: 1500, player_damage: 0, gold_death_loss: 0 },
+        { time_stamp_s: 9999, net_worth: 1 },
+        { net_worth: 5 },
+      ],
+      600,
+    ).map(({ time, souls, playerDamage, soulsLostToDeaths }) => ({
+      time,
+      souls,
+      playerDamage,
+      soulsLostToDeaths,
+    })),
+    [
+      { time: 180, souls: 1500, playerDamage: 0, soulsLostToDeaths: 0 },
+      { time: 360, souls: 4000, playerDamage: 900, soulsLostToDeaths: null },
+    ],
+  );
+});
+test("lane assignment and time dead come from the API, with no inference", () => {
+  const match = summarizeMatch(
+    metadata([
+      player(0, { assigned_lane: 4, kills: 1 }),
+      player(1, {
+        assigned_lane: 0,
+        deaths: 1,
+        death_details: [{ killer_player_slot: 0, game_time_s: 50, death_duration_s: 12 }],
+      }),
+    ]),
+    55,
+  );
+  assert.deepEqual(match.players.map((p) => p.lane), [4, null]);
+  assert.equal(killTimeline(match)[0].deadFor, 12);
 });

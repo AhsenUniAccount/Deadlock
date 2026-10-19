@@ -1,6 +1,6 @@
 # Live match scouting v0.1
 
-Implemented at `live.html`, linked from Overview, Hero Meta, and match breakdowns. It reuses the existing masthead, match sections, typography, portraits, and colors. No login, API key, backend, or new runtime dependency is required. The repository currently has no backend/proxy; public API calls follow `common.js`. A future private key must be held by a server/Worker, never added to these scripts.
+Implemented at `live.html`, linked from Overview, Hero Meta, and match breakdowns. It reuses the existing masthead, match sections, typography, portraits, and colors. No login, API key, backend, or new runtime dependency is required. Public API calls follow `common.js` directly from the browser. The site Worker (used for AI match review) is not involved; any private key must stay in Worker secrets, never in these scripts.
 
 The site is hosted on Cloudflare Workers. A read-only check of `/tier-lists.html` returned a 307 redirect to `/tier-lists`, so sitemap and canonical URLs use the extensionless hosted paths. Local development links retain `.html` to work with the simple Python server. The sitemap now covers `/`, `/tier-lists`, and `/live`.
 
@@ -53,14 +53,14 @@ Core candidates follow the most-used qualifying published build when resolvable.
 Run a bounded retrospective diagnostic with explicit completed normal-game IDs:
 
 ```sh
-node scripts/backtest-live.cjs 117202274 117181625
+node scripts/backtest-live.mjs 117202274 117181625
 ```
 
 It makes read-only public API calls and caches responses in the OS temporary directory. It writes `docs/live-backtest-results.json`. Rankings are evaluated against an explicit post-match log-KDA residual proxy; that is not ground-truth threat or causal contribution. Calibration is only diagnostic for the historical adjusted win-rate component. The scouting index itself has no probability calibration. Current rank is rejected for past matches, and population/distribution features are bounded before each target. Retrospective late ingestion is still a limitation.
 
 Initial pilot: two selected matches; 7/12 and 6/12 eligible players; three eligible team-ranking comparisons. Mean precision@3 was 0.556 against a 0.500 random reference. Mean NDCG@3 was 0.778. For 23 correlated player outcomes, adjusted hero-rate Brier was 0.294, worse than the 0.250 constant-half reference. This is insufficient to validate or tune the model. Keep the preview labeling; a larger chronological held-out dataset and prospective archived pregame snapshots are needed before claiming predictive performance. No weights were tuned to this pilot.
 
-Automated checks cover source filtering, shrinkage, missing components, percentile ranks, safe recommendations, split SSE frames/error events, stale updates, partial lobbies, team changes, and cancellation. Run `node --test tests/*.test.cjs`.
+Automated checks cover source filtering, shrinkage, missing components, percentile ranks, safe recommendations, split SSE frames/error events, stale updates, partial lobbies, team changes, and cancellation. Run `npm test`.
 
 Browser-render verification could not run in the authoring session: native computer-use service startup failed and no in-app browser was available. Local HTTP and controller checks are recorded separately; desktop/mobile visual checks remain necessary before deployment.
 

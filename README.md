@@ -1,10 +1,10 @@
 # Deadlock player tracker
 
-A standalone browser tracker with a dark dashboard in warm charcoal, cream, and muted brass. Search a Steam player name, choose the matching account, and retrieve recent statistics from the community-run [Deadlock API](https://api.deadlock-api.com/docs). No API key, account, installation, or backend is needed. Internet access is required for searches and match data.
+A standalone browser tracker with a dark dashboard in warm charcoal, cream, and muted brass. Search a Steam player name, choose the matching account, and retrieve recent statistics from the community-run [Deadlock API](https://api.deadlock-api.com/docs). Statistics need no API key or account. Match pages open with a **Match summary** of the selected player's game, built from the statistics in the browser, plus an optional **AI coach** explanation from a free Cloudflare Workers AI model. Internet access is required for searches and match data.
 
 ## Use it
 
-1. Open `index.html` in Safari or Chrome, or refresh your existing tab.
+1. Run the site locally (see [Run locally](#run-locally)) or open the hosted site.
 2. Start typing a Steam display name. After at least two characters and a 300 ms pause, matching accounts appear below the input with Steam avatars. **Search** or Enter also runs an immediate search.
 3. Click a matching player, or use Up/Down and Enter. Escape closes the suggestions. Account IDs distinguish players with identical names.
 4. Review their latest 20 recorded matches, per-hero win rates, and individual match K/D/A and durations. Hero portraits appear beside names in both tables.
@@ -73,7 +73,7 @@ Typing immediately cancels obsolete requests, even before the debounce delay exp
 
 Requests have a 20-second timeout. New searches and player selections cancel obsolete requests so old results cannot replace the current selection. Successful results are cached in memory: searches for one minute, match history for five minutes, and hero names for the page session. Reloading clears these local caches; the service may still return its own cached data. Searches and selected account IDs are sent to the API. API results are kept in memory only. No credentials are stored.
 
-If this becomes a hosted product, a small backend proxy would allow shared caching and centralized rate-limit handling. Any future private API credentials should stay on that server, never in the browser code.
+The Worker uses the same `common.js` request helper for the AI coach. Any private credentials (such as an optional Anthropic key) live only in the Worker's secrets, never in browser code.
 
 ## Files
 
@@ -81,7 +81,7 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 - `live-data.js`: public API batching/caching, cohort queries and bounded SSE transport.
 - `live-stats.js`: pure scouting, rank percentile, recommendation guards and stream state normalization.
 - `docs/LIVE_MATCH_ANALYSIS.md`: verified API contract, provisional model, failure behavior, backtest and implementation limits.
-- `scripts/backtest-live.cjs`, `docs/live-backtest-results.json`: reproducible retrospective diagnostic and initial pilot results.
+- `scripts/backtest-live.mjs`, `docs/live-backtest-results.json`: reproducible retrospective diagnostic and initial pilot results.
 - `sitemap.xml`, `robots.txt`: crawl discovery for the canonical Overview, Hero Meta and Live Scouting pages on `deadstats.ahsenjauhar.workers.dev`.
 
 - `deadlock-theme.css`: shared visual theme (period-style headings, squared panels, team accents and report stamps), loaded after the base styles.
@@ -91,7 +91,7 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 - `404.html`, `404-character.png`: custom Cloudflare Pages not-found page and its character artwork.
 - `tier-lists.html`, `tier-lists.js`: aggregate hero scatter plot, filters, and rendering.
 - `tier-stats.js`: validated hero counts, pick-rate, and win-rate calculations.
-- `tests/tier-stats.test.cjs`: ranking, ties, unscored results, and validation checks.
+- `tests/tier-stats.test.js`: ranking, ties, unscored results, and validation checks.
 - `styles.css`: responsive dashboard styling using system fonts; profile avatars and hero portraits load from image URLs supplied by the API.
 - `stats.js`: ID conversion and match aggregation.
 - `app.js`: API requests, state, and rendering.
@@ -101,26 +101,31 @@ If this becomes a hosted product, a small backend proxy would allow shared cachi
 - `souls-chart.js`: individual SVG souls timelines, player perspective dropdown, and player/item event tooltips.
 - `match-stats.js`: roster validation, event-log completeness, purchases, player/objective timelines, and API MVP ranks.
 - `analysis-stats.js`: pure team-advantage and opponent calculations; retained historical helpers are not exposed in the UI.
+- `match-digest.js`: per-player match facts used by the summary and sent to the AI model.
+- `match-summary.js`: rule-based match summary points built from a digest.
+- `review-panel.js`: Match summary and AI coach panel on the match page.
+- `tests/match-summary.test.js`: summary rules, thresholds and missing data.
+- `worker/index.js`, `worker/analyze.js`: Cloudflare Worker routes (`/api/analyze`, `/api/digest`), caching, rate limiting and the Claude request.
+- `wrangler.jsonc`, `.assetsignore`, `package.json`: Worker configuration, unpublished files, and dependencies/scripts.
+- `tests/match-digest.test.js`: digest perspective, shared snapshots, death windows and missing data.
 - `match-analysis.js`: lane comparison UI, team souls advantage graph, and objective hover markers.
 - `rejuvenator.svg`: local Rejuvenator-inspired symbol for Mid Boss deaths.
-- `tests/analysis-stats.test.cjs`: synchronized snapshots, event boundaries, historical selection, and purchase timings.
-- `tests/match-stats.test.cjs`: sparse slots, incomplete logs, unknown killers, souls, objective IDs/times, and metadata validation.
-- `tests/stats.test.cjs`: calculation and input-validation checks.
-- `tests/app.test.cjs`: search debounce, keyboard navigation, avatars, IME input, API errors, stored-history fallback, and request cancellation checks.
+- `tests/analysis-stats.test.js`: synchronized snapshots, event boundaries, historical selection, and purchase timings.
+- `tests/match-stats.test.js`: sparse slots, incomplete logs, unknown killers, souls, objective IDs/times, and metadata validation.
+- `tests/stats.test.js`: calculation and input-validation checks.
+- `tests/app.test.js`: search debounce, keyboard navigation, avatars, IME input, API errors, stored-history fallback, and request cancellation checks.
 
-Run the automated calculation and search-interaction tests with Node.js:
+## Run locally
 
-```sh
-node --test tests/*.test.cjs
-```
-
-Opening the HTML file directly is sufficient. For an optional local web server:
+The pages are ES modules, which browsers do not load from `file://` URLs, so serve the folder over HTTP. Install dependencies once with `npm install`, then:
 
 ```sh
-python3 -m http.server 8000 --bind 127.0.0.1
+npm run dev:offline  # pages + Worker at http://127.0.0.1:8787, no Cloudflare login needed
+npm run dev          # same, with the AI coach (needs `npx wrangler login` once)
+npm test          # calculation, digest and page-controller tests (Node 22+)
 ```
 
-Then visit `http://127.0.0.1:8000`. Stop the server with Control+C.
+Workers AI has no local emulator, so `npm run dev` connects to your Cloudflare account and its requests count toward the free daily allowance. In `dev:offline`, the summary works and the AI button reports that AI is not configured. A plain static server (`python3 -m http.server 8000 --bind 127.0.0.1`) still serves the statistics pages, but not `/api/*`.
 
 ## Match analysis and review
 
@@ -137,12 +142,35 @@ The team advantage remains Hidden King minus ArchMother regardless of the select
 
 Detailed player encounters, five-minute performance panels, recent-game/item comparisons, replay bookmarks, and the separate clickable event list below Player analysis are not part of the current UI. The kill timeline remains a separate section.
 
-Contents links automatically open their collapsible target section. No additional API key or backend is needed.
+Contents links automatically open their collapsible target section.
 
+## Match summary and AI coach
+
+The **Match summary** section opens first on a match page and describes the selected player's game. Select another player in the KDA table to see theirs.
+
+**Summary (free, no AI).** `match-digest.js` turns the normalized match into facts relative to that player: lane partners and opponents from `assigned_lane`, souls/damage/healing checkpoints at the recorded snapshot times, the team and lane souls leads from their side, kills and deaths with time spent dead, objectives (and whether they were dead at the time), Mid Boss claims, phase totals and the purchase order. `match-summary.js` applies fixed rules to those facts (lane result, lead swings, kills versus souls, time dead, clustered deaths, structures lost while dead, MVP, souls sources). Everything runs in the browser, and a point is only shown when every value it mentions was recorded. Thresholds are constants at the top of `match-summary.js`.
+
+**AI coach (optional).** **Explain with AI** posts only `{ matchId, slot }` to `/api/analyze`. The Worker fetches the match itself (so no client-supplied text reaches the model; Steam names are never sent), builds the same digest, and asks a model for a headline, summary, key moments, strengths and improvements with evidence, using a JSON schema. Timestamps outside the match are dropped. The page shows the review with clickable times and **Match data the AI was given**. `GET /api/digest?match=ID&slot=N` returns the digest without calling a model.
+
+Providers, set in `wrangler.jsonc`:
+
+- `ANALYSIS_PROVIDER: "workers-ai"` (default, free): Cloudflare Workers AI through the `AI` binding, model `@cf/openai/gpt-oss-120b` (it followed the review rules much better than Llama 3.3 70B in testing). Every account gets 10,000 neurons a day free; one review uses roughly 260. Its reviews are specific but can still misstate a number, which the page warns about. On the Workers Free plan, usage beyond the allowance fails instead of being billed. On Workers Paid it is billed, so the Worker also stops at `DAILY_REVIEW_LIMIT` new reviews per UTC day (25 by default, about the free allowance).
+- `ANALYSIS_PROVIDER: "anthropic"` (paid, higher quality): Claude through the Anthropic API. Requires the `ANTHROPIC_API_KEY` secret and costs money per new review; set a spend limit on the Anthropic workspace.
+
+Reviews are cached in Workers KV for 180 days (completed matches never change), keyed by match, slot, provider, model, prompt version and digest version. Cached reviews are free and do not count toward either limit. New reviews are also limited to 3 per minute per IP. Bump `PROMPT_VERSION` (`worker/analyze.js`) or `MatchDigest.VERSION` when the prompt or digest changes. Only standard 6v6 matches with a final result can be reviewed.
+
+### Deploying
+
+```sh
+npx wrangler login
+npm run deploy
+```
+
+`wrangler.jsonc` deploys the Worker named `deadstats`, serves the repository root as static assets (files listed in `.assetsignore` are not published), connects Workers AI, and provisions the `ANALYSIS_CACHE` KV namespace on the first deploy. No API key is needed for the default provider. For Claude instead, run `npx wrangler secret put ANTHROPIC_API_KEY` and set `ANALYSIS_PROVIDER` to `"anthropic"` and `ANALYSIS_MODEL` to a Claude model.
 
 ## Editing guide
 
-This is a static site: no build step or framework is needed. Each HTML page loads its scripts with `defer`; keep shared utilities and calculation modules before the page controllers that use them.
+No build step or framework is needed. Each HTML page loads one controller as an ES module (`<script type="module">`), which imports what it needs. Calculation modules have no DOM dependencies, so the Worker and Node tests import the same files.
 
 - **Change player search:** edit `app.js` for interaction and `stats.js` for calculations.
 - **Change the match layout:** edit `match.html` and `styles.css`. The shared `.match-details` class styles collapsible sections; preserve IDs used by JavaScript.
@@ -150,19 +178,21 @@ This is a static site: no build step or framework is needed. Each HTML page load
 - **Change objective markers:** edit `match-stats.js` for event normalization and `match-analysis.js` for marker layout/tooltips. Keep objective markers separate from the individual player graph.
 - **Change comparisons:** edit `analysis-stats.js` for calculations and `match-analysis.js` for UI and loading.
 - **Change chart behavior:** edit `souls-chart.js`. Highlighted-player selection comes from `match.js`; event markers and tooltips belong to the chart.
+- **Change the summary or AI coach:** edit `match-digest.js` for the facts (test in `tests/match-digest.test.js`), `match-summary.js` for the rule-based points (test in `tests/match-summary.test.js`), `worker/analyze.js` for the prompt, schema and providers, and `review-panel.js` for rendering.
 - **Change API behavior:** edit `common.js`. Cancellation, timeout, cache lifetime, and stored-history fallback are shared here.
 
 Missing values must remain distinct from zero. Do not join events by roster array index: use `player_slot`. Keep API strings in `textContent`, and retain cancellation checks after asynchronous requests so stale responses cannot overwrite the current selection. Comments explain these constraints where they matter.
 
-Run `node --test tests/*.test.cjs` after changing calculations or request behavior. For a browser smoke check, open a match, switch players, expand Items/KDA table/Match analysis, compare two opposing players, and hover or keyboard-focus graph events. Switch between teams and check that friendly-objective markers change while the team-advantage sign stays fixed. Check a narrow viewport as well as desktop. Formatting is conventional two-space indentation; the site has no runtime formatter dependency.
+Run `npm test` after changing calculations or request behavior. For a browser smoke check, open a match, switch players, expand Items/KDA table/Match analysis, compare two opposing players, and hover or keyboard-focus graph events. Switch between teams and check that friendly-objective markers change while the team-advantage sign stays fixed. Check a narrow viewport as well as desktop. Formatting is conventional two-space indentation; the site has no runtime formatter dependency.
 
 ## Data flow for contributors
 
-`common.js` provides requests, caching and safe DOM/image helpers. `stats.js`, `match-stats.js`, `analysis-stats.js` and `tier-stats.js` are calculation modules that can run under Node without a browser. Page controllers connect those calculations to the DOM:
+`common.js` provides requests, caching and safe DOM/image helpers. `stats.js`, `match-stats.js`, `analysis-stats.js`, `match-digest.js`, `match-summary.js` and `tier-stats.js` are calculation modules that can run under Node without a browser. Page controllers connect those calculations to the DOM:
 
 - Overview: `app.js` searches profiles, loads history and renders `stats.js` summaries.
 - Match: `match.js` validates the URL match ID, loads metadata through `match-stats.js`, then enriches names, heroes and items independently. Its shared view contains the normalized match, identity/catalog maps and `selectedSlot`.
 - Player selection: the scoreboard and `souls-chart.js` dropdown both use `selectMatchPlayer()` in `match.js`. This refreshes selection and the two chart modules without another metadata request. Lane selectors keep their own opposing pair.
+- Summary and AI coach: `review-panel.js` builds the digest and summary for the same `selectedSlot` in the browser; AI responses are stored per match and slot, so a late response never replaces another player's review.
 - Hero meta: `tier-lists.js` fetches aggregates and assets, then delegates count validation and rate calculations to `tier-stats.js`.
 
 Function comments describe purpose and non-obvious constraints rather than each statement. When changing a calculation, preserve the distinction between unavailable (`null`) and a measured zero, and add a focused test for the changed rule. The current tests cover calculations and overview interactions; they do not replace the browser checks above for SVG layout and tooltips.

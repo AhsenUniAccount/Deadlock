@@ -1,6 +1,8 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const { rankHeroes } = require("../tier-stats.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import DeadlockTierStats from "../tier-stats.js";
+
+const { rankHeroes } = DeadlockTierStats;
 const row = (hero_id, wins, losses, matches = wins + losses) => ({
   hero_id,
   wins,

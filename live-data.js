@@ -1,8 +1,12 @@
-"use strict";
+import DeadlockLiveStats from "./live-stats.js";
+import { API_BASE, request, errorMessage } from "./common.js";
 
 const DeadlockLiveData = (() => {
   const S = DeadlockLiveStats;
   const sources = new Map();
+  // Swappable so the Node backtest can serve responses from its disk cache.
+  let transport = request;
+  const useTransport = (fn) => { transport = fn; };
   const LIVE_QUERY = `SELECT 'player' AS kind, tick, entity_index, delta_type,
     "m_unEconAccountID" AS account_id, "m_iTeamNum" AS team,
     "m_PlayerDataGlobal__m_nHeroID" AS hero_id,
@@ -43,7 +47,7 @@ const DeadlockLiveData = (() => {
   async function get(path, signal, ttl = 600000, object = false) {
     for (let attempt = 0; ; attempt++) {
       try {
-        const result = await request(path, signal, ttl, false, object);
+        const result = await transport(path, signal, ttl, false, object);
         signal.throwIfAborted(); sources.set(path, result.fetchedAt); return result.data;
       } catch (error) {
         if (signal.aborted || attempt || ![429, 503].includes(error.status) || (error.retryAfter || 0) > 10) throw error;
@@ -197,6 +201,6 @@ const DeadlockLiveData = (() => {
     }, signal, 2);
     return output;
   }
-  return { get, sources, mapLimit, parseFrame, stream, delay, scopeFor, paramsFor, scouting, builds, LIVE_QUERY };
+  return { get, useTransport, sources, mapLimit, parseFrame, stream, delay, scopeFor, paramsFor, scouting, builds, LIVE_QUERY };
 })();
-if (typeof module !== "undefined") module.exports = DeadlockLiveData;
+export default DeadlockLiveData;

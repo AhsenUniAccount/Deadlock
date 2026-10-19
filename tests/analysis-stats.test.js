@@ -1,7 +1,7 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const A = require("../analysis-stats.js");
-const M = require("../match-stats.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import A from "../analysis-stats.js";
+import M from "../match-stats.js";
 const player = (slot, team, stats, extra = {}) => ({
   player_slot: slot,
   team,

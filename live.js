@@ -1,4 +1,6 @@
-"use strict";
+import DeadlockLiveStats from "./live-stats.js";
+import DeadlockLiveData from "./live-data.js";
+import { API_BASE, errorMessage, portrait } from "./common.js";
 
 (() => {
   const S = DeadlockLiveStats, D = DeadlockLiveData;

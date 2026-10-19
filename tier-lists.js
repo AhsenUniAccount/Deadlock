@@ -1,4 +1,5 @@
-"use strict";
+import DeadlockTierStats from "./tier-stats.js";
+import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
 
 // Aggregate hero chart: API loading here, count validation in tier-stats.js.
 const tierForm = document.querySelector("#tier-filters");

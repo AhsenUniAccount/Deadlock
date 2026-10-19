@@ -1,6 +1,8 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const { formatWinRate, accountIdFromQuery, summarize } = require("../stats.js");
+import test from "node:test";
+import assert from "node:assert/strict";
+import DeadlockStats from "../stats.js";
+
+const { formatWinRate, accountIdFromQuery, summarize } = DeadlockStats;
 const match = (id, outcome, extra = {}) => ({
   account_id: 42,
   match_id: id,

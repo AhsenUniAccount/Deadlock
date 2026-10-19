@@ -11,12 +11,7 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
-    <script src="common.js" defer></script>
-    <script src="match-stats.js" defer></script>
-    <script src="souls-chart.js" defer></script>
-    <script src="analysis-stats.js" defer></script>
-    <script src="match-analysis.js" defer></script>
-    <script src="match.js" defer></script>
+    <script type="module" src="match.js"></script>
   </head>
   <body>
     <main>
@@ -53,8 +48,38 @@
             </div>
             <div id="match-mvps" class="team-mvps"></div>
           </section>
+          <details id="match-summary" class="match-details" open>
+            <summary>Match summary</summary>
+            <div class="analysis-body">
+              <p class="match-help">
+                Key facts from the recorded statistics for the selected player.
+                Select a player in the KDA table to see their summary. Times
+                open the souls chart.
+              </p>
+              <h3 id="summary-headline"></h3>
+              <ol id="summary-points" class="ai-moments"></ol>
+              <h3>AI coach</h3>
+              <p class="match-help">
+                An AI model explains the match in plain language using the same
+                data. It cannot see positioning or ability use, and can be
+                wrong. A limited number of new explanations are available each
+                day.
+              </p>
+              <button id="ai-review-button" type="button">
+                Explain with AI
+              </button>
+              <p
+                id="ai-review-status"
+                class="results-status"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <div id="ai-review-result" class="ai-review-result" hidden></div>
+            </div>
+          </details>
           <nav class="match-contents" aria-label="Match contents">
             <strong>Contents</strong>
+            <a href="#match-summary">Summary</a>
             <a href="#souls-graph">Player analysis</a>
             <a href="#kda-tables">KDA table</a>
             <a href="#items-purchased">Items</a>
@@ -183,10 +208,6 @@
           <details id="match-analysis" class="match-details">
             <summary>Match analysis</summary>
             <div class="analysis-body">
-              <p class="match-help">
-                AI match analysis is currently being reworked and will be back
-                shortly.
-              </p>
               <h3>Team souls advantage</h3>
               <p class="match-help">
                 The Hidden King minus The ArchMother. Positive: Hidden King

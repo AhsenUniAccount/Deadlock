@@ -1,5 +1,3 @@
-"use strict";
-
 // Pure scouting calculations. Null means unknown; scores are indices, not probabilities.
 const DeadlockLiveStats = (() => {
   const number = (v) => typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -167,4 +165,4 @@ const DeadlockLiveStats = (() => {
   }
   return { number, count, average, roster, percentile, baseline, recentGames, shrink, scout, focusPlan, itemCandidates, StreamState };
 })();
-if (typeof module !== "undefined") module.exports = DeadlockLiveStats;
+export default DeadlockLiveStats;

@@ -1,5 +1,3 @@
-"use strict";
-
 // Shared calculations use the API's player_match_outcome, not the winning team's ID.
 const DeadlockStats = (() => {
   // Display a win percentage, keeping an empty scored sample distinct from zero wins.
@@ -71,4 +69,4 @@ const DeadlockStats = (() => {
   }
   return { formatWinRate, accountIdFromQuery, summarize };
 })();
-if (typeof module !== "undefined") module.exports = DeadlockStats;
+export default DeadlockStats;

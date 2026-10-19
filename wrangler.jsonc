@@ -1,0 +1,51 @@
+// Cloudflare Worker for deadstats: static pages from the repository root plus /api/* routes.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "deadstats",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Only API routes reach the Worker; every other path is a static file.
+    "run_worker_first": ["/api/*"]
+  },
+  // Finished reviews, keyed by match, player, model and prompt version.
+  // The "deadstats-analysis-cache" namespace in the ahsenjauhar@gmail.com account.
+  "kv_namespaces": [{ "binding": "ANALYSIS_CACHE", "id": "b25dfc664cdc455f885d7719448b146f" }],
+  // Per-IP limit on new (uncached) reviews, which are the only paid requests.
+  "ratelimits": [
+    {
+      "name": "ANALYSIS_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 3, "period": 60 }
+    }
+  ],
+  // Workers AI: free daily allowance, no API key. Usage beyond it fails on the
+  // Workers Free plan and is billed on Workers Paid, hence DAILY_REVIEW_LIMIT.
+  "ai": { "binding": "AI" },
+  "vars": {
+    // "workers-ai" (free) or "anthropic" (paid; needs the ANTHROPIC_API_KEY secret).
+    "ANALYSIS_PROVIDER": "workers-ai",
+    "ANALYSIS_MODEL": "@cf/openai/gpt-oss-120b",
+    "DAILY_REVIEW_LIMIT": "25"
+  },
+  "observability": { "enabled": true },
+  "env": {
+    // `npm run dev:offline`: no Cloudflare login needed. Workers AI only runs
+    // remotely, so this environment omits it; summaries still work and the AI
+    // button reports that AI is not configured.
+    "offline": {
+      "kv_namespaces": [{ "binding": "ANALYSIS_CACHE" }],
+      "ratelimits": [
+        {
+          "name": "ANALYSIS_LIMITER",
+          "namespace_id": "1001",
+          "simple": { "limit": 3, "period": 60 }
+        }
+      ],
+      "vars": { "ANALYSIS_PROVIDER": "workers-ai", "DAILY_REVIEW_LIMIT": "25" }
+    }
+  }
+}

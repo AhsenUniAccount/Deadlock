@@ -1,4 +1,6 @@
-"use strict";
+import AnalysisStats from "./analysis-stats.js";
+import { cell, portrait } from "./common.js";
+
 // Match analysis owns opponent selection and the team souls advantage graph.
 // render() receives the shared view; calculations stay in analysis-stats.js.
 const MatchAnalysis = (() => {
@@ -420,3 +422,5 @@ const MatchAnalysis = (() => {
   );
   return { render };
 })();
+
+export default MatchAnalysis;

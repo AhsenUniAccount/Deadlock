@@ -1,4 +1,8 @@
-"use strict";
+import DeadlockMatchStats from "./match-stats.js";
+import SoulsChart from "./souls-chart.js";
+import MatchAnalysis from "./match-analysis.js";
+import ReviewPanel from "./review-panel.js";
+import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
 
 // Standalone match-page controller. Data normalization lives in match-stats.js;
 // player timelines, lane comparisons and team analysis have separate rendering modules.
@@ -258,6 +262,7 @@ function renderMatch() {
   renderPlayerSelection();
   SoulsChart.render(matchView);
   MatchAnalysis.render(matchView);
+  ReviewPanel.render(matchView);
 }
 
 // Both the scoreboard and chart dropdown use the same selection path.
@@ -271,6 +276,7 @@ function selectMatchPlayer(slot) {
   renderPlayerSelection();
   SoulsChart.render(matchView);
   MatchAnalysis.render(matchView);
+  ReviewPanel.render(matchView);
 }
 document.addEventListener("match-player-select", (event) =>
   selectMatchPlayer(event.detail?.slot),

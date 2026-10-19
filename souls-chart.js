@@ -1,4 +1,5 @@
-"use strict";
+import DeadlockMatchStats from "./match-stats.js";
+import { cell, portrait } from "./common.js";
 
 // SVG chart controller. All available timelines remain visible; the selected
 // perspective controls team colors, the solid line, and event markers.
@@ -538,3 +539,5 @@ const SoulsChart = (() => {
     });
   return { render, jump };
 })();
+
+export default SoulsChart;

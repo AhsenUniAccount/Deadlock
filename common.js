@@ -1,13 +1,16 @@
-"use strict";
-
 // Shared browser utilities. No API credentials are required by these endpoints.
-const API_BASE = "https://api.deadlock-api.com";
+export const API_BASE = "https://api.deadlock-api.com";
 const cache = new Map();
+
+// Tests load fresh page controllers that share this module; they reset the cache between cases.
+export function clearRequestCache() {
+  cache.clear();
+}
 
 // Cache only successful responses. Stored history on HTTP 429 is an explicit
 // opt-in because it can be older than a freshly fetched response.
 // Callers own cancellation; the shared timeout also bounds every network request.
-async function request(
+export async function request(
   path,
   signal,
   ttl = 60000,
@@ -53,7 +56,7 @@ async function request(
 }
 
 // Convert network and timeout errors into messages suitable for the page.
-function errorMessage(error) {
+export function errorMessage(error) {
   if (error.name === "TimeoutError")
     return "The API took too long to respond. Please try again.";
   if (error instanceof TypeError)
@@ -62,7 +65,7 @@ function errorMessage(error) {
 }
 
 // Build a reusable avatar or hero image with an initial as its loading/error fallback.
-function portrait(url, name, className = "avatar") {
+export function portrait(url, name, className = "avatar") {
   const wrapper = document.createElement("span");
   wrapper.className = className;
   wrapper.setAttribute("aria-hidden", "true");
@@ -83,7 +86,7 @@ function portrait(url, name, className = "avatar") {
 }
 
 // Format API Unix seconds in the viewer’s local timezone.
-function dateTime(timestamp) {
+export function dateTime(timestamp) {
   return new Date(timestamp * 1000).toLocaleString([], {
     year: "numeric",
     month: "short",
@@ -94,7 +97,7 @@ function dateTime(timestamp) {
 }
 
 // Create text-only DOM content; API strings are never interpreted as HTML.
-function cell(tag, text) {
+export function cell(tag, text) {
   const element = document.createElement(tag);
   element.textContent = text;
   if (tag === "th") element.scope = "row";

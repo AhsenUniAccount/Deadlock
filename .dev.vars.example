@@ -1,0 +1,3 @@
+# Only needed when ANALYSIS_PROVIDER is "anthropic". Copy to .dev.vars for `npm run dev`.
+# Never commit the real file.
+ANTHROPIC_API_KEY=sk-ant-...

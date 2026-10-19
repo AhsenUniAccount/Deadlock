@@ -1,10 +1,14 @@
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const vm = require("node:vm");
-const fs = require("node:fs");
-const path = require("node:path");
+import test from "node:test";
+import assert from "node:assert/strict";
+import { clearRequestCache } from "../common.js";
 
-function setup(fetch) {
+// app.js is a page module: each test installs stub DOM globals, then imports a
+// fresh copy (the query string forces a new module instance).
+let instance = 0;
+const text = (node) =>
+  node.textContent + node.children.map((child) => text(child)).join(" ");
+
+async function setup(fetch) {
   class Element {
     constructor() {
       this.children = [];
@@ -44,12 +48,8 @@ function setup(fetch) {
   };
   const timers = new Map();
   let timerId = 0;
-  const context = vm.createContext({
+  Object.assign(globalThis, {
     fetch,
-    AbortSignal,
-    AbortController,
-    URLSearchParams,
-    console,
     setTimeout: (callback) => {
       timers.set(++timerId, callback);
       return timerId;
@@ -61,11 +61,8 @@ function setup(fetch) {
       addEventListener() {},
     },
   });
-  for (const file of ["stats.js", "common.js", "app.js"])
-    vm.runInContext(
-      fs.readFileSync(path.join(__dirname, "..", file), "utf8"),
-      context,
-    );
+  clearRequestCache();
+  await import(`../app.js?test=${++instance}`);
   return {
     get,
     search: async (query) => {
@@ -73,10 +70,9 @@ function setup(fetch) {
       await get("#search-form").events.submit({ preventDefault() {} });
     },
     choose: async (id) =>
-      vm.runInContext(
-        `choosePlayer(profiles.find(p => p.account_id === ${id}))`,
-        context,
-      ),
+      get("#player-suggestions")
+        .children.find((option) => text(option).includes(`Account ${id}`))
+        .events.click(),
     type: (query) => {
       get("#search-query").value = query;
       get("#search-query").events.input();
@@ -110,7 +106,7 @@ const history = (id) => [
 ];
 
 test("empty name searches leave no previous statistics", async () => {
-  const app = setup(async (url) =>
+  const app = await setup(async (url) =>
     response(
       url.includes("steam-search")
         ? []
@@ -127,13 +123,13 @@ test("empty name searches leave no previous statistics", async () => {
   assert.equal(app.get("#player-suggestions").hidden, true);
 });
 test("rate limit without stored history shows a useful error", async () => {
-  const app = setup(async () => response({ error: "limited" }, 429));
+  const app = await setup(async () => response({ error: "limited" }, 429));
   await app.search("a player");
   assert.match(app.get("#search-status").textContent, /request limit/);
   assert.equal(app.get("#search-form").attributes["aria-busy"], "false");
 });
 test("429 stored history is rendered and labelled, with hero-ID fallback", async () => {
-  const app = setup(async (url) =>
+  const app = await setup(async (url) =>
     url.includes("assets") ? response({}, 500) : response(history(42), 429),
   );
   await app.search("42");
@@ -148,7 +144,7 @@ test("429 stored history is rendered and labelled, with hero-ID fallback", async
 });
 test("late results from a cancelled player cannot overwrite the next account", async () => {
   let finishFirst;
-  const app = setup(async (url) => {
+  const app = await setup(async (url) => {
     if (url.includes("/42/"))
       return new Promise((resolve) => {
         finishFirst = () => resolve(response(history(42)));
@@ -167,7 +163,7 @@ test("late results from a cancelled player cannot overwrite the next account", a
 
 test("incremental typing is debounced and short or cleared queries make no requests", async () => {
   const calls = [];
-  const app = setup(async (url) => {
+  const app = await setup(async (url) => {
     calls.push(url);
     return response([]);
   });
@@ -189,7 +185,7 @@ test("incremental typing is debounced and short or cleared queries make no reque
 });
 test("editing aborts old suggestions immediately, before the next debounce completes", async () => {
   let resolveOld;
-  const app = setup(
+  const app = await setup(
     async () =>
       new Promise((resolve) => {
         resolveOld = resolve;
@@ -203,7 +199,7 @@ test("editing aborts old suggestions immediately, before the next debounce compl
   assert.equal(app.get("#player-suggestions").hidden, true);
 });
 test("suggestions include avatars, keyboard focus and a selected-player identity", async () => {
-  const app = setup(async (url) =>
+  const app = await setup(async (url) =>
     response(
       url.includes("steam-search")
         ? [
@@ -254,7 +250,7 @@ test("suggestions include avatars, keyboard focus and a selected-player identity
 });
 test("IME composition does not search until composition finishes", async () => {
   let count = 0;
-  const app = setup(async () => {
+  const app = await setup(async () => {
     count++;
     return response([]);
   });

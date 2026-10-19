@@ -1,10 +1,8 @@
-"use strict";
+import DeadlockMatchStats from "./match-stats.js";
+
 // Pure comparison helpers: no DOM, requests, or storage dependencies.
 const AnalysisStats = (() => {
-  const matchStats =
-    typeof module !== "undefined"
-      ? require("./match-stats.js")
-      : DeadlockMatchStats;
+  const matchStats = DeadlockMatchStats;
   // Use the last observed value, not interpolation. Callers display its timestamp.
   const at = (player, time) =>
     player.soulSamples.filter((point) => point.time <= time).at(-1) || null;
@@ -88,4 +86,4 @@ const AnalysisStats = (() => {
   }
   return { at, mean, advantage, counts, firstBuys, candidates };
 })();
-if (typeof module !== "undefined") module.exports = AnalysisStats;
+export default AnalysisStats;
