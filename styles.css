@@ -2043,3 +2043,53 @@ a.secondary-button {
   margin-top: 18px;
   font-size: 11px;
 }
+
+/* Homepage "Your last game" card and per-match takeaways. */
+.latest-match {
+  border-top: 3px solid var(--accent);
+}
+.latest-match .eyebrow {
+  margin: 0 0 4px;
+}
+.latest-headline,
+.latest-points {
+  margin: 0 24px;
+}
+.latest-headline {
+  font-size: 18px;
+  color: #e0d5b7;
+}
+.latest-points {
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+.latest-points p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.row-verdict {
+  display: inline-block;
+  max-width: 240px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.row-verdict[data-tone="positive"] {
+  color: #a8c5a0;
+}
+.row-verdict[data-tone="negative"] {
+  color: #d39b90;
+}
+.summary-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.summary-heading .secondary-button {
+  min-height: 34px;
+  font-size: 12px;
+}

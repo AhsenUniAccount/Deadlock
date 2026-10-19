@@ -121,3 +121,10 @@ test("top kills on the team are compared with souls, and MVP and souls sources a
   assert.deepEqual(titles(summary), ["Kills did not turn into souls", "Match MVP #2", "Where your souls came from"]);
   assert.match(summary.points.at(-1).detail, /lane creeps 75%, kills on players 25%\.$/);
 });
+test("plain-text summary lists each point and ends with the link", () => {
+  const text = MatchSummary.toText(
+    { headline: "Win as Haze", points: [{ title: "Won your lane", detail: "Up 900 souls." }] },
+    "https://example.test/match?id=1",
+  );
+  assert.equal(text, "Win as Haze\n• Won your lane: Up 900 souls.\nhttps://example.test/match?id=1");
+});

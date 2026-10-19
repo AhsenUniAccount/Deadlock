@@ -9,6 +9,19 @@
       name="description"
       content="Review a Deadlock match with player K/D/A, hero builds, item purchases, souls timelines, and team analysis."
     />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:site_name" content="Deadlock Tracker" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deadlock Match Stats &amp; Breakdown | Deadlock Tracker" />
+    <meta property="og:description" content="Review a Deadlock match with player K/D/A, hero builds, item purchases, souls timelines, and team analysis." />
+    <meta property="og:url" content="https://deadstats.ahsenjauhar.workers.dev/match" />
+    <meta property="og:image" content="https://deadstats.ahsenjauhar.workers.dev/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Deadlock Match Stats &amp; Breakdown | Deadlock Tracker" />
+    <meta name="twitter:description" content="Review a Deadlock match with player K/D/A, hero builds, item purchases, souls timelines, and team analysis." />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
     <script type="module" src="match.js"></script>
@@ -56,7 +69,12 @@
                 Select a player in the KDA table to see their summary. Times
                 open the souls chart.
               </p>
-              <h3 id="summary-headline"></h3>
+              <div class="summary-heading">
+                <h3 id="summary-headline"></h3>
+                <button id="summary-copy" class="secondary-button" type="button">
+                  Copy summary
+                </button>
+              </div>
               <ol id="summary-points" class="ai-moments"></ol>
               <section class="ai-coach" aria-labelledby="ai-coach-heading">
                 <div class="ai-coach-header">

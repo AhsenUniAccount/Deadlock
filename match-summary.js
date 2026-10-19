@@ -159,7 +159,14 @@ const MatchSummary = (() => {
     return { headline: `${result} as ${you.hero}${kda}${souls}`, points };
   }
 
-  return { build };
+  // Plain text for pasting into Discord or a message, with a link back to the match.
+  function toText(summary, url) {
+    const lines = [summary.headline, ...summary.points.map((p) => `• ${p.title}: ${p.detail}`)];
+    if (url) lines.push(url);
+    return lines.join("\n");
+  }
+
+  return { build, toText };
 })();
 
 export default MatchSummary;

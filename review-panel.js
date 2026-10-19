@@ -10,6 +10,8 @@ const ReviewPanel = (() => {
   const byId = (id) => document.getElementById(id);
   const summaryHeadline = byId("summary-headline");
   const summaryPoints = byId("summary-points");
+  const copyButton = byId("summary-copy");
+  let currentSummary = null;
   const button = byId("ai-review-button");
   const status = byId("ai-review-status");
   const result = byId("ai-review-result");
@@ -39,6 +41,8 @@ const ReviewPanel = (() => {
 
   function renderSummary() {
     summaryPoints.replaceChildren();
+    currentSummary = null;
+    copyButton.hidden = true;
     let summary;
     try {
       summary = MatchSummary.build(
@@ -49,6 +53,8 @@ const ReviewPanel = (() => {
       return;
     }
     summaryHeadline.textContent = summary.headline;
+    currentSummary = summary;
+    copyButton.hidden = false;
     if (!summary.points.length)
       summaryPoints.append(cell("li", "Not enough recorded data for a summary of this player."));
     for (const point of summary.points) {
@@ -182,6 +188,21 @@ const ReviewPanel = (() => {
     result.hidden = false;
   }
 
+  // Copy the summary as plain text with a link that reopens this player's view.
+  copyButton.addEventListener("click", async () => {
+    if (!currentSummary) return;
+    const player = view.match.players.find((p) => p.slot === view.selectedSlot);
+    const link = new URL("/match", window.location.origin);
+    link.searchParams.set("id", view.match.id);
+    if (player?.accountId) link.searchParams.set("player", player.accountId);
+    try {
+      await navigator.clipboard.writeText(MatchSummary.toText(currentSummary, link.toString()));
+      copyButton.textContent = "Copied ✓";
+    } catch {
+      copyButton.textContent = "Copy failed";
+    }
+    setTimeout(() => (copyButton.textContent = "Copy summary"), 2000);
+  });
   button.addEventListener("click", requestReview);
   window.addEventListener("pagehide", () => {
     for (const controller of pending.values()) controller.abort();

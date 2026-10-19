@@ -8,8 +8,9 @@
     "directory": ".",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    // Only API routes reach the Worker; every other path is a static file.
-    "run_worker_first": ["/api/*"]
+    // API routes and the match page (for link-preview tags) reach the Worker;
+    // every other path is a static file.
+    "run_worker_first": ["/api/*", "/match"]
   },
   // Finished reviews, keyed by match, player, model and prompt version.
   // The "deadstats-analysis-cache" namespace in the ahsenjauhar@gmail.com account.

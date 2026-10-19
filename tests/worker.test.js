@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker from "../worker/index.js";
+import worker, { applyPreviewTags } from "../worker/index.js";
 
 // The Worker is exercised end to end with fetch mocked for both the Deadlock
 // API and the Anthropic API, so no network or API key is needed.
@@ -175,4 +175,39 @@ test("digest route returns facts without calling the model; other paths are stat
   assert.equal((await digest.json()).digest.match.result, "loss");
   assert.equal(await (await worker.fetch(new Request("https://example.test/match.html"), env)).text(), "asset");
   assert.equal(calls.anthropic.length, 0);
+});
+
+const PAGE = `<title>Match | Deadlock Tracker</title>
+<meta property="og:title" content="Generic" />
+<meta property="og:description" content="Generic" />
+<meta property="og:url" content="https://example.test/match" />
+<meta name="twitter:title" content="Generic" />
+<meta name="twitter:description" content="Generic" />`;
+const visit = (env, userAgent, query = "?id=77&player=10") =>
+  worker.fetch(new Request(`https://example.test/match${query}`, { headers: { "User-Agent": userAgent } }), env);
+
+test("link-preview bots get the player's summary in the page tags; browsers get the static page", async () => {
+  const { env, calls } = setup();
+  env.ASSETS = { fetch: async () => new Response(PAGE, { headers: { "Content-Type": "text/html" } }) };
+  const bot = await (await visit(env, "Mozilla/5.0 (compatible; Discordbot/2.0)")).text();
+  assert.match(bot, /<meta property="og:title" content="Win as Haze · 0\/0\/0 · 1st of 2 in souls" \/>/);
+  assert.match(bot, /<meta name="twitter:description" content="[^"]*souls/);
+  assert.match(bot, /<title>Win as Haze · 0\/0\/0 · 1st of 2 in souls \| Deadlock Tracker<\/title>/);
+  assert.match(bot, /og:url" content="https:\/\/example.test\/match\?id=77&amp;player=10"/);
+  const fetchesAfterBot = calls.deadlock.length;
+  assert.equal(await (await visit(env, "Mozilla/5.0 Chrome/130")).text(), PAGE);
+  assert.equal(calls.deadlock.length, fetchesAfterBot);
+});
+test("previews without a player describe the result; bad IDs and API failures keep generic tags", async () => {
+  const { env } = setup();
+  env.ASSETS = { fetch: async () => new Response(PAGE) };
+  assert.match(await (await visit(env, "Twitterbot/1.0", "?id=77")).text(), /og:title" content="Match #77: The Hidden King won in 15:00"/);
+  assert.equal(await (await visit(env, "Twitterbot/1.0", "?id=abc")).text(), PAGE);
+  globalThis.fetch = async () => new Response("down", { status: 503 });
+  assert.match(await (await visit(env, "Twitterbot/1.0", "?id=78")).text(), /og:title" content="Generic"/);
+});
+test("preview text is escaped before it goes into attributes", () => {
+  const html = applyPreviewTags(PAGE, { title: 'A "quote" <b>', description: "x & y" }, "https://e.test/?a=1&b=2");
+  assert.match(html, /og:title" content="A &quot;quote&quot; &lt;b&gt;"/);
+  assert.match(html, /og:description" content="x &amp; y"/);
 });

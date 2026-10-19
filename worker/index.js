@@ -1,5 +1,6 @@
 import DeadlockMatchStats from "../match-stats.js";
 import MatchDigest from "../match-digest.js";
+import MatchSummary from "../match-summary.js";
 import { request } from "../common.js";
 import { analyzeDigest, providerConfig, AnalysisError, PROMPT_VERSION } from "./analyze.js";
 
@@ -125,9 +126,74 @@ async function handleAnalyze(req, env, signal) {
   return json({ ...record, cached: false });
 }
 
+// Link-preview crawlers. Only these get per-match tags, so normal page views
+// never trigger an extra metadata download.
+const PREVIEW_BOTS =
+  /discordbot|twitterbot|facebookexternalhit|slackbot|telegrambot|whatsapp|linkedinbot|redditbot|embedly|skypeuripreview|mastodon|iframely|bluesky|googlebot|bingbot/i;
+const clock = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+const escapeAttr = (text) =>
+  String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Title and description for a match link: the player's summary when the link
+// names a player in the match, otherwise the result and MVPs.
+async function previewTags(matchId, accountId, signal) {
+  const metadata = (await request(`/v1/matches/${matchId}/metadata`, signal, 1800000, false, true)).data;
+  const match = DeadlockMatchStats.summarizeMatch(metadata, matchId);
+  const { heroes } = await loadCatalogs(signal);
+  const player = match.players.find((p) => p.accountId === accountId && accountId > 0);
+  if (player && metadata.match_info?.game_mode === 1 && [0, 1].includes(player.team)) {
+    const summary = MatchSummary.build(MatchDigest.build(match, { heroes, items: new Map() }, player.slot));
+    const description = summary.points
+      .slice(0, 3)
+      .map((p) => `${p.title}: ${p.detail}`)
+      .join(" ");
+    return { title: summary.headline, description: description.length > 280 ? `${description.slice(0, 277)}…` : description };
+  }
+  const winner = match.winningTeam === 0 ? "The Hidden King" : match.winningTeam === 1 ? "The ArchMother" : null;
+  const mvps = DeadlockMatchStats.matchMvps(match.players).map((p) => heroes.get(p.heroId)?.name || `Hero ${p.heroId}`);
+  return {
+    title: `Match #${matchId}${winner && Number.isFinite(match.duration) ? `: ${winner} won in ${clock(match.duration)}` : ""}`,
+    description: `${mvps.length ? `MVPs: ${mvps.join(", ")}. ` : ""}Open the breakdown for a plain-English summary of every player's game.`,
+  };
+}
+
+export function applyPreviewTags(html, { title, description }, url) {
+  const set = (pattern, value) => html.replace(pattern, (_, before, after) => `${before}${escapeAttr(value)}${after}`);
+  html = set(/(<meta (?:property|name)="(?:og|twitter):title" content=")[^"]*(")/g, title);
+  html = set(/(<meta (?:property|name)="(?:og|twitter):description" content=")[^"]*(")/g, description);
+  html = set(/(<meta property="og:url" content=")[^"]*(")/, url);
+  return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(title)} | Deadlock Tracker</title>`);
+}
+
+async function matchPreview(req, env) {
+  const page = await env.ASSETS.fetch(req);
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id") ?? "";
+  if (!page.ok || !/^\d{1,15}$/.test(id)) return page;
+  // Completed matches never change, so previews are cached at the edge for a day.
+  const cache = globalThis.caches?.default;
+  const key = new Request(url.toString());
+  const hit = await cache?.match(key);
+  if (hit) return hit;
+  const html = await page.text();
+  let tags;
+  try {
+    tags = await previewTags(Number(id), Number(url.searchParams.get("player")), req.signal);
+  } catch {
+    return new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
+  }
+  const response = new Response(applyPreviewTags(html, tags, url.toString()), {
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=86400" },
+  });
+  await cache?.put(key, response.clone());
+  return response;
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
+    if (url.pathname === "/match" && PREVIEW_BOTS.test(req.headers.get("User-Agent") || ""))
+      return matchPreview(req, env);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(req);
     try {
       if (url.pathname === "/api/digest" && req.method === "GET") return await handleDigest(url, req.signal);

@@ -1,4 +1,8 @@
 import DeadlockStats from "./stats.js";
+import DeadlockMatchStats from "./match-stats.js";
+import MatchDigest from "./match-digest.js";
+import MatchSummary from "./match-summary.js";
+import PlayerTrends from "./player-trends.js";
 import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
 
 // Overview page controller: search suggestions, selected profile, then match history.
@@ -26,6 +30,7 @@ let suggestionsDismissed = false;
 
 // Clear statistics when the search changes so the previous player’s results cannot linger.
 function resetResults(message) {
+  document.querySelector("#latest-match").hidden = true;
   resultsBody.replaceChildren();
   recentBody.replaceChildren();
   summary.textContent = message;
@@ -293,6 +298,7 @@ async function loadPlayer() {
     const names = new Map((heroNames || []).map((hero) => [hero.id, hero]));
     const result = summarize(historyResult.value.data, player.account_id);
     renderResults(player, result, names);
+    loadLatestSummary(player, result.recent, names, controller);
     if (!result.recent.length) {
       summary.textContent = `No recorded matches are available for ${player.personaname}. The API may not have indexed this account yet.`;
       return;
@@ -305,6 +311,51 @@ async function loadPlayer() {
     resetResults(
       `${player.personaname}: ${errorMessage(error)} Search again to retry.`,
     );
+  }
+}
+
+// Summarize the most recent standard match, so the first thing a player sees is
+// why their last game went the way it did. One metadata request; failures only
+// hide the card, never the rest of the page.
+async function loadLatestSummary(player, recent, names, controller) {
+  const card = document.querySelector("#latest-match");
+  const latest = recent.find((match) => match.game_mode === 1);
+  if (!latest) return;
+  const status = document.querySelector("#latest-status");
+  const headline = document.querySelector("#latest-headline");
+  const list = document.querySelector("#latest-points");
+  const link = document.querySelector("#latest-link");
+  const url = `match.html?id=${latest.match_id}&player=${player.account_id}`;
+  link.href = url;
+  headline.textContent = "";
+  list.replaceChildren();
+  status.textContent = `Summarizing your match from ${dateTime(latest.start_time)}…`;
+  card.hidden = false;
+  try {
+    const metadata = await request(`/v1/matches/${latest.match_id}/metadata`, controller.signal, 1800000, false, true);
+    if (controller.signal.aborted) return;
+    const match = DeadlockMatchStats.summarizeMatch(metadata.data, latest.match_id);
+    const slot = match.players.find((p) => p.accountId === player.account_id)?.slot;
+    if (slot === undefined) throw new Error("Player not found in match.");
+    const summary = MatchSummary.build(MatchDigest.build(match, { heroes: names, items: new Map() }, slot));
+    headline.textContent = summary.headline;
+    status.textContent = `Match from ${dateTime(latest.start_time)}.`;
+    for (const point of summary.points.slice(0, 5)) {
+      const item = document.createElement("li");
+      item.dataset.impact = point.tone;
+      const time = cell("span", point.timeS === null ? "" : `${Math.floor(point.timeS / 60)}:${String(point.timeS % 60).padStart(2, "0")}`);
+      time.className = "kill-time";
+      const text = document.createElement("div");
+      text.append(cell("strong", point.title), cell("p", point.detail));
+      item.append(time, text);
+      list.append(item);
+    }
+  } catch (error) {
+    if (controller.signal.aborted) return;
+    status.textContent =
+      error.status === 404
+        ? "Detailed data for your latest match is not available yet. Open it for the basic breakdown."
+        : "A summary of your latest match is not available right now.";
   }
 }
 
@@ -354,6 +405,7 @@ function renderResults(player, { totals, heroes, recent }, names) {
     row.append(rateCell);
     resultsBody.append(row);
   }
+  const games = PlayerTrends.scoredGames(recent);
   for (const match of recent) {
     const row = document.createElement("tr");
     const hero = heroCell(match.hero_id, match.match_id);
@@ -381,8 +433,18 @@ function renderResults(player, { totals, heroes, recent }, names) {
       cell("td", kda),
       cell("td", duration),
     );
+    // One factual takeaway per game, relative to the player's own recent matches.
+    const verdict = PlayerTrends.rowVerdict(match, games);
+    const takeaway = cell("td", "");
+    if (verdict) {
+      const note = cell("span", verdict.text);
+      note.className = "row-verdict";
+      note.dataset.tone = verdict.tone;
+      takeaway.append(note);
+    }
+    row.append(takeaway);
     const action = document.createElement("td");
-    const open = cell("a", "View match ↗");
+    const open = cell("a", "Breakdown ↗");
     open.href = `match.html?id=${match.match_id}&player=${player.account_id}`;
     open.target = "_blank";
     open.rel = "noopener noreferrer";

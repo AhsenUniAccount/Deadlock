@@ -103,7 +103,10 @@ The Worker uses the same `common.js` request helper for the AI coach. Any privat
 - `analysis-stats.js`: pure team-advantage and opponent calculations; retained historical helpers are not exposed in the UI.
 - `match-digest.js`: per-player match facts used by the summary and sent to the AI model.
 - `match-summary.js`: rule-based match summary points built from a digest.
-- `review-panel.js`: Match summary and AI coach panel on the match page.
+- `review-panel.js`: Match summary (with **Copy summary**) and AI coach panel on the match page.
+- `player-trends.js`: per-match takeaways on the overview, computed from match history only; also recent-game patterns and same-rank hero comparisons (not yet shown in the UI).
+- `tests/player-trends.test.js`: takeaway rules and scored-game filtering.
+- `favicon.svg`, `apple-touch-icon.png`, `og-card.png`: site icon and the 1200×630 link-preview image.
 - `tests/match-summary.test.js`: summary rules, thresholds and missing data.
 - `worker/index.js`, `worker/analyze.js`: Cloudflare Worker routes (`/api/analyze`, `/api/digest`), caching, rate limiting and the Claude request.
 - `wrangler.jsonc`, `.assetsignore`, `package.json`: Worker configuration, unpublished files, and dependencies/scripts.
@@ -143,6 +146,12 @@ The team advantage remains Hidden King minus ArchMother regardless of the select
 Detailed player encounters, five-minute performance panels, recent-game/item comparisons, replay bookmarks, and the separate clickable event list below Player analysis are not part of the current UI. The kill timeline remains a separate section.
 
 Contents links automatically open their collapsible target section.
+
+## Overview summary and sharing
+
+After a player is chosen, the overview loads their most recent standard match (one metadata request) and shows its Match summary in **Your last game**, with a link to the full breakdown. Each recent-match row gets a one-line **Takeaway** from `player-trends.js`, relative to the player's own recent games (deathless game, best or lowest souls/min, deaths or kills well above average). Takeaways use match-history fields only, so they cost no extra requests.
+
+Every page has Open Graph and Twitter tags with `og-card.png`. When a link-preview crawler (Discord, Reddit, X, Slack, Telegram, WhatsApp and similar) requests `/match?id=…&player=…`, the Worker replaces the match page's title and description with that player's summary, or with the result and MVPs when no player is given. Normal visitors get the static page, so previews never add API traffic for them. Previews are cached at the edge for a day. **Copy summary** on the match page copies the summary as text with a link back to that player's view.
 
 ## Match summary and AI coach
 

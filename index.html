@@ -4,12 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#171918" />
-    <title>Deadlock Player Stats &amp; Match Tracker | Deadlock Tracker</title>
+    <title>Deadlock Match Analysis &amp; Player Stats | Deadlock Tracker</title>
     <meta
       name="description"
-      content="Look up Deadlock player match history, hero win rates, K/D/A, and detailed match breakdowns."
+      content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates."
     />
     <link rel="canonical" href="https://deadstats.ahsenjauhar.workers.dev/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:site_name" content="Deadlock Tracker" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deadlock Match Analysis &amp; Player Stats | Deadlock Tracker" />
+    <meta property="og:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
+    <meta property="og:url" content="https://deadstats.ahsenjauhar.workers.dev/" />
+    <meta property="og:image" content="https://deadstats.ahsenjauhar.workers.dev/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Deadlock Match Analysis &amp; Player Stats | Deadlock Tracker" />
+    <meta name="twitter:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
     <script type="module" src="app.js"></script>
@@ -33,12 +46,13 @@
       <div class="page-heading">
         <p class="eyebrow">PLAYER INSIGHTS</p>
         <div class="page-title-row">
-          <h1 id="page-heading">Player statistics</h1>
+          <h1 id="page-heading">Find out why you won or lost</h1>
           <small class="author-credit">by ahsen jauhar</small>
         </div>
         <p class="intro">
-          Search by Steam name or account ID to review recent Deadlock matches,
-          hero win rates, and player performance. Match history comes from the
+          Search your Steam name to get a plain-English summary of your last
+          Deadlock match: your lane, the swings, your deaths and what decided
+          it. Then dig into recent games and hero win rates. Data comes from the
           community Deadlock API and may be incomplete or delayed.
         </p>
       </div>
@@ -104,6 +118,35 @@
           <p id="record-detail">No player selected</p>
           <span class="record-scope">Based on up to 20 recorded matches</span>
         </aside>
+      </section>
+
+      <section
+        id="latest-match"
+        class="panel latest-match"
+        aria-labelledby="latest-heading"
+        hidden
+      >
+        <div class="toolbar">
+          <div>
+            <p class="eyebrow">YOUR LAST GAME</p>
+            <h2 id="latest-heading">Why it went the way it did</h2>
+          </div>
+          <a
+            id="latest-link"
+            class="secondary-button"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Full breakdown ↗</a
+          >
+        </div>
+        <p
+          id="latest-status"
+          class="results-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <h3 id="latest-headline" class="latest-headline"></h3>
+        <ol id="latest-points" class="ai-moments latest-points"></ol>
       </section>
 
       <section class="panel" aria-labelledby="results-heading">
@@ -195,6 +238,7 @@
                 <th scope="col">Result</th>
                 <th scope="col">K / D / A</th>
                 <th scope="col">Duration</th>
+                <th scope="col">Takeaway</th>
                 <th scope="col">Details</th>
               </tr>
             </thead>
