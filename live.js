@@ -284,7 +284,7 @@ import { API_BASE, errorMessage, portrait } from "./common.js";
     $("live-match-id").value = String(id); $("live-title").textContent = `Match #${id}`;
     $("live-reconnect").disabled = false;
     const params = new URLSearchParams({ id: String(id), team: String(currentTeam()) }); history.replaceState(null, "", `${location.pathname || "live.html"}?${params}`);
-    document.title = `Live Match #${id} | Deadlock Tracker`;
+    document.title = `Live Match #${id} | DeadStats`;
     try {
       await discover(signal).catch((e) => {
         $("live-discovery-status").textContent = `Watch list unavailable: ${errorMessage(e)} Trying the entered match directly.`;

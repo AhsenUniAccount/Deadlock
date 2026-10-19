@@ -177,7 +177,7 @@ test("digest route returns facts without calling the model; other paths are stat
   assert.equal(calls.anthropic.length, 0);
 });
 
-const PAGE = `<title>Match | Deadlock Tracker</title>
+const PAGE = `<title>Match | DeadStats</title>
 <meta property="og:title" content="Generic" />
 <meta property="og:description" content="Generic" />
 <meta property="og:url" content="https://example.test/match" />
@@ -192,7 +192,7 @@ test("link-preview bots get the player's summary in the page tags; browsers get 
   const bot = await (await visit(env, "Mozilla/5.0 (compatible; Discordbot/2.0)")).text();
   assert.match(bot, /<meta property="og:title" content="Win as Haze · 0\/0\/0 · 1st of 2 in souls" \/>/);
   assert.match(bot, /<meta name="twitter:description" content="[^"]*souls/);
-  assert.match(bot, /<title>Win as Haze · 0\/0\/0 · 1st of 2 in souls \| Deadlock Tracker<\/title>/);
+  assert.match(bot, /<title>Win as Haze · 0\/0\/0 · 1st of 2 in souls \| DeadStats<\/title>/);
   assert.match(bot, /og:url" content="https:\/\/example.test\/match\?id=77&amp;player=10"/);
   const fetchesAfterBot = calls.deadlock.length;
   assert.equal(await (await visit(env, "Mozilla/5.0 Chrome/130")).text(), PAGE);

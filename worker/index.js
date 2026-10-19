@@ -162,7 +162,7 @@ export function applyPreviewTags(html, { title, description }, url) {
   html = set(/(<meta (?:property|name)="(?:og|twitter):title" content=")[^"]*(")/g, title);
   html = set(/(<meta (?:property|name)="(?:og|twitter):description" content=")[^"]*(")/g, description);
   html = set(/(<meta property="og:url" content=")[^"]*(")/, url);
-  return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(title)} | Deadlock Tracker</title>`);
+  return html.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(title)} | DeadStats</title>`);
 }
 
 async function matchPreview(req, env) {

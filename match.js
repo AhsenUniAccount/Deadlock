@@ -56,9 +56,12 @@ async function openMatch(id) {
   matchContent.hidden = true;
   retryMatch.hidden = true;
   document.querySelector("#match-scoreboard").replaceChildren();
-  document.querySelector("#match-title").textContent = `Match #${id}`;
+  // The match number takes the brass highlight used by every page heading.
+  const matchNumber = document.createElement("em");
+  matchNumber.textContent = `#${id}`;
+  document.querySelector("#match-title").replaceChildren("Match ", matchNumber);
   matchStatus.textContent = "Loading match statistics…";
-  document.title = `Match #${id} • Deadlock Tracker`;
+  document.title = `Match #${id} • DeadStats`;
   try {
     const result = await request(
       `/v1/matches/${id}/metadata`,

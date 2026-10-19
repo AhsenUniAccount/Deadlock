@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#171918" />
-    <title>Deadlock Match History | Deadlock Tracker</title>
+    <title>Deadlock Match History | DeadStats</title>
     <meta
       name="description"
       content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates."
@@ -12,19 +12,20 @@
     <meta name="robots" content="noindex" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <meta property="og:site_name" content="Deadlock Tracker" />
+    <meta property="og:site_name" content="DeadStats" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Deadlock Match History | Deadlock Tracker" />
+    <meta property="og:title" content="Deadlock Match History | DeadStats" />
     <meta property="og:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
     <meta property="og:url" content="https://deadstats.ahsenjauhar.workers.dev/history" />
     <meta property="og:image" content="https://deadstats.ahsenjauhar.workers.dev/og-card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Deadlock Match History | Deadlock Tracker" />
+    <meta name="twitter:title" content="Deadlock Match History | DeadStats" />
     <meta name="twitter:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="deadlock-theme.css" />
+    <link rel="stylesheet" href="site.css" />
     <script type="module" src="history.js"></script>
   </head>
   <body>
@@ -33,8 +34,8 @@
         <a
           class="brand"
           href="index.html"
-          aria-label="Deadlock player tracker home"
-          >DEADLOCK<span>TRACKER</span></a
+          aria-label="DeadStats home"
+          ><strong>DEAD<b>STATS</b></strong><span>FOR DEADLOCK</span></a
         >
         <nav aria-label="Page navigation">
           <a href="index.html">Overview</a
@@ -46,7 +47,7 @@
       <div class="page-heading">
         <p class="eyebrow">MATCH HISTORY</p>
         <div class="page-title-row">
-          <h1 id="page-heading">Match history</h1>
+          <h1 id="page-heading">Match <em>history</em></h1>
         </div>
         <div id="history-player" class="selected-player history-player">
           Loading player…

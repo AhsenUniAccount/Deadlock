@@ -1,4 +1,4 @@
-# Deadlock player tracker
+# DeadStats
 
 A standalone browser tracker with a dark dashboard in warm charcoal, cream, and muted brass. Search a Steam player name, choose the matching account, and retrieve recent statistics from the community-run [Deadlock API](https://api.deadlock-api.com/docs). Statistics need no API key or account. Match pages open with a **Match summary** of the selected player's game, built from the statistics in the browser, plus an optional **AI coach** explanation from a free Cloudflare Workers AI model. Internet access is required for searches and match data.
 
@@ -107,6 +107,7 @@ The Worker uses the same `common.js` request helper for the AI coach. Any privat
 - `player-trends.js`: per-match takeaways, recent-game patterns and same-rank hero comparisons, from match history and hero-stats aggregates.
 - `player-percentiles.js`: places a player's average game on the per-game quantile curve of all games at their rank.
 - `profile-view.js`: renders the profile's percentile cards, patterns and hero comparison.
+- `site.css`: shared look on every page (DeadStats brand, centred headings with a brass highlight, pill controls, rounded cards).
 - `home.css`: front-page layout: centred hero search, feature previews before a search (`landing-only`), and the profile header after one (`player-only`, toggled by the `has-player` body class; `compact` shrinks the hero after the first search).
 - `history.html`, `history.js`: match history tab (latest 50 matches with takeaways), opened from the profile.
 - `tests/player-percentiles.test.js`: interpolation, clamping and lower-is-better metrics.

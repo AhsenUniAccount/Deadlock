@@ -73,7 +73,7 @@ async function load() {
     portrait(profile?.avatarmedium || profile?.avatar, name),
     cell("span", name),
   );
-  document.title = `${name} · Match history | Deadlock Tracker`;
+  document.title = `${name} · Match history | DeadStats`;
   if (history.status === "rejected") {
     status.textContent = errorMessage(history.reason);
     return;

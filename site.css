@@ -1,0 +1,109 @@
+/* Shared look from the front page, applied to every page: DeadStats brand,
+   centred headings with a brass highlight, pill controls and rounded cards.
+   Loaded after each page's own styles; home.css loads after this on the front page. */
+
+/* Brand: DEAD + brass STATS, with a small "for Deadlock" tag. */
+.brand {
+  letter-spacing: -0.03em;
+}
+.brand strong {
+  font-weight: inherit;
+}
+.brand b {
+  color: var(--accent);
+  font-weight: inherit;
+}
+.brand span {
+  margin-left: 6px;
+}
+
+/* Page headings: centred, with a highlighted word. */
+.page-heading {
+  max-width: 880px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.page-heading .page-title-row {
+  justify-content: center;
+}
+.page-heading .intro {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  color: #c9c4b4;
+}
+h1 em,
+h2 em {
+  font-style: normal;
+  color: var(--accent);
+  text-shadow: 0 0 40px #d7bf8333;
+}
+
+/* Pill controls with the brass focus glow. List-like buttons keep their shape. */
+button,
+.secondary-button,
+.history-button {
+  border-radius: 999px;
+}
+.scoreboard-player,
+.hero-picker-options button {
+  border-radius: 6px;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select {
+  border-radius: 999px;
+  padding-left: 18px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px #d7bf8326;
+}
+
+/* Rounded cards with the front page's soft gradient. */
+.panel,
+.search-panel,
+.match-details,
+.mvp-team,
+.team-scoreboard,
+#match-page {
+  border-radius: 8px;
+}
+.panel,
+.search-panel {
+  background: linear-gradient(180deg, #262723, #1f201d);
+}
+.search-panel {
+  border-top: 3px solid var(--accent);
+}
+#match-page {
+  border-top: 3px solid var(--accent);
+  background:
+    radial-gradient(ellipse at 0% 0%, #3b3a2c55, transparent 55%),
+    #212320;
+}
+.toolbar,
+.panel > .toolbar {
+  border-bottom: 1px solid var(--line);
+}
+.scope {
+  border-radius: 999px;
+}
+
+/* Match history: centred player chip under the heading. */
+.history-player {
+  border-radius: 999px;
+  padding-right: 18px;
+}
+.history-player .avatar {
+  border-radius: 50%;
+}
+
+.match-search-form button {
+  white-space: nowrap;
+}
