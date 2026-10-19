@@ -130,6 +130,7 @@ async function handleAnalyze(req, env, signal) {
 // never trigger an extra metadata download.
 const PREVIEW_BOTS =
   /discordbot|twitterbot|facebookexternalhit|slackbot|telegrambot|whatsapp|linkedinbot|redditbot|embedly|skypeuripreview|mastodon|iframely|bluesky|googlebot|bingbot/i;
+const PREVIEW_VERSION = "2";
 const clock = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
 const escapeAttr = (text) =>
   String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -172,7 +173,11 @@ async function matchPreview(req, env) {
   if (!page.ok || !/^\d{1,15}$/.test(id)) return page;
   // Completed matches never change, so previews are cached at the edge for a day.
   const cache = globalThis.caches?.default;
-  const key = new Request(url.toString());
+  // Bump PREVIEW_VERSION when the preview text or page template changes, so
+  // cached previews are replaced rather than served for another day.
+  const keyUrl = new URL(url);
+  keyUrl.searchParams.set("preview", PREVIEW_VERSION);
+  const key = new Request(keyUrl.toString());
   const hit = await cache?.match(key);
   if (hit) return hit;
   const html = await page.text();
