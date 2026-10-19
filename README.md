@@ -104,7 +104,11 @@ The Worker uses the same `common.js` request helper for the AI coach. Any privat
 - `match-digest.js`: per-player match facts used by the summary and sent to the AI model.
 - `match-summary.js`: rule-based match summary points built from a digest.
 - `review-panel.js`: Match summary (with **Copy summary**) and AI coach panel on the match page.
-- `player-trends.js`: per-match takeaways on the overview, computed from match history only; also recent-game patterns and same-rank hero comparisons (not yet shown in the UI).
+- `player-trends.js`: per-match takeaways, recent-game patterns and same-rank hero comparisons, from match history and hero-stats aggregates.
+- `player-percentiles.js`: places a player's average game on the per-game quantile curve of all games at their rank.
+- `profile-view.js`: renders the profile's percentile cards, patterns and hero comparison.
+- `history.html`, `history.js`: match history tab (latest 50 matches with takeaways), opened from the profile.
+- `tests/player-percentiles.test.js`: interpolation, clamping and lower-is-better metrics.
 - `tests/player-trends.test.js`: takeaway rules and scored-game filtering.
 - `favicon.svg`, `apple-touch-icon.png`, `og-card.png`: site icon and the 1200×630 link-preview image.
 - `tests/match-summary.test.js`: summary rules, thresholds and missing data.
@@ -147,9 +151,19 @@ Detailed player encounters, five-minute performance panels, recent-game/item com
 
 Contents links automatically open their collapsible target section.
 
+## Player profile and match history
+
+Searching a player opens their profile at `index.html?player=ACCOUNT_ID`, which can be bookmarked or shared. **Match history ↗** opens `history.html?player=ACCOUNT_ID` in a new tab with the latest 50 matches, each with a takeaway and a link to its breakdown.
+
+The profile uses the player's standard matches from the last 30 days:
+
+- **Your stats and percentiles**: for 11 metrics (souls and damage per minute, KDA, kills, deaths, assists, last hits, denies, objective damage per minute, accuracy, headshot rate), the player's average from `/v1/analytics/player-stats/metrics?account_ids=…` is placed on the per-game quantile curve (1st to 99th percentile) of all games at their rank tier (by match average badge), by linear interpolation. Deaths are flipped so every percentile means "better than". The API's quantiles are approximate (DDSketch, about 1% relative error), and values beyond the 1st/99th percentile are shown as Top/Bottom 1%.
+- **Your patterns**: deaths and souls per minute in wins against losses, win rate in short against long games, and best and worst hero (each needs at least 3 games per side), plus the last five results.
+- **Your heroes against other players**: for up to two heroes with at least 3 games in the player's main mode, per-game averages against the same hero at the same rank tier from `/v1/analytics/hero-stats`, needing at least 100 matches by others. Totals are not adjusted for game length.
+
 ## Overview summary and sharing
 
-After a player is chosen, the overview loads their most recent standard match (one metadata request) and shows its Match summary in **Your last game**, with a link to the full breakdown. Each recent-match row gets a one-line **Takeaway** from `player-trends.js`, relative to the player's own recent games (deathless game, best or lowest souls/min, deaths or kills well above average). Takeaways use match-history fields only, so they cost no extra requests.
+After a player is chosen, the overview loads their most recent standard match (one metadata request) and shows its Match summary in **Your last game**, with a link to the full breakdown. Each match-history row gets a one-line **Takeaway** from `player-trends.js`, relative to the player's own recent games (deathless game, best or lowest souls/min, deaths or kills well above average). Takeaways use match-history fields only, so they cost no extra requests.
 
 Every page has Open Graph and Twitter tags with `og-card.png`. When a link-preview crawler (Discord, Reddit, X, Slack, Telegram, WhatsApp and similar) requests `/match?id=…&player=…`, the Worker replaces the match page's title and description with that player's summary, or with the result and MVPs when no player is given. Normal visitors get the static page, so previews never add API traffic for them. Previews are cached at the edge for a day. **Copy summary** on the match page copies the summary as text with a link back to that player's view.
 

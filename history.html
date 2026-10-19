@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171918" />
+    <title>Deadlock Match History | Deadlock Tracker</title>
+    <meta
+      name="description"
+      content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates."
+    />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:site_name" content="Deadlock Tracker" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deadlock Match History | Deadlock Tracker" />
+    <meta property="og:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
+    <meta property="og:url" content="https://deadstats.ahsenjauhar.workers.dev/history" />
+    <meta property="og:image" content="https://deadstats.ahsenjauhar.workers.dev/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Deadlock Match History | Deadlock Tracker" />
+    <meta name="twitter:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="deadlock-theme.css" />
+    <script type="module" src="history.js"></script>
+  </head>
+  <body>
+    <main>
+      <header class="masthead">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Deadlock player tracker home"
+          >DEADLOCK<span>TRACKER</span></a
+        >
+        <nav aria-label="Page navigation">
+          <a href="index.html">Overview</a
+          ><a href="tier-lists.html">Hero meta</a><a href="live.html">Live scouting</a>
+        </nav>
+        <span class="connection">Community tracker</span>
+      </header>
+
+      <div class="page-heading">
+        <p class="eyebrow">MATCH HISTORY</p>
+        <div class="page-title-row">
+          <h1 id="page-heading">Match history</h1>
+        </div>
+        <div id="history-player" class="selected-player history-player">
+          Loading player…
+        </div>
+        <p
+          id="history-status"
+          class="results-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <a id="profile-link" class="secondary-button" href="index.html"
+          >← Player profile</a
+        >
+      </div>
+
+      <section class="panel recent-panel" aria-labelledby="recent-heading">
+        <div class="toolbar">
+          <div><h2 id="recent-heading">Recent matches</h2></div>
+          <span id="history-scope" class="scope">Latest 50 recorded matches</span>
+        </div>
+        <form
+          id="match-search-form"
+          class="match-search-form"
+          action="match.html"
+          method="get"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <label for="match-id">Open a match by ID</label>
+          <div class="search-controls">
+            <input
+              id="match-id"
+              name="id"
+              inputmode="numeric"
+              pattern="[0-9]+"
+              placeholder="Match ID"
+              required
+              aria-describedby="match-id-status"
+            /><button type="submit">Open match</button>
+          </div>
+          <span id="match-id-status" role="status"></span>
+        </form>
+        <div
+          class="table-scroll"
+          role="region"
+          aria-label="Recent match results"
+          tabindex="0"
+        >
+          <table>
+            <caption class="sr-only">
+              Latest recorded matches for the selected player
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Hero / match</th>
+                <th scope="col">Played</th>
+                <th scope="col">Result</th>
+                <th scope="col">K / D / A</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Takeaway</th>
+                <th scope="col">Details</th>
+              </tr>
+            </thead>
+            <tbody id="recent-results"></tbody>
+          </table>
+        </div>
+      </section>
+      <aside class="data-note">
+        <p>
+          <strong>Community data</strong
+          ><span
+            >Provided by
+            <a
+              href="https://api.deadlock-api.com/docs"
+              target="_blank"
+              rel="noreferrer"
+              >Deadlock API</a
+            >, an unofficial service. Recorded matches may be incomplete or
+            delayed. Takeaways compare each match with this player's other
+            listed games.</span
+          >
+        </p>
+      </aside>
+      <noscript>Please enable JavaScript to load match history.</noscript>
+    </main>
+  </body>
+</html>

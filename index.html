@@ -117,6 +117,15 @@
           <span>Recent win rate</span><strong id="overall-rate">—</strong>
           <p id="record-detail">No player selected</p>
           <span class="record-scope">Based on up to 20 recorded matches</span>
+          <span id="player-rank" class="record-scope"></span>
+          <a
+            id="history-link"
+            class="history-button"
+            target="_blank"
+            rel="noopener noreferrer"
+            hidden
+            >Match history ↗</a
+          >
         </aside>
       </section>
 
@@ -147,6 +156,58 @@
         ></p>
         <h3 id="latest-headline" class="latest-headline"></h3>
         <ol id="latest-points" class="ai-moments latest-points"></ol>
+      </section>
+
+      <section
+        id="player-stats"
+        class="panel player-stats"
+        aria-labelledby="stats-heading"
+        hidden
+      >
+        <div class="toolbar">
+          <div>
+            <p class="eyebrow">HOW YOU STACK UP</p>
+            <h2 id="stats-heading">Your stats and percentiles</h2>
+          </div>
+        </div>
+        <p id="stats-scope" class="results-status"></p>
+        <div id="percentile-grid" class="percentile-grid"></div>
+      </section>
+
+      <section
+        id="player-patterns"
+        class="panel"
+        aria-labelledby="patterns-heading"
+        hidden
+      >
+        <div class="toolbar">
+          <div>
+            <p class="eyebrow">LAST 30 DAYS</p>
+            <h2 id="patterns-heading">Your patterns</h2>
+          </div>
+          <div class="form-strip-wrap">
+            <span class="scope">Last 5</span>
+            <div id="form-strip" class="form-strip"></div>
+          </div>
+        </div>
+        <p id="patterns-scope" class="results-status"></p>
+        <ol id="pattern-points" class="ai-moments latest-points"></ol>
+      </section>
+
+      <section
+        id="hero-compare"
+        class="panel"
+        aria-labelledby="compare-heading"
+        hidden
+      >
+        <div class="toolbar">
+          <div>
+            <p class="eyebrow">SAME HERO, SAME RANK</p>
+            <h2 id="compare-heading">Your heroes against other players</h2>
+          </div>
+        </div>
+        <p id="compare-scope" class="results-status"></p>
+        <div id="compare-list" class="compare-list"></div>
       </section>
 
       <section class="panel" aria-labelledby="results-heading">
@@ -193,58 +254,6 @@
           and unscored outcomes appear under Other and are excluded from win
           rates.
         </p>
-      </section>
-      <section class="panel recent-panel" aria-labelledby="recent-heading">
-        <div class="toolbar">
-          <div><h2 id="recent-heading">Recent matches</h2></div>
-          <span id="kda-summary" class="scope">Kills / deaths / assists</span>
-        </div>
-        <form
-          id="match-search-form"
-          class="match-search-form"
-          action="match.html"
-          method="get"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <label for="match-id">Open a match by ID</label>
-          <div class="search-controls">
-            <input
-              id="match-id"
-              name="id"
-              inputmode="numeric"
-              pattern="[0-9]+"
-              placeholder="Match ID"
-              required
-              aria-describedby="match-id-status"
-            /><button type="submit">Open match</button>
-          </div>
-          <span id="match-id-status" role="status"></span>
-        </form>
-        <div
-          class="table-scroll"
-          role="region"
-          aria-label="Recent match results"
-          tabindex="0"
-        >
-          <table>
-            <caption class="sr-only">
-              Latest recorded matches for the selected player
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Hero / match</th>
-                <th scope="col">Played</th>
-                <th scope="col">Result</th>
-                <th scope="col">K / D / A</th>
-                <th scope="col">Duration</th>
-                <th scope="col">Takeaway</th>
-                <th scope="col">Details</th>
-              </tr>
-            </thead>
-            <tbody id="recent-results"></tbody>
-          </table>
-        </div>
       </section>
       <aside class="data-note">
         <p>

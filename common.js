@@ -103,3 +103,21 @@ export function cell(tag, text) {
   if (tag === "th") element.scope = "row";
   return element;
 }
+
+// Hero portrait and name in a table header cell, optionally with a match ID.
+export function heroCell(names, id, matchId) {
+  const metadata = names.get(id);
+  const name = metadata?.name || `Hero ${id}`;
+  const th = cell("th", "");
+  const identity = document.createElement("span");
+  identity.className = "hero-identity";
+  const label = cell("span", name);
+  if (matchId !== undefined) label.append(cell("small", `#${matchId}`));
+  const images = metadata?.images;
+  identity.append(
+    portrait(images?.icon_image_small_webp || images?.icon_image_small, name, "hero-portrait"),
+    label,
+  );
+  th.append(identity);
+  return th;
+}

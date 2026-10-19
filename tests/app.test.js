@@ -133,7 +133,7 @@ test("429 stored history is rendered and labelled, with hero-ID fallback", async
     url.includes("assets") ? response({}, 500) : response(history(42), 429),
   );
   await app.search("42");
-  assert.equal(app.get("#recent-results").children.length, 1);
+  assert.equal(app.get("#hero-results").children.length, 1);
   assert.match(app.get("#summary").textContent, /stored history/);
   assert.match(app.get("#summary").textContent, /Hero names are unavailable/);
   assert.equal(
@@ -158,7 +158,7 @@ test("late results from a cancelled player cannot overwrite the next account", a
   finishFirst();
   await first;
   assert.match(app.get("#summary").textContent, /^Account 43/);
-  assert.equal(app.get("#recent-results").children.length, 1);
+  assert.equal(app.get("#hero-results").children.length, 1);
 });
 
 test("incremental typing is debounced and short or cleared queries make no requests", async () => {
