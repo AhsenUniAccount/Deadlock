@@ -1,6 +1,6 @@
 import DeadlockStats from "./stats.js";
 import PlayerTrends from "./player-trends.js";
-import { request, errorMessage, dateTime, cell, portrait, heroCell } from "./common.js";
+import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "./common.js";
 
 // Match history tab, opened from the player profile as history.html?player=ID.
 // Each row links to the match breakdown with this player selected.
@@ -63,7 +63,7 @@ async function load() {
   status.textContent = "Loading match history…";
   const [history, heroes, profiles] = await Promise.allSettled([
     request(`/v1/players/${id}/match-history`, controller.signal, 300000, true),
-    request("/v1/assets/heroes", controller.signal, 3600000),
+    assetCatalog("heroes", controller.signal),
     request(`/v1/players/steam?account_ids=${id}`, controller.signal, 300000),
   ]);
   const profile =

@@ -3,7 +3,7 @@ import DeadlockMatchStats from "./match-stats.js";
 import MatchDigest from "./match-digest.js";
 import MatchSummary from "./match-summary.js";
 import PlayerTrends from "./player-trends.js";
-import { request, errorMessage, dateTime, cell, portrait, heroCell } from "./common.js";
+import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "./common.js";
 import PlayerPercentiles from "./player-percentiles.js";
 import ProfileView from "./profile-view.js";
 
@@ -296,7 +296,7 @@ async function loadPlayer() {
       ),
       heroNames
         ? Promise.resolve({ data: heroNames })
-        : request("/v1/assets/heroes", controller.signal, 3600000),
+        : assetCatalog("heroes", controller.signal),
     ]);
     if (controller.signal.aborted) return;
     if (historyResult.status === "rejected") throw historyResult.reason;

@@ -187,6 +187,10 @@ Providers, set in `wrangler.jsonc`:
 
 Reviews are cached in Workers KV for 180 days (completed matches never change), keyed by match, slot, provider, model, prompt version and digest version. Cached reviews are free and do not count toward either limit. New reviews are also limited to 3 per minute per IP. Bump `PROMPT_VERSION` (`worker/analyze.js`) or `MatchDigest.VERSION` when the prompt or digest changes. Only standard 6v6 matches with a final result can be reviewed.
 
+### Catalogs
+
+The pages need only a few fields from the public hero and item catalogs (about 1.9 MB and 6.2 MB). The Worker serves trimmed copies at `/api/assets/heroes` and `/api/assets/items` (about 1 KB and 24 KB gzipped), edge-cached for an hour; `trimHero`/`trimItem` in `worker/index.js` list the kept fields. `assetCatalog()` in `common.js` falls back to the full public catalog when the Worker is not available. If a page starts reading a new catalog field, add it to the trim list.
+
 ### Security
 
 - `/api/analyze` accepts only `application/json` POSTs whose `Origin` is the site itself, so other websites cannot trigger reviews through visitors' browsers.

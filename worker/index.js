@@ -52,6 +52,38 @@ const json = (body, status = 200, headers = {}) =>
     headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...headers },
   });
 
+// Fields the pages read from the public catalogs, which are several megabytes
+// in full. Served trimmed at /api/assets/{heroes,items} and used by the digest.
+const pick = (source, keys) => Object.fromEntries(keys.filter((k) => source?.[k] !== undefined).map((k) => [k, source[k]]));
+export const trimHero = (hero) => ({
+  ...pick(hero, ["id", "name"]),
+  images: pick(hero.images, ["icon_image_small", "icon_image_small_webp"]),
+});
+export const trimItem = (item) =>
+  pick(item, [
+    "id", "name", "type", "item_slot_type", "item_tier", "cost", "shopable", "disabled", "heroes",
+    "image", "image_webp", "shop_image", "shop_image_webp", "shop_image_small_webp",
+  ]);
+
+async function handleAsset(req, kind, signal) {
+  // Edge-cached for an hour; the catalogs change only with game patches.
+  const cache = globalThis.caches?.default;
+  const key = new Request(new URL(`/api/assets/${kind}`, req.url).toString());
+  const hit = await cache?.match(key);
+  if (hit) return hit;
+  let upstream;
+  try {
+    upstream = await request(`/v1/assets/${kind}`, signal, CATALOG_TTL_MS);
+  } catch {
+    throw new AnalysisError("The Deadlock API could not provide the catalog right now.");
+  }
+  const response = new Response(JSON.stringify(upstream.data.map(kind === "heroes" ? trimHero : trimItem)), {
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+  });
+  await cache?.put(key, response.clone());
+  return response;
+}
+
 // The asset catalogs are several megabytes; keep only the fields the digest needs.
 let catalogs = null;
 async function loadCatalogs(signal) {
@@ -288,6 +320,8 @@ async function route(req, env) {
     // make the Worker download match data on demand.
     if (url.pathname === "/api/digest" && req.method === "GET" && LOCAL_HOSTS.has(url.hostname))
       return await handleDigest(url, req.signal);
+    const asset = /^\/api\/assets\/(heroes|items)$/.exec(url.pathname);
+    if (asset && req.method === "GET") return await handleAsset(req, asset[1], req.signal);
     if (url.pathname === "/api/analyze" && req.method === "POST")
       return await handleAnalyze(req, env, req.signal, url);
     return json({ error: "Not found." }, 404);

@@ -146,3 +146,34 @@ footer a {
     padding: 8px 18px 20px;
   }
 }
+
+/* "Beta" marker for features that are still experimental (Live scouting). */
+.beta-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1px solid #5b4a86;
+  border-radius: 999px;
+  background: #2a2238;
+  color: #c9b5f5;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  vertical-align: 2px;
+}
+.eyebrow .beta-tag {
+  vertical-align: 1px;
+}
+.beta-note {
+  max-width: 640px;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  border: 1px solid #5b4a86;
+  border-radius: 8px;
+  background: #221d2c;
+  color: #d8cdf2;
+  font-size: 13px;
+  line-height: 1.6;
+}

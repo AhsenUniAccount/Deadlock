@@ -1,5 +1,5 @@
 import DeadlockLiveStats from "./live-stats.js";
-import { API_BASE, request, errorMessage } from "./common.js";
+import { API_BASE, request, errorMessage, assetCatalog } from "./common.js";
 
 const DeadlockLiveData = (() => {
   const S = DeadlockLiveStats;
@@ -47,7 +47,10 @@ const DeadlockLiveData = (() => {
   async function get(path, signal, ttl = 600000, object = false) {
     for (let attempt = 0; ; attempt++) {
       try {
-        const result = await transport(path, signal, ttl, false, object);
+        // Hero and item catalogs come trimmed from the site's Worker, unless a
+        // custom transport (the Node backtest) is in use.
+        const catalog = transport === request && { "/v1/assets/heroes": "heroes", "/v1/assets/items": "items" }[path];
+        const result = catalog ? await assetCatalog(catalog, signal) : await transport(path, signal, ttl, false, object);
         signal.throwIfAborted(); sources.set(path, result.fetchedAt); return result.data;
       } catch (error) {
         if (signal.aborted || attempt || ![429, 503].includes(error.status) || (error.retryAfter || 0) > 10) throw error;

@@ -19,7 +19,8 @@ export async function request(
 ) {
   const cached = cache.get(path);
   if (cached && cached.expires > Date.now()) return cached.result;
-  const response = await fetch(`${API_BASE}${path}`, {
+  // /api/ paths are this site's own Worker; everything else is the public API.
+  const response = await fetch(path.startsWith("/api/") ? path : `${API_BASE}${path}`, {
     signal: AbortSignal.any([signal, AbortSignal.timeout(20000)]),
     headers: { Accept: "application/json" },
   });
@@ -120,4 +121,16 @@ export function heroCell(names, id, matchId) {
   );
   th.append(identity);
   return th;
+}
+
+// Hero and item catalogs trimmed by the site's Worker to the fields the pages
+// use (tens of KB instead of several MB). Falls back to the full public
+// catalog when the Worker is unavailable, such as on a plain static server.
+export async function assetCatalog(kind, signal) {
+  try {
+    return await request(`/api/assets/${kind}`, signal, 3600000);
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    return request(`/v1/assets/${kind}`, signal, 3600000);
+  }
 }

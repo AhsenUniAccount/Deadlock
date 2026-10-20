@@ -2,7 +2,7 @@ import DeadlockMatchStats from "./match-stats.js";
 import SoulsChart from "./souls-chart.js";
 import MatchAnalysis from "./match-analysis.js";
 import ReviewPanel from "./review-panel.js";
-import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
+import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "./common.js";
 
 // Standalone match-page controller. Data normalization lives in match-stats.js;
 // player timelines, lane comparisons and team analysis have separate rendering modules.
@@ -102,10 +102,10 @@ async function openMatch(id) {
           : Promise.resolve({ data: [] }),
         heroNames
           ? Promise.resolve({ data: heroNames })
-          : request("/v1/assets/heroes", controller.signal, 3600000),
+          : assetCatalog("heroes", controller.signal),
         itemCatalog
           ? Promise.resolve({ data: [...itemCatalog.values()] })
-          : request("/v1/assets/items", controller.signal, 3600000),
+          : assetCatalog("items", controller.signal),
       ]);
     if (controller.signal.aborted) return;
     const warnings = [];

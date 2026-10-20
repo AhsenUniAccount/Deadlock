@@ -1,5 +1,5 @@
 import DeadlockTierStats from "./tier-stats.js";
-import { request, errorMessage, dateTime, cell, portrait } from "./common.js";
+import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "./common.js";
 
 // Aggregate hero chart: API loading here, count validation in tier-stats.js.
 const tierForm = document.querySelector("#tier-filters");
@@ -304,7 +304,7 @@ async function loadTiers() {
   try {
     const [stats, assets] = await Promise.allSettled([
       request(`/v1/analytics/hero-stats?${params}`, controller.signal, 300000),
-      request("/v1/assets/heroes", controller.signal, 3600000),
+      assetCatalog("heroes", controller.signal),
     ]);
     if (controller.signal.aborted) return;
     if (stats.status === "rejected") throw stats.reason;
