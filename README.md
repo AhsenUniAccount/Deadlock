@@ -1,239 +1,133 @@
 # DeadStats
 
-A standalone browser tracker with a dark dashboard in warm charcoal, cream, and muted brass. Search a Steam player name, choose the matching account, and retrieve recent statistics from the community-run [Deadlock API](https://api.deadlock-api.com/docs). Statistics need no API key or account. Match pages open with a **Match summary** of the selected player's game, built from the statistics in the browser, plus an optional **AI coach** explanation from a free Cloudflare Workers AI model. Internet access is required for searches and match data.
+**Find out why you won or lost your last Deadlock match.**
 
-## Use it
+DeadStats is a free stats site for [Deadlock](https://store.steampowered.com/app/1422450/Deadlock/). Search a Steam name and it explains your games in plain English: how your lane went, when the lead swung, what your deaths cost, and how your stats compare with other players at your rank. An optional AI coach writes a fuller review of any match.
 
-1. Run the site locally (see [Run locally](#run-locally)) or open the hosted site.
-2. Start typing a Steam display name. After at least two characters and a 300 ms pause, matching accounts appear below the input with Steam avatars. **Search** or Enter also runs an immediate search.
-3. Click a matching player, or use Up/Down and Enter. Escape closes the suggestions. Account IDs distinguish players with identical names.
-4. Review their latest 20 recorded matches, per-hero win rates, and individual match K/D/A and durations. Hero portraits appear beside names in both tables.
-5. Click **View match** on any row, or enter a match ID beside the history table. A separate match tab opens and shows every player’s kills, deaths, assists, and final souls. All players’ purchased items appear below the team scoreboards. Select a player’s name to highlight their build and souls timeline. Your player-search tab stays open. The match URL can be bookmarked or shared; reopening it loads the same match.
+**Live site:** https://deadstats.ahsenjauhar.workers.dev (moving to `deadstats.org`)
 
-You can also enter a numeric Steam account ID (SteamID3's account number) or a SteamID64 to load that account directly. Steam profile URLs and vanity URLs are not supported. Name search covers profiles indexed by the API, so an account ID may work when a name does not.
+![DeadStats landing page](docs/screenshots/landing.png)
 
-## What the statistics mean
+## Features
 
-The app downloads the available match history, removes duplicate match IDs, sorts by match start time, and takes the latest 20 records. This includes all game and match modes returned by the API; it is not a ranked-only or lifetime summary. The displayed date range uses your local timezone.
+- **Player profiles.** Win rate, rank, most-played heroes and the latest match at a glance, with every stat placed as a percentile against players at the same rank over the last 30 days.
+- **Match summaries in plain English.** Rule-based findings for any player in any match: lane result, lead swings, time spent dead, structures lost while respawning, and where their souls came from. Every number is computed from the match data, so the summary never invents anything.
+- **AI coach (experimental).** A written review of a match, with key moments, strengths and things to work on, generated from the same match data by a language model.
+- **Patterns and comparisons.** What decides your games (for example, deaths in losses compared with wins), your best and worst heroes, and how you play each main hero compared with others at your rank.
+- **Full match breakdowns.** Scoreboards, item builds, souls timelines for all twelve players, team advantage with objectives, lane comparisons and a kill timeline.
+- **Hero meta.** Pick rate against win rate for every hero, filterable by rank, queue and time window.
+- **Live scouting (beta).** Looks up the players in a live lobby and highlights likely threats.
+- **Shareable.** Profile and match links unfurl in Discord, Reddit and other apps with a summary of that player's game, and summaries can be copied as text.
 
-Win rates use `player_match_outcome`: 1 is a win and 2 is a loss. Invalid, penalized, penalized-party, unscored, or unknown outcomes appear as **Other** and do not enter the win-rate denominator. The recent overall rate is total wins divided by total wins plus losses, not an average of hero rates. A player or hero with no scored matches shows `—`.
+| Player profile | Match summary |
+| --- | --- |
+| ![Player profile with percentiles](docs/screenshots/profile.png) | ![Plain-English match summary](docs/screenshots/match-summary.png) |
+| **AI coach** | **Hero meta** |
+| ![AI coach review](docs/screenshots/ai-coach.png) | ![Hero pick rate against win rate](docs/screenshots/hero-meta.png) |
 
-The API is unofficial and is not endorsed by Valve. Its recorded history may be incomplete or delayed. According to its match-history documentation, accounts that are not friends with one of its bots receive stored history only. This tracker does not request bot access or force a refresh. If the API responds with rate-limited stored history, the page labels that fallback.
+## How it works
 
-## Hero meta chart
+DeadStats is a static website plus a small [Cloudflare Worker](https://developers.cloudflare.com/workers/). All game data comes from the community-run [Deadlock API](https://api.deadlock-api.com/docs).
 
-Open **Hero meta** beside Overview to compare hero pick rate with win rate. The default is the last 30 days, normal game mode, ranked matches at Oracle and above, and at least 1,000 scored matches per hero. Choose 7/30/90 days, Ranked or Unranked, a ranked threshold, and minimum sample size, then select **Apply filters**. The rank selector is hidden for Unranked.
-
-The page calls `/v1/analytics/hero-stats` with `bucket=no_bucket` and explicit time/mode filters. Ranked thresholds use `min_average_badge`, which filters on the average badge level of both teams in a match. Pick rate is a hero's matches divided by the sum of matches across all heroes in the filtered API response; heroes excluded by the minimum-sample display filter still count in this denominator. Win rate is wins divided by wins plus losses. Unscored matches do not affect win rate, and heroes without scored results are omitted. No individual account filter is applied.
-
-These stats cover the API's recorded matches and are not guaranteed full-playerbase coverage. Windows can span patches. Missing hero metadata falls back to initials, while API failures and empty results are explicitly labelled. Requests use the shared timeout/cancellation and five-minute local cache.
-
-## Individual match breakdowns
-
-The page starts with the match-wide MVPs in the API’s `mvp_rank` order (1–3), with their K/D/A and team. No MVP score is calculated locally; missing rankings show an unavailable message. Contents links below the MVPs jump to and open the corresponding section. The current order is:
-
-1. **Player analysis** — open by default, with player perspective, large final K/D/A, and the individual souls timelines.
-2. **KDA table** — collapsed by default, with one scoreboard per team.
-3. **Items** — collapsible purchase histories for every player.
-4. **Lane comparison** — collapsible comparison of any two opposing players.
-5. **Match analysis** — collapsible team souls advantage graph with objective markers.
-6. **Kill timeline** — collapsible chronological kill/death log.
-
-Match scoreboards are split into **The Hidden King** (Amber) and **The ArchMother** (Sapphire), with a separate K/D/A and souls table for each team. Player selection works across both tables.
-
-Match scoreboards use the final `kills`, `deaths`, `assists`, and `net_worth` fields from `match_info.players`. Souls means final net worth (including souls already spent), not an unspent wallet balance.
-
-The kill timeline orders recorded deaths by `death_details[].game_time_s`, resolving killers by player slot and displaying player names and heroes. Unknown/non-player killers and self-attributed deaths are labelled. Events with missing or invalid times appear last; incomplete logs are flagged.
-
-Timed kill and death counts in opponent comparisons use each victim's `death_details[].killer_player_slot`, joined to the roster by `player_slot`, not array position or account ID. Untimed events are excluded from time-specific counts. Incomplete logs are flagged, while the final scoreboard remains independent of event-log completeness.
-
-**Limitation: per-player assist attribution is unavailable.** The verified metadata and its protobuf definition provide total assists but no assister identifiers in death events. The analysis shows assists as unavailable at a particular game time; it does not infer attribution from damage or proximity.
-
-Player names are retrieved in a single batch. Missing Steam profiles fall back to account IDs, and missing hero metadata falls back to hero IDs. Match metadata loads on demand and is cached in memory for 30 minutes. Unavailable matches show a retry option. Leaving or replacing a match cancels pending requests.
-
-Purchases are shown chronologically with current item names and icons. Ability unlocks and upgrades are excluded using the catalog's `type: upgrade` classification for shop items. Repeat purchases remain separate. Removal timestamps are labelled “sold / replaced” because they may represent sales or components replaced by upgrades; the list is purchase history, not a claimed final inventory. Missing catalogs or purchase logs are explicitly labelled. Unidentified entries are counted in a notice.
-
-The match tab includes a **Player analysis** line chart for all players. The X axis is elapsed game time and the Y axis is souls (net worth). Lines connect validated `stats[].time_stamp_s` / `net_worth` snapshots; no start-of-game or missing values are invented. A hero-portrait dropdown selects the player perspective while keeping all available lines visible. The highlighted player has a solid green line; other players have dotted lines. Teammates are green and opponents red, relative to the player selected in the scoreboard. Selecting another player updates the chart, final K/D/A, event markers, and friendly-objective perspective in Match analysis. Hovering a player line shows their username and hero portrait. Missing timelines are labelled. The chart scrolls horizontally on narrow screens.
-
-## API integration
-
-The browser calls these endpoints directly; the service currently permits cross-origin requests:
-
-- `GET /v1/players/steam-search?search_query=NAME&limit=20&min_matches_played_last_30d=0`
-- `GET /v1/players/{account_id}/match-history`
-- `GET /v1/assets/heroes`
-- `GET /v1/assets/items`
-- `GET /v1/analytics/hero-stats?bucket=no_bucket&game_mode=normal&match_mode=...&min_unix_timestamp=...&max_unix_timestamp=...`
-- `GET /v1/matches/{match_id}/metadata`
-- `GET /v1/players/steam?account_ids=ID1,ID2,...`
-
-Base URL: `https://api.deadlock-api.com`. See the [OpenAPI specification](https://api.deadlock-api.com/openapi.json) for the source contract.
-
-Typing immediately cancels obsolete requests, even before the debounce delay expires. Clearing the field closes the dropdown and clears the selection. IME composition waits until input is committed. Missing or failed avatar and hero images fall back to initials.
-
-Requests have a 20-second timeout. New searches and player selections cancel obsolete requests so old results cannot replace the current selection. Successful results are cached in memory: searches for one minute, match history for five minutes, and hero names for the page session. Reloading clears these local caches; the service may still return its own cached data. Searches and selected account IDs are sent to the API. API results are kept in memory only. No credentials are stored.
-
-The Worker uses the same `common.js` request helper for the AI coach. Any private credentials (such as an optional Anthropic key) live only in the Worker's secrets, never in browser code.
-
-## Files
-
-- `live.html`, `live.css`, `live.js`: live scouting page, match discovery, broadcast observations, roster, focus overrides, and build evidence.
-- `live-data.js`: public API batching/caching, cohort queries and bounded SSE transport.
-- `live-stats.js`: pure scouting, rank percentile, recommendation guards and stream state normalization.
-- `docs/LIVE_MATCH_ANALYSIS.md`: verified API contract, provisional model, failure behavior, backtest and implementation limits.
-- `scripts/backtest-live.mjs`, `docs/live-backtest-results.json`: reproducible retrospective diagnostic and initial pilot results.
-- `sitemap.xml`, `robots.txt`: crawl discovery for the canonical Overview, Hero Meta and Live Scouting pages on `deadstats.ahsenjauhar.workers.dev`.
-
-- `deadlock-theme.css`: shared visual theme (period-style headings, squared panels, team accents and report stamps), loaded after the base styles.
-- `city-silhouette.svg`, `tracker-seal.svg`: original decorative header assets, stored locally.
-
-- `index.html`: search form and results structure.
-- `404.html`, `404-character.png`: custom Cloudflare Pages not-found page and its character artwork.
-- `tier-lists.html`, `tier-lists.js`: aggregate hero scatter plot, filters, and rendering.
-- `tier-stats.js`: validated hero counts, pick-rate, and win-rate calculations.
-- `tests/tier-stats.test.js`: ranking, ties, unscored results, and validation checks.
-- `styles.css`: responsive dashboard styling using system fonts; profile avatars and hero portraits load from image URLs supplied by the API.
-- `stats.js`: ID conversion and match aggregation.
-- `app.js`: API requests, state, and rendering.
-- `match.js`: standalone match page, scoreboard, Steam profile enrichment, and player highlighting.
-- `match.html`: match page opened in a new tab using `?id=MATCH_ID&player=ACCOUNT_ID`.
-- `common.js`: shared API requests and rendering helpers.
-- `souls-chart.js`: individual SVG souls timelines, player perspective dropdown, and player/item event tooltips.
-- `match-stats.js`: roster validation, event-log completeness, purchases, player/objective timelines, and API MVP ranks.
-- `analysis-stats.js`: pure team-advantage and opponent calculations; retained historical helpers are not exposed in the UI.
-- `match-digest.js`: per-player match facts used by the summary and sent to the AI model.
-- `match-summary.js`: rule-based match summary points built from a digest.
-- `review-panel.js`: Match summary (with **Copy summary**) and AI coach panel on the match page.
-- `player-trends.js`: per-match takeaways, recent-game patterns and same-rank hero comparisons, from match history and hero-stats aggregates.
-- `player-percentiles.js`: places a player's average game on the per-game quantile curve of all games at their rank.
-- `profile-view.js`: renders the profile's percentile cards, patterns and hero comparison.
-- `privacy.html`: privacy policy (what the site shows, who processes requests, what is stored, Valve disclaimer), linked from every footer. Update it when data handling changes, such as adding analytics or switching the AI provider.
-- `site.css`: shared look on every page (DeadStats brand, centred headings with a brass highlight, pill controls, rounded cards).
-- `home.css`: front-page layout: centred hero search, feature previews before a search (`landing-only`), and the profile header after one (`player-only`, toggled by the `has-player` body class; `compact` shrinks the hero after the first search).
-- `history.html`, `history.js`: match history tab (latest 50 matches with takeaways), opened from the profile.
-- `tests/player-percentiles.test.js`: interpolation, clamping and lower-is-better metrics.
-- `tests/player-trends.test.js`: takeaway rules and scored-game filtering.
-- `favicon.svg`, `apple-touch-icon.png`, `og-card.png`: site icon and the 1200×630 link-preview image.
-- `tests/match-summary.test.js`: summary rules, thresholds and missing data.
-- `worker/index.js`, `worker/analyze.js`: Cloudflare Worker routes (`/api/analyze`, `/api/digest`), caching, rate limiting and the Claude request.
-- `wrangler.jsonc`, `.assetsignore`, `package.json`: Worker configuration, unpublished files, and dependencies/scripts.
-- `tests/match-digest.test.js`: digest perspective, shared snapshots, death windows and missing data.
-- `match-analysis.js`: lane comparison UI, team souls advantage graph, and objective hover markers.
-- `rejuvenator.svg`: local Rejuvenator-inspired symbol for Mid Boss deaths.
-- `tests/analysis-stats.test.js`: synchronized snapshots, event boundaries, historical selection, and purchase timings.
-- `tests/match-stats.test.js`: sparse slots, incomplete logs, unknown killers, souls, objective IDs/times, and metadata validation.
-- `tests/stats.test.js`: calculation and input-validation checks.
-- `tests/app.test.js`: search debounce, keyboard navigation, avatars, IME input, API errors, stored-history fallback, and request cancellation checks.
-
-## Run locally
-
-The pages are ES modules, which browsers do not load from `file://` URLs, so serve the folder over HTTP. Install dependencies once with `npm install`, then:
-
-```sh
-npm run dev:offline  # pages + Worker at http://127.0.0.1:8787, no Cloudflare login needed
-npm run dev          # same, with the AI coach (needs `npx wrangler login` once)
-npm test          # calculation, digest and page-controller tests (Node 22+)
+```mermaid
+flowchart LR
+  B[Browser] -- "searches, match history,<br/>match data, rank stats" --> D[(Deadlock API)]
+  B -- "pages, trimmed catalogs,<br/>AI reviews" --> W[Cloudflare Worker]
+  W -- "match data, catalogs" --> D
+  W -- "match facts only" --> AI[Workers AI]
+  W <--> KV[(KV cache)]
+  W -. "bot check" .-> T[Turnstile]
 ```
 
-Workers AI has no local emulator, so `npm run dev` connects to your Cloudflare account and its requests count toward the free daily allowance. In `dev:offline`, the summary works and the AI button reports that AI is not configured. A plain static server (`python3 -m http.server 8000 --bind 127.0.0.1`) still serves the statistics pages, but not `/api/*`.
+- **The browser does most of the work.** Pages call the Deadlock API directly and compute everything locally: summaries, percentiles, patterns and charts. No account or sign-in is needed.
+- **The Worker** serves the site and handles the few jobs a browser can't:
+  - it serves trimmed hero and item catalogs (about 25 KB instead of 8 MB);
+  - it generates and caches AI reviews;
+  - it adds per-match link previews for chat apps.
 
-## Match analysis and review
+### Numbers come from code, not the AI
 
-The match page keeps its existing dark styling and adds an **Analysis** contents link. Team souls analysis covers both teams; lane comparison has independent player selectors:
+Every figure the site shows is calculated by plain JavaScript from the recorded match data:
 
-- **Team souls advantage:** The Hidden King’s total minus The ArchMother’s total, using only snapshot times available for every player. Missing team data is never treated as zero.
-- **Kills, deaths and purchases on the souls graph:** hollow green kill circles, red death Xs, brass shopping-cart purchase icons for the highlighted player. A key below the graph explains the markers; a portrait dropdown changes the player perspective. Kill and death tooltips identify the other player and hero; purchase tooltips show the item. Exact souls gained or lost per kill/death are unavailable in the current metadata integration and are labelled accordingly; snapshot changes are not attributed to individual events. Selecting a marker opens the section and displays its timestamp below the graph; it does not seek a replay.
-- **Objective markers in Match analysis:** red Xs along the upper row identify destroyed friendly Guardians, Base Guardians, Walkers and Shrines. “Friendly” follows the player selected in Player analysis or the scoreboard. Hover or keyboard-focus a marker to see its objective type, team and destruction time. Rejuvenator-style symbols along the bottom mark Mid Boss deaths for either team. The checkbox toggles these markers independently of player events. These markers are **not** on the Player analysis graph.
-- **Lane comparison:** a separate collapsible section lets you select any first player, a second player restricted to the opposing team, and a game time to compare souls, recorded kills/deaths, and first item purchase timings. Snapshot times are shown; a souls difference is calculated only for matching times. Timed assists are unavailable.
+1. `match-stats.js` validates and normalizes the API's match metadata. Missing values stay `null`, never zero.
+2. `match-digest.js` turns one match into facts about one player: lane opponents, souls and damage at each recorded snapshot, team and lane leads, deaths with time spent dead, objectives, purchases, and a list of what the data *can't* show (positions, ability use).
+3. `match-summary.js` applies fixed rules to those facts to produce the plain-English summary.
+4. For the AI coach, the Worker sends that same digest to a model, using hero names only, never Steam names. The model's job is to explain and prioritize, not to calculate. Its output is constrained to a JSON schema, and timestamps outside the match are dropped.
 
-Objective events come from `match_info.objectives[].destroyed_time_s` and `match_info.mid_boss[].destroyed_time_s`. Structure IDs are translated from `team_objective_id`; older matches can use `legacy_objective_id`. Structure team IDs identify the owning team. Zero, invalid, out-of-duration and unknown structure events are omitted. Missing objective arrays yield no markers; this does not establish that no objectives fell. Mid Boss markers indicate death time, not Rejuvenator pickup time or the identity of the player who claimed it.
+### Percentiles
 
-The team advantage remains Hidden King minus ArchMother regardless of the selected player; only the friendly-objective filter changes with selection. Lines between snapshots are visual connections, not measured values between those timestamps. No interpolation is used to claim exact income or losses.
+The Deadlock API publishes per-game quantiles (1st to 99th percentile) for metrics such as souls per minute, KDA and accuracy, and can filter them by rank. DeadStats asks for the player's own averages and for the distribution at their rank tier, then places the player on that curve by linear interpolation. For deaths, lower is better, so the percentile is flipped and every percentile reads as "better than X%".
 
-Detailed player encounters, five-minute performance panels, recent-game/item comparisons, replay bookmarks, and the separate clickable event list below Player analysis are not part of the current UI. The kill timeline remains a separate section.
+## Project structure
 
-Contents links automatically open their collapsible target section.
-
-## Player profile and match history
-
-Searching a player opens their profile at `index.html?player=ACCOUNT_ID`, which can be bookmarked or shared. **Match history ↗** opens `history.html?player=ACCOUNT_ID` in a new tab with the latest 50 matches, each with a takeaway and a link to its breakdown.
-
-The profile is two columns. On the left: the player card (avatar, rank, win rate and record over the last 20 matches, Match history and Copy profile link), their three most-played heroes over the last 30 days with win rate and average K/D/A (`PlayerTrends.topHeroes`), and their most recent standard match with its top summary point and a link to the breakdown. On the right: stats and percentiles as a list with a median tick on each bar. The full last-game summary, patterns, hero comparison and hero performance follow below.
-
-The profile uses the player's standard matches from the last 30 days:
-
-- **Your stats and percentiles**: for 11 metrics (souls and damage per minute, KDA, kills, deaths, assists, last hits, denies, objective damage per minute, accuracy, headshot rate), the player's average from `/v1/analytics/player-stats/metrics?account_ids=…` is placed on the per-game quantile curve (1st to 99th percentile) of all games at their rank tier (by match average badge), by linear interpolation. Deaths are flipped so every percentile means "better than". The API's quantiles are approximate (DDSketch, about 1% relative error), and values beyond the 1st/99th percentile are shown as Top/Bottom 1%.
-- **Your patterns**: deaths and souls per minute in wins against losses, win rate in short against long games, and best and worst hero (each needs at least 3 games per side), plus the last five results.
-- **Your heroes against other players**: for up to two heroes with at least 3 games in the player's main mode, per-game averages against the same hero at the same rank tier from `/v1/analytics/hero-stats`, needing at least 100 matches by others. Totals are not adjusted for game length.
-
-## Overview summary and sharing
-
-After a player is chosen, the overview loads their most recent standard match (one metadata request) and shows its Match summary in **Your last game**, with a link to the full breakdown. Each match-history row gets a one-line **Takeaway** from `player-trends.js`, relative to the player's own recent games (deathless game, best or lowest souls/min, deaths or kills well above average). Takeaways use match-history fields only, so they cost no extra requests.
-
-Every page has Open Graph and Twitter tags with `og-card.png`. When a link-preview crawler (Discord, Reddit, X, Slack, Telegram, WhatsApp and similar) requests `/match?id=…&player=…`, the Worker replaces the match page's title and description with that player's summary, or with the result and MVPs when no player is given. Normal visitors get the static page, so previews never add API traffic for them. Previews are cached at the edge for a day. **Copy summary** on the match page copies the summary as text with a link back to that player's view.
-
-## Match summary and AI coach
-
-The **Match summary** section opens first on a match page and describes the selected player's game. Select another player in the KDA table to see theirs.
-
-**Summary (free, no AI).** `match-digest.js` turns the normalized match into facts relative to that player: lane partners and opponents from `assigned_lane`, souls/damage/healing checkpoints at the recorded snapshot times, the team and lane souls leads from their side, kills and deaths with time spent dead, objectives (and whether they were dead at the time), Mid Boss claims, phase totals and the purchase order. `match-summary.js` applies fixed rules to those facts (lane result, lead swings, kills versus souls, time dead, clustered deaths, structures lost while dead, MVP, souls sources). Everything runs in the browser, and a point is only shown when every value it mentions was recorded. Thresholds are constants at the top of `match-summary.js`.
-
-**AI coach (optional).** **Explain with AI** posts only `{ matchId, slot }` to `/api/analyze`. The Worker fetches the match itself (so no client-supplied text reaches the model; Steam names are never sent), builds the same digest, and asks a model for a headline, summary, key moments, strengths and improvements with evidence, using a JSON schema. Timestamps outside the match are dropped. The page shows the review with clickable times and **Match data the AI was given**. `GET /api/digest?match=ID&slot=N` returns the digest without calling a model.
-
-Providers, set in `wrangler.jsonc`:
-
-- `ANALYSIS_PROVIDER: "workers-ai"` (default, free): Cloudflare Workers AI through the `AI` binding, model `@cf/openai/gpt-oss-120b` (it followed the review rules much better than Llama 3.3 70B in testing). Every account gets 10,000 neurons a day free; one review uses roughly 260. Its reviews are specific but can still misstate a number, which the page warns about. On the Workers Free plan, usage beyond the allowance fails instead of being billed. On Workers Paid it is billed, so the Worker also stops at `DAILY_REVIEW_LIMIT` new reviews per UTC day (25 by default, about the free allowance).
-- `ANALYSIS_PROVIDER: "anthropic"` (paid, higher quality): Claude through the Anthropic API. Requires the `ANTHROPIC_API_KEY` secret and costs money per new review; set a spend limit on the Anthropic workspace.
-
-Reviews are cached in Workers KV for 180 days (completed matches never change), keyed by match, slot, provider, model, prompt version and digest version. Cached reviews are free and do not count toward either limit. New reviews are also limited to 3 per minute per IP. Bump `PROMPT_VERSION` (`worker/analyze.js`) or `MatchDigest.VERSION` when the prompt or digest changes. Only standard 6v6 matches with a final result can be reviewed.
-
-### Catalogs
-
-The pages need only a few fields from the public hero and item catalogs (about 1.9 MB and 6.2 MB). The Worker serves trimmed copies at `/api/assets/heroes` and `/api/assets/items` (about 1 KB and 24 KB gzipped), edge-cached for an hour; `trimHero`/`trimItem` in `worker/index.js` list the kept fields. `assetCatalog()` in `common.js` falls back to the full public catalog when the Worker is not available. If a page starts reading a new catalog field, add it to the trim list.
-
-### Security
-
-- `/api/analyze` accepts only `application/json` POSTs whose `Origin` is the site itself, so other websites cannot trigger reviews through visitors' browsers.
-- New (uncached) reviews need a Cloudflare Turnstile token (invisible widget, site key in `review-panel.js`, secret in the `TURNSTILE_SECRET` Worker secret). Without the secret the Worker refuses reviews, except on localhost. Saved reviews need no token.
-- Limits on new reviews: 3 per minute per IP (`ANALYSIS_LIMITER`), `DAILY_IP_LIMIT` per visitor per day (keyed by a salted SHA-256 of IP and date, never the raw IP), and `DAILY_REVIEW_LIMIT` site-wide.
-- Link previews are rate-limited per IP (`PREVIEW_LIMITER`, 60/min) and cached by match, player and version only; over the limit, the static page is served.
-- `/api/digest` only answers on localhost.
-- Security headers (CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS) come from `_headers` for static files and `SECURITY_HEADERS` in `worker/index.js` for Worker responses; keep the two in sync. The CSP allows scripts only from the site and Turnstile, images from the site, `assets-bucket.deadlock-api.com` and Steam's avatar CDN, and requests to the site, `api.deadlock-api.com` and Turnstile, so avoid inline `style=` attributes and inline scripts.
-
-### Deploying
-
-```sh
-npx wrangler login
-npm run deploy
+```
+public/                 The website (static files served as-is)
+  *.html                Pages: profile, match, match history, hero meta, live scouting, privacy, 404
+  css/                  Shared theme, front page and per-page styles
+  images/               Icons, share card and artwork
+  js/core/              Data and calculations, no DOM: also used by the Worker and tests
+  js/ui/                Page controllers and renderers
+  _headers              Security headers for static files
+worker/                 Cloudflare Worker: routing, AI reviews, previews, security
+tests/                  Node test suite (node:test)
+scripts/                Backtest for the live scouting model
+docs/                   Technical notes, live scouting notes, screenshots
+wrangler.jsonc          Worker, static assets, KV, rate limits and settings
 ```
 
-`wrangler.jsonc` deploys the Worker named `deadstats`, serves the repository root as static assets (files listed in `.assetsignore` are not published), connects Workers AI, and provisions the `ANALYSIS_CACHE` KV namespace on the first deploy. No API key is needed for the default provider. For Claude instead, run `npx wrangler secret put ANTHROPIC_API_KEY` and set `ANALYSIS_PROVIDER` to `"anthropic"` and `ANALYSIS_MODEL` to a Claude model.
+The pages are plain ES modules: there's no framework and no build step.
 
-## Editing guide
+## Running locally
 
-No build step or framework is needed. Each HTML page loads one controller as an ES module (`<script type="module">`), which imports what it needs. Calculation modules have no DOM dependencies, so the Worker and Node tests import the same files.
+You need [Node.js](https://nodejs.org/) 22 or newer.
 
-- **Change player search:** edit `app.js` for interaction and `stats.js` for calculations.
-- **Change the match layout:** edit `match.html` and `styles.css`. The shared `.match-details` class styles collapsible sections; preserve IDs used by JavaScript.
-- **Change match data handling:** edit `match-stats.js`. Keep API field names at this boundary and use the normalized player model in rendering code.
-- **Change objective markers:** edit `match-stats.js` for event normalization and `match-analysis.js` for marker layout/tooltips. Keep objective markers separate from the individual player graph.
-- **Change comparisons:** edit `analysis-stats.js` for calculations and `match-analysis.js` for UI and loading.
-- **Change chart behavior:** edit `souls-chart.js`. Highlighted-player selection comes from `match.js`; event markers and tooltips belong to the chart.
-- **Change the summary or AI coach:** edit `match-digest.js` for the facts (test in `tests/match-digest.test.js`), `match-summary.js` for the rule-based points (test in `tests/match-summary.test.js`), `worker/analyze.js` for the prompt, schema and providers, and `review-panel.js` for rendering.
-- **Change API behavior:** edit `common.js`. Cancellation, timeout, cache lifetime, and stored-history fallback are shared here.
+```sh
+npm install
+npm run dev:offline   # site and Worker at http://127.0.0.1:8787, no Cloudflare account needed
+npm test              # 89 tests: calculations, page behaviour and Worker routes
+```
 
-Missing values must remain distinct from zero. Do not join events by roster array index: use `player_slot`. Keep API strings in `textContent`, and retain cancellation checks after asynchronous requests so stale responses cannot overwrite the current selection. Comments explain these constraints where they matter.
+`dev:offline` runs everything except the AI coach. To try the AI coach locally, run `npx wrangler login` once and then `npm run dev`. Workers AI always runs on Cloudflare, so local requests count toward that account's free daily allowance.
 
-Run `npm test` after changing calculations or request behavior. For a browser smoke check, open a match, switch players, expand Items/KDA table/Match analysis, compare two opposing players, and hover or keyboard-focus graph events. Switch between teams and check that friendly-objective markers change while the team-advantage sign stays fixed. Check a narrow viewport as well as desktop. Formatting is conventional two-space indentation; the site has no runtime formatter dependency.
+Any static server pointed at `public/` (for example VS Code Live Server) also works for everything that doesn't need the Worker.
 
-## Data flow for contributors
+## Deploying your own copy
 
-`common.js` provides requests, caching and safe DOM/image helpers. `stats.js`, `match-stats.js`, `analysis-stats.js`, `match-digest.js`, `match-summary.js` and `tier-stats.js` are calculation modules that can run under Node without a browser. Page controllers connect those calculations to the DOM:
+1. Run `npx wrangler login`.
+2. Create a [Turnstile](https://developers.cloudflare.com/turnstile/) widget (invisible mode) for your domain. Put its site key in `public/js/ui/review-panel.js`, and its secret in the Worker:
+   ```sh
+   npx wrangler secret put TURNSTILE_SECRET
+   ```
+3. Update the site URL in the pages' canonical and share tags, `sitemap.xml` and `robots.txt`.
+4. Run `npm run deploy`. On the first deploy, Wrangler creates the KV namespace; then set its ID in `wrangler.jsonc`.
 
-- Overview: `app.js` searches profiles, loads history and renders `stats.js` summaries.
-- Match: `match.js` validates the URL match ID, loads metadata through `match-stats.js`, then enriches names, heroes and items independently. Its shared view contains the normalized match, identity/catalog maps and `selectedSlot`.
-- Player selection: the scoreboard and `souls-chart.js` dropdown both use `selectMatchPlayer()` in `match.js`. This refreshes selection and the two chart modules without another metadata request. Lane selectors keep their own opposing pair.
-- Summary and AI coach: `review-panel.js` builds the digest and summary for the same `selectedSlot` in the browser; AI responses are stored per match and slot, so a late response never replaces another player's review.
-- Hero meta: `tier-lists.js` fetches aggregates and assets, then delegates count validation and rate calculations to `tier-stats.js`.
+Settings in `wrangler.jsonc`:
 
-Function comments describe purpose and non-obvious constraints rather than each statement. When changing a calculation, preserve the distinction between unavailable (`null`) and a measured zero, and add a focused test for the changed rule. The current tests cover calculations and overview interactions; they do not replace the browser checks above for SVG layout and tooltips.
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| `ANALYSIS_PROVIDER` | `workers-ai` | `workers-ai` (free daily allowance) or `anthropic` (paid; needs an `ANTHROPIC_API_KEY` secret) |
+| `ANALYSIS_MODEL` | `@cf/openai/gpt-oss-120b` | Model used for AI reviews |
+| `DAILY_REVIEW_LIMIT` | `25` | New AI reviews per day across the site, sized to stay within the free allowance |
+| `DAILY_IP_LIMIT` | `5` | New AI reviews per visitor per day |
+| `ANALYSIS_LIMITER`, `PREVIEW_LIMITER` | 3/min, 60/min | Per-IP rate limits for AI reviews and link previews |
+
+## Security and privacy
+
+- **No accounts or tracking:** there are no sign-ins, no cookies and no analytics. Page text from the API and the AI is always inserted as text, never as HTML.
+- **AI reviews can't be abused cheaply:** they only accept same-origin JSON requests, require a Cloudflare Turnstile token, and are rate-limited per IP and per day. Per-visitor counts are stored as a salted hash, never the IP itself.
+- **Strict browser security:** a strict Content Security Policy and other security headers apply to every response.
+- **Privacy policy:** what is processed and stored is set out in plain English in the site's [privacy policy](public/privacy.html).
+
+## Accuracy and limitations
+
+- **Coverage:** data comes from a community API that records most, but not all, matches. History may be incomplete or delayed.
+- **Unavailable data:** the match data has no player positions, ability usage or per-kill assist credit, so DeadStats doesn't make claims about them.
+- **AI coach:** it can still misstate a number or draw a weak conclusion. It's labelled experimental, and every review links to the exact data it was given.
+- **Live scouting:** its threat index is in beta and hasn't been shown to predict results (see [docs/LIVE_MATCH_ANALYSIS.md](docs/LIVE_MATCH_ANALYSIS.md)).
+
+For definitions of every statistic, API details and contributor notes, see [docs/TECHNICAL_NOTES.md](docs/TECHNICAL_NOTES.md).
+
+## Credits
+
+- **Match data:** the community [Deadlock API](https://api.deadlock-api.com/docs).
+- **Disclaimer:** DeadStats is an unofficial fan project, made by Ahsen Jauhar. It is not affiliated with or endorsed by Valve. Deadlock and related names and images are trademarks of Valve Corporation.

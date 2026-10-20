@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clearRequestCache } from "../common.js";
+import { clearRequestCache } from "../public/js/core/common.js";
 
 // app.js is a page module: each test installs stub DOM globals, then imports a
 // fresh copy (the query string forces a new module instance).
@@ -63,7 +63,7 @@ async function setup(fetch) {
     },
   });
   clearRequestCache();
-  await import(`../app.js?test=${++instance}`);
+  await import(`../public/js/ui/app.js?test=${++instance}`);
   return {
     get,
     search: async (query) => {

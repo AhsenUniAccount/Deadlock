@@ -1,5 +1,5 @@
-import DeadlockTierStats from "./tier-stats.js";
-import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "./common.js";
+import DeadlockTierStats from "../core/tier-stats.js";
+import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "../core/common.js";
 
 // Aggregate hero chart: API loading here, count validation in tier-stats.js.
 const tierForm = document.querySelector("#tier-filters");

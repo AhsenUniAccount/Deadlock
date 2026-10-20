@@ -1,5 +1,5 @@
-import AnalysisStats from "./analysis-stats.js";
-import { cell, portrait } from "./common.js";
+import AnalysisStats from "../core/analysis-stats.js";
+import { cell, portrait } from "../core/common.js";
 
 // Match analysis owns opponent selection and the team souls advantage graph.
 // render() receives the shared view; calculations stay in analysis-stats.js.
@@ -217,7 +217,7 @@ const MatchAnalysis = (() => {
       marker.append(
         boss
           ? el("image", {
-              href: "rejuvenator.svg",
+              href: "images/rejuvenator.svg",
               x: cx - 11,
               y: cy - 11,
               width: 22,

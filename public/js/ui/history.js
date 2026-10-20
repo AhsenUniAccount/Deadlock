@@ -1,6 +1,6 @@
-import DeadlockStats from "./stats.js";
-import PlayerTrends from "./player-trends.js";
-import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "./common.js";
+import DeadlockStats from "../core/stats.js";
+import PlayerTrends from "../core/player-trends.js";
+import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "../core/common.js";
 
 // Match history tab, opened from the player profile as history.html?player=ID.
 // Each row links to the match breakdown with this player selected.

@@ -28,7 +28,7 @@ body {
 }
 /* Decorative city silhouette stays behind the header, away from tables and plots. */
 main {
-  background: url("city-silhouette.svg") no-repeat right 88px;
+  background: url("../images/city-silhouette.svg") no-repeat right 88px;
   background-size: 700px 190px;
 }
 .masthead {
@@ -44,7 +44,7 @@ main {
   width: 28px;
   height: 34px;
   flex-shrink: 0;
-  background: url("tracker-seal.svg") center / contain no-repeat;
+  background: url("../images/tracker-seal.svg") center / contain no-repeat;
 }
 h1 {
   font-family: var(--display);

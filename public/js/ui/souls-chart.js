@@ -1,5 +1,5 @@
-import DeadlockMatchStats from "./match-stats.js";
-import { cell, portrait } from "./common.js";
+import DeadlockMatchStats from "../core/match-stats.js";
+import { cell, portrait } from "../core/common.js";
 
 // SVG chart controller. All available timelines remain visible; the selected
 // perspective controls team colors, the solid line, and event markers.

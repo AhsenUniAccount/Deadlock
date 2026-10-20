@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import M from "../match-stats.js";
-import MatchDigest from "../match-digest.js";
+import M from "../public/js/core/match-stats.js";
+import MatchDigest from "../public/js/core/match-digest.js";
 
 const snapshots = (rows) =>
   rows.map(([time_stamp_s, net_worth, gold_death_loss = 0]) => ({

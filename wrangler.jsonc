@@ -1,11 +1,11 @@
-// Cloudflare Worker for deadstats: static pages from the repository root plus /api/* routes.
+// Cloudflare Worker for DeadStats: static pages from public/ plus /api/* routes.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "deadstats",
   "main": "worker/index.js",
   "compatibility_date": "2026-10-01",
   "assets": {
-    "directory": ".",
+    "directory": "./public",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     // API routes and the match page (for link-preview tags) reach the Worker;
@@ -13,7 +13,7 @@
     "run_worker_first": ["/api/*", "/match"]
   },
   // Finished reviews, keyed by match, player, model and prompt version.
-  // The "deadstats-analysis-cache" namespace in the ahsenjauhar@gmail.com account.
+  // The "deadstats-analysis-cache" namespace, created by the first deploy.
   "kv_namespaces": [{ "binding": "ANALYSIS_CACHE", "id": "b25dfc664cdc455f885d7719448b146f" }],
   // Per-IP limits: new (uncached) AI reviews, and link previews (which anyone
   // can request by claiming to be a preview bot).

@@ -1,6 +1,7 @@
 {
   "name": "deadstats",
   "private": true,
+  "description": "DeadStats: plain-English match summaries, percentiles and an AI coach for Deadlock players.",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",

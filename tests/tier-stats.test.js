@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import DeadlockTierStats from "../tier-stats.js";
+import DeadlockTierStats from "../public/js/core/tier-stats.js";
 
 const { rankHeroes } = DeadlockTierStats;
 const row = (hero_id, wins, losses, matches = wins + losses) => ({

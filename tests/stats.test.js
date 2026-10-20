@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import DeadlockStats from "../stats.js";
+import DeadlockStats from "../public/js/core/stats.js";
 
 const { formatWinRate, accountIdFromQuery, summarize } = DeadlockStats;
 const match = (id, outcome, extra = {}) => ({

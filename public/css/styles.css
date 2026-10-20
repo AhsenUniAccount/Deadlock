@@ -1081,7 +1081,7 @@ a.secondary-button {
   flex: 0 0 auto;
   border: 1px solid #b39a5a;
   border-radius: 50%;
-  background: url("tracker-seal.svg") center / 30px 34px no-repeat;
+  background: url("../images/tracker-seal.svg") center / 30px 34px no-repeat;
 }
 .not-found-nav {
   color: #eee9dc;

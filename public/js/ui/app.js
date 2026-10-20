@@ -1,10 +1,10 @@
-import DeadlockStats from "./stats.js";
-import DeadlockMatchStats from "./match-stats.js";
-import MatchDigest from "./match-digest.js";
-import MatchSummary from "./match-summary.js";
-import PlayerTrends from "./player-trends.js";
-import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "./common.js";
-import PlayerPercentiles from "./player-percentiles.js";
+import DeadlockStats from "../core/stats.js";
+import DeadlockMatchStats from "../core/match-stats.js";
+import MatchDigest from "../core/match-digest.js";
+import MatchSummary from "../core/match-summary.js";
+import PlayerTrends from "../core/player-trends.js";
+import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "../core/common.js";
+import PlayerPercentiles from "../core/player-percentiles.js";
 import ProfileView from "./profile-view.js";
 
 // Overview page controller: search suggestions, selected profile, then match history.

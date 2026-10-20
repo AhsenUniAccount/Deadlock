@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import S from "../live-stats.js";
-import D from "../live-data.js";
+import S from "../public/js/core/live-stats.js";
+import D from "../public/js/core/live-data.js";
 
 const population = { rate: .5, n: 1000, matches: 1000, kills: 6, assists: 8, deaths: 6, rankAdjusted: true };
 const game = (id, overrides = {}) => ({ match_id: id, start_time: id * 100, match_duration_s: 60, game_mode: 1, match_mode: 4, hero_id: 1, player_match_outcome: 1, player_kills: 5, player_deaths: 4, player_assists: 6, ...overrides });

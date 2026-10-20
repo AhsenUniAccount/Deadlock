@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import D from "../live-data.js";
+import D from "../public/js/core/live-data.js";
 
 // live.js is a page module: install stub DOM globals and mock the shared data
 // object, then import a fresh copy (the query string forces a new instance).
@@ -35,7 +35,7 @@ async function setup(scouting) {
   Object.assign(globalThis, { document, window: { addEventListener() {} }, history: { replaceState() {} }, location: { search: "" },
     setTimeout(fn) { timers.set(++timer, fn); return timer; }, clearTimeout(id) { timers.delete(id); }, setInterval() { return 0; }, clearInterval() {},
   });
-  await import(`../live.js?test=${++instance}`);
+  await import(`../public/js/ui/live.js?test=${++instance}`);
   return { get, timers, async open(id) { get("live-match-id").value = String(id); get("live-match-form").events.submit({ preventDefault() {} }); await flush(); } };
 }
 async function flush() { for (let i = 0; i < 12; i++) await new Promise(setImmediate); }

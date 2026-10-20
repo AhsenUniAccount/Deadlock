@@ -1,6 +1,6 @@
-import DeadlockLiveStats from "./live-stats.js";
-import DeadlockLiveData from "./live-data.js";
-import { API_BASE, errorMessage, portrait } from "./common.js";
+import DeadlockLiveStats from "../core/live-stats.js";
+import DeadlockLiveData from "../core/live-data.js";
+import { API_BASE, errorMessage, portrait } from "../core/common.js";
 
 (() => {
   const S = DeadlockLiveStats, D = DeadlockLiveData;

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import MatchSummary from "../match-summary.js";
+import MatchSummary from "../public/js/core/match-summary.js";
 
 // Digest-shaped input; each test overrides only the fields its rule reads.
 const checkpoint = (timeS, extra = {}) => ({

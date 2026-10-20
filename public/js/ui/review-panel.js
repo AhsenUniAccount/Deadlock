@@ -1,7 +1,7 @@
 import SoulsChart from "./souls-chart.js";
-import MatchDigest from "./match-digest.js";
-import MatchSummary from "./match-summary.js";
-import { cell } from "./common.js";
+import MatchDigest from "../core/match-digest.js";
+import MatchSummary from "../core/match-summary.js";
+import { cell } from "../core/common.js";
 
 // Match summary panel for the selected player. The rule-based summary is built
 // here in the browser from the loaded match. The optional AI explanation is

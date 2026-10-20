@@ -1,4 +1,4 @@
-import { cell, portrait } from "./common.js";
+import { cell, portrait } from "../core/common.js";
 
 // Renders the player profile sections. Calculations live in player-percentiles.js
 // and player-trends.js; this module only builds DOM from their results.

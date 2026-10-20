@@ -1,7 +1,7 @@
-import DeadlockMatchStats from "../match-stats.js";
-import MatchDigest from "../match-digest.js";
-import MatchSummary from "../match-summary.js";
-import { request } from "../common.js";
+import DeadlockMatchStats from "../public/js/core/match-stats.js";
+import MatchDigest from "../public/js/core/match-digest.js";
+import MatchSummary from "../public/js/core/match-summary.js";
+import { request } from "../public/js/core/common.js";
 import { analyzeDigest, providerConfig, AnalysisError, PROMPT_VERSION } from "./analyze.js";
 
 // Site Worker: static pages are served from assets; /api/* routes run here.

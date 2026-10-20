@@ -1,8 +1,8 @@
-import DeadlockMatchStats from "./match-stats.js";
+import DeadlockMatchStats from "../core/match-stats.js";
 import SoulsChart from "./souls-chart.js";
 import MatchAnalysis from "./match-analysis.js";
 import ReviewPanel from "./review-panel.js";
-import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "./common.js";
+import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "../core/common.js";
 
 // Standalone match-page controller. Data normalization lives in match-stats.js;
 // player timelines, lane comparisons and team analysis have separate rendering modules.

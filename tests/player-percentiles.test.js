@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import PlayerPercentiles from "../player-percentiles.js";
+import PlayerPercentiles from "../public/js/core/player-percentiles.js";
 
 const curve = { avg: 5, percentile1: 0, percentile5: 1, percentile10: 2, percentile25: 3, percentile50: 5, percentile75: 7, percentile90: 9, percentile95: 10, percentile99: 14 };
 

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import A from "../analysis-stats.js";
-import M from "../match-stats.js";
+import A from "../public/js/core/analysis-stats.js";
+import M from "../public/js/core/match-stats.js";
 const player = (slot, team, stats, extra = {}) => ({
   player_slot: slot,
   team,

@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
-import S from "../live-stats.js";
-import D from "../live-data.js";
-import { API_BASE } from "../common.js";
+import S from "../public/js/core/live-stats.js";
+import D from "../public/js/core/live-data.js";
+import { API_BASE } from "../public/js/core/common.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const cacheDir = path.join(os.tmpdir(), "deadlock-scout-backtest");

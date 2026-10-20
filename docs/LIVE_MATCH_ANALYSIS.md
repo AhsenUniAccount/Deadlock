@@ -1,6 +1,6 @@
 # Live match scouting v0.1
 
-Implemented at `live.html`, linked from Overview, Hero Meta, and match breakdowns. It reuses the existing masthead, match sections, typography, portraits, and colors. No login, API key, backend, or new runtime dependency is required. Public API calls follow `common.js` directly from the browser. The site Worker (used for AI match review) is not involved; any private key must stay in Worker secrets, never in these scripts.
+Implemented at `public/live.html`, linked from Overview, Hero Meta, and match breakdowns. It reuses the existing masthead, match sections, typography, portraits, and colors. No login, API key, backend, or new runtime dependency is required. Public API calls follow `public/js/core/common.js` directly from the browser. The site Worker (used for AI match review) is not involved; any private key must stay in Worker secrets, never in these scripts.
 
 The site is hosted on Cloudflare Workers. A read-only check of `/tier-lists.html` returned a 307 redirect to `/tier-lists`, so sitemap and canonical URLs use the extensionless hosted paths. Local development links retain `.html` to work with the simple Python server. The sitemap now covers `/`, `/tier-lists`, and `/live`.
 
@@ -21,11 +21,11 @@ Sources: [API specification](https://api.deadlock-api.com/openapi.json), [API re
 | Items/builds | Item analytics returned purchase counts, unique players, outcomes and average buy time. Published builds expose category/mod `ability_id` paths. | Purchase timing and win associations are observational. Build popularity lacks an explicit game-mode filter; normal-mode item evidence and current-catalog checks still apply. Inventory IDs use an unverified binary encoding, so inventory is unavailable. |
 | Patch notes | Latest note title was `09-29-2026`, while its `pub_date` was `2026-10-15T03:12:00Z`. | Publication date is not a trustworthy patch-start timestamp. Windows use a labeled calendar-date proxy parsed from titles, or a rolling 30-day fallback. Exact client-version cohorts cannot be certified by the inspected analytics filters. |
 
-The query is inspectable in `live-data.js` as `LIVE_QUERY`. An existing listed broadcast allows 20 query connections/min/IP; a query/spectate acquisition by match ID is documented at 6/hour/IP. Rank batch: 20/min/IP. Rank distribution: 5/min/IP. Analytics share 200/min/IP. The page does not make a separate spectate request on each retry.
+The query is inspectable in `public/js/core/live-data.js` as `LIVE_QUERY`. An existing listed broadcast allows 20 query connections/min/IP; a query/spectate acquisition by match ID is documented at 6/hour/IP. Rank batch: 20/min/IP. Rank distribution: 5/min/IP. Analytics share 200/min/IP. The page does not make a separate spectate request on each retry.
 
 ## Scoring and population
 
-`live-stats.js` is pure and independently testable. Scouting v0.1 is an unvalidated index, not a probability or a causal measure of player impact.
+`public/js/core/live-stats.js` is pure and independently testable. Scouting v0.1 is an unvalidated index, not a probability or a causal measure of player impact.
 
 - Hero strength: 50% starting weight. Scored wins/losses on the selected hero are compared with the same-hero, same-mode population in the account’s rank tier, using the match’s average badge as a cohort proxy. The adjusted rate is `(wins + 20 * baselineRate) / (scoredMatches + 20)`. The displayed interval is a normal approximation to the conditional Beta posterior; baseline uncertainty and missing-match bias are not fully represented. Prior strength 20 is provisional.
 - Rank context: 30%. Compute the account badge’s empirical tied midpoint percentile from ranked-player counts. Compare it with the mean of at least three known friendly percentiles. No equal numeric spacing between named ranks is assumed.

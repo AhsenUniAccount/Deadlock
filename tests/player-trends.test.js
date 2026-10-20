@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import PlayerTrends from "../player-trends.js";
+import PlayerTrends from "../public/js/core/player-trends.js";
 
 const game = (id, extra = {}) => ({
   match_id: id,
