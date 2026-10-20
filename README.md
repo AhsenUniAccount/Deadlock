@@ -1,5 +1,7 @@
 # DeadStats
 
+[![CI/CD](https://github.com/AhsenUniAccount/Deadlock/actions/workflows/ci.yml/badge.svg)](https://github.com/AhsenUniAccount/Deadlock/actions/workflows/ci.yml)
+
 **Find out why you won or lost your last Deadlock match.**
 
 DeadStats is a free stats site for [Deadlock](https://store.steampowered.com/app/1422450/Deadlock/). Search a Steam name and it explains your games in plain English: how your lane went, when the lead swung, what your deaths cost, and how your stats compare with other players at your rank. An optional AI coach writes a fuller review of any match.
@@ -85,6 +87,7 @@ You need [Node.js](https://nodejs.org/) 22 or newer.
 npm install
 npm run dev:offline   # site and Worker at http://127.0.0.1:8787, no Cloudflare account needed
 npm test              # 89 tests: calculations, page behaviour and Worker routes
+npm run check         # every import, page asset and CSS url() points at a real file
 ```
 
 `dev:offline` runs everything except the AI coach. To try the AI coach locally, run `npx wrangler login` once and then `npm run dev`. Workers AI always runs on Cloudflare, so local requests count toward that account's free daily allowance.
@@ -110,6 +113,26 @@ Settings in `wrangler.jsonc`:
 | `DAILY_REVIEW_LIMIT` | `25` | New AI reviews per day across the site, sized to stay within the free allowance |
 | `DAILY_IP_LIMIT` | `5` | New AI reviews per visitor per day |
 | `ANALYSIS_LIMITER`, `PREVIEW_LIMITER` | 3/min, 60/min | Per-IP rate limits for AI reviews and link previews |
+
+## Continuous integration
+
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push and pull request:
+
+1. `npm ci` from a clean checkout.
+2. `npm test`: the full test suite.
+3. `npm run check`: no broken file references.
+4. A Wrangler dry run, which proves the Worker builds and lists the files that would be published.
+
+On pushes to `main`, once those pass, the **deploy** job publishes to Cloudflare and then smoke-tests the live site (pages load, the catalog endpoint works, private files stay private, security headers are present). Dependabot opens weekly pull requests for npm and GitHub Actions updates, and each one goes through the same checks.
+
+Deploys need two repository secrets (**Settings → Secrets and variables → Actions**). Until they exist, the deploy job skips with a notice and CI still runs.
+
+| Secret | Value |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | A Cloudflare API token from the **Edit Cloudflare Workers** template |
+| `CLOUDFLARE_ACCOUNT_ID` | The Cloudflare account ID that owns the Worker |
+
+The optional repository variable `SITE_URL` sets the address for the smoke test (for example `https://deadstats.org`). Once deploys run from GitHub, deploy only through `main` rather than from a laptop, so the live site always matches the repository.
 
 ## Security and privacy
 

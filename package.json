@@ -5,14 +5,18 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
+    "check": "node scripts/check-references.mjs",
     "dev": "wrangler dev",
     "dev:offline": "wrangler dev --env offline",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --env=\"\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0"
   },
   "devDependencies": {
     "wrangler": "^4.151.1"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

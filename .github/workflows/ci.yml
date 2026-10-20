@@ -1,0 +1,103 @@
+# CI on every push and pull request; deploy to Cloudflare from main once the
+# checks pass. Deploys are skipped until the CLOUDFLARE_API_TOKEN secret exists.
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded pull-request runs are cancelled; runs on main finish in order.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Tests and checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit, page and Worker tests
+        run: npm test
+
+      - name: File references resolve
+        run: npm run check
+
+      - name: Worker bundles
+        # A dry run builds the Worker and lists the static assets without uploading.
+        run: npx wrangler deploy --dry-run --env="" --outdir dist
+
+  deploy:
+    name: Deploy to Cloudflare
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL || 'https://deadstats.ahsenjauhar.workers.dev' }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://deadstats.ahsenjauhar.workers.dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check deploy credentials
+        id: credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::CLOUDFLARE_API_TOKEN is not set, so this run did not deploy. See README > Continuous integration."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy --env=""
+
+      - name: Smoke test the live site
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          set -e
+          expect() {
+            code=$(curl -s -o /dev/null -w '%{http_code}' -L --retry 3 --retry-delay 5 "$SITE_URL$2")
+            echo "$2 -> $code (expected $1)"
+            [ "$code" = "$1" ]
+          }
+          expect 200 /
+          expect 200 /match
+          expect 200 /history
+          expect 200 /api/assets/heroes
+          expect 404 /package.json
+          curl -s -D - -o /dev/null "$SITE_URL/" | grep -qi '^content-security-policy:' && echo "Security headers present"
