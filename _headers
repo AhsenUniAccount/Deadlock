@@ -1,0 +1,9 @@
+# Security headers for static files. The Worker sets the same headers on
+# its own responses (SECURITY_HEADERS in worker/index.js); keep them in sync.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https://assets-bucket.deadlock-api.com https://*.steamstatic.com https://steamcdn-a.akamaihd.net; connect-src 'self' https://api.deadlock-api.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000

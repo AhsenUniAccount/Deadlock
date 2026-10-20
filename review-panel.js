@@ -6,6 +6,43 @@ import { cell } from "./common.js";
 // Match summary panel for the selected player. The rule-based summary is built
 // here in the browser from the loaded match. The optional AI explanation is
 // requested from the Worker, which builds the same digest and calls the model.
+// Cloudflare Turnstile site key (public). Local development uses Cloudflare's
+// always-pass test key; the Worker skips verification there.
+const TURNSTILE_SITE_KEY = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+  ? "1x00000000000000000000AA"
+  : "0x4AAAAAAFc-T-fxoxgPxFj8";
+
+// Loads Turnstile on first use and returns a fresh single-use token. The widget
+// is invisible; most visitors never see a challenge.
+let turnstileScript;
+let turnstileWidget;
+function turnstileToken() {
+  turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.onload = () => resolve(window.turnstile);
+    script.onerror = () => {
+      turnstileScript = undefined;
+      reject(new Error("Could not load the bot check. Check your connection and try again."));
+    };
+    document.head.append(script);
+  });
+  return turnstileScript.then(
+    (turnstile) =>
+      new Promise((resolve, reject) => {
+        if (turnstileWidget !== undefined) turnstile.remove(turnstileWidget);
+        const fail = () => reject(new Error("The bot check failed. Reload the page and try again."));
+        turnstileWidget = turnstile.render("#turnstile-box", {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: resolve,
+          "error-callback": fail,
+          "timeout-callback": fail,
+        });
+      }),
+  );
+}
+
 const ReviewPanel = (() => {
   const byId = (id) => document.getElementById(id);
   const summaryHeadline = byId("summary-headline");
@@ -98,10 +135,11 @@ const ReviewPanel = (() => {
     render(view);
     const [matchId, slot] = key.split(":").map(Number);
     try {
+      const token = await turnstileToken();
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ matchId, slot }),
+        body: JSON.stringify({ matchId, slot, turnstileToken: token }),
         signal: controller.signal,
       });
       const body = await response.json().catch(() => null);

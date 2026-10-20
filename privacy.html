@@ -84,14 +84,20 @@
               <strong>Cloudflare.</strong> The site is hosted on Cloudflare
               Workers. Like any web host, Cloudflare processes your IP address and
               standard request details to deliver pages and protect the site.
-              Requests for AI reviews are limited per IP address, and the Worker
-              keeps operational logs for troubleshooting.
+              Requests for AI reviews and link previews are limited per IP
+              address, and the Worker keeps operational logs for troubleshooting.
             </li>
             <li>
               <strong>AI coach.</strong> When you choose <em>Explain with AI</em>,
               the site sends that match's statistics to an AI model run by
               Cloudflare Workers AI. Players are described only by hero name;
               Steam names, account IDs and avatars are not sent to the model.
+            </li>
+            <li>
+              <strong>Bot check.</strong> Before a new AI review is generated,
+              Cloudflare Turnstile checks that the request comes from a real
+              browser. It runs in the background and processes standard browser
+              and connection signals under Cloudflare's own privacy terms.
             </li>
           </ul>
           <p>
@@ -116,8 +122,10 @@
               text, identified by match ID and player slot, not by name.
             </li>
             <li>
-              <strong>A daily count</strong> of new AI reviews (a number only) is
-              kept for two days to stay within the free AI allowance.
+              <strong>Daily counts</strong> of new AI reviews are kept for two
+              days to stay within the free AI allowance: one for the whole site,
+              and one per visitor that is keyed by a one-way hash of the IP
+              address and date, so the address itself is not stored.
             </li>
             <li>
               <strong>Link previews</strong> for shared match links are cached by

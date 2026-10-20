@@ -15,12 +15,18 @@
   // Finished reviews, keyed by match, player, model and prompt version.
   // The "deadstats-analysis-cache" namespace in the ahsenjauhar@gmail.com account.
   "kv_namespaces": [{ "binding": "ANALYSIS_CACHE", "id": "b25dfc664cdc455f885d7719448b146f" }],
-  // Per-IP limit on new (uncached) reviews, which are the only paid requests.
+  // Per-IP limits: new (uncached) AI reviews, and link previews (which anyone
+  // can request by claiming to be a preview bot).
   "ratelimits": [
     {
       "name": "ANALYSIS_LIMITER",
       "namespace_id": "1001",
       "simple": { "limit": 3, "period": 60 }
+    },
+    {
+      "name": "PREVIEW_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 60, "period": 60 }
     }
   ],
   // Workers AI: free daily allowance, no API key. Usage beyond it fails on the
@@ -28,9 +34,12 @@
   "ai": { "binding": "AI" },
   "vars": {
     // "workers-ai" (free) or "anthropic" (paid; needs the ANTHROPIC_API_KEY secret).
+    // The TURNSTILE_SECRET secret (bot check on new AI reviews) is set with
+    // `wrangler secret put`; its public site key is in review-panel.js.
     "ANALYSIS_PROVIDER": "workers-ai",
     "ANALYSIS_MODEL": "@cf/openai/gpt-oss-120b",
-    "DAILY_REVIEW_LIMIT": "25"
+    "DAILY_REVIEW_LIMIT": "25",
+    "DAILY_IP_LIMIT": "5"
   },
   "observability": { "enabled": true },
   "env": {
@@ -44,9 +53,14 @@
           "name": "ANALYSIS_LIMITER",
           "namespace_id": "1001",
           "simple": { "limit": 3, "period": 60 }
+        },
+        {
+          "name": "PREVIEW_LIMITER",
+          "namespace_id": "1002",
+          "simple": { "limit": 60, "period": 60 }
         }
       ],
-      "vars": { "ANALYSIS_PROVIDER": "workers-ai", "DAILY_REVIEW_LIMIT": "25" }
+      "vars": { "ANALYSIS_PROVIDER": "workers-ai", "DAILY_REVIEW_LIMIT": "25", "DAILY_IP_LIMIT": "5" }
     }
   }
 }

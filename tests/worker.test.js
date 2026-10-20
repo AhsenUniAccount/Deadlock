@@ -36,10 +36,14 @@ const review = {
   improvements: [{ title: "Push", detail: "Take Guardians.", evidence: "No structures fell." }],
 };
 
-function setup({ modelText = JSON.stringify(review), stopReason = "end_turn", ai } = {}) {
-  const calls = { anthropic: [], deadlock: [] };
+function setup({ modelText = JSON.stringify(review), stopReason = "end_turn", ai, turnstileOk = true } = {}) {
+  const calls = { anthropic: [], deadlock: [], turnstile: [] };
   globalThis.fetch = async (input, init = {}) => {
     const url = String(input instanceof Request ? input.url : input);
+    if (url.startsWith("https://challenges.cloudflare.com/turnstile/")) {
+      calls.turnstile.push(Object.fromEntries(init.body.entries()));
+      return Response.json({ success: turnstileOk });
+    }
     if (url.startsWith("https://api.anthropic.com")) {
       calls.anthropic.push({ url, init, headers: new Headers(init.headers), body: JSON.parse(init.body) });
       return Response.json({
@@ -64,15 +68,21 @@ function setup({ modelText = JSON.stringify(review), stopReason = "end_turn", ai
     ANALYSIS_MODEL: undefined,
     AI: ai,
     ANTHROPIC_API_KEY: "test-key",
+    TURNSTILE_SECRET: "turnstile-secret",
     ANALYSIS_CACHE: {
       get: async (key) => (store.has(key) ? JSON.parse(store.get(key)) : null),
       put: async (key, value) => store.set(key, value),
     },
     ASSETS: { fetch: async () => new Response("asset") },
   };
-  const post = (body) =>
+  // A same-origin JSON request from the site's own page, with a Turnstile token.
+  const post = (body, headers = {}, ip = "203.0.113.5") =>
     worker.fetch(
-      new Request("https://example.test/api/analyze", { method: "POST", body: JSON.stringify(body) }),
+      new Request("https://example.test/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: "https://example.test", "CF-Connecting-IP": ip, ...headers },
+        body: JSON.stringify({ turnstileToken: "token", ...body }),
+      }),
       env,
     );
   return { calls, env, store, post };
@@ -171,7 +181,7 @@ test("refusals and unreadable output are reported, not cached", async () => {
 });
 test("digest route returns facts without calling the model; other paths are static assets", async () => {
   const { calls, env } = setup();
-  const digest = await worker.fetch(new Request("https://example.test/api/digest?match=77&slot=1"), env);
+  const digest = await worker.fetch(new Request("http://127.0.0.1:8787/api/digest?match=77&slot=1"), env);
   assert.equal((await digest.json()).digest.match.result, "loss");
   assert.equal(await (await worker.fetch(new Request("https://example.test/match.html"), env)).text(), "asset");
   assert.equal(calls.anthropic.length, 0);
@@ -210,4 +220,66 @@ test("preview text is escaped before it goes into attributes", () => {
   const html = applyPreviewTags(PAGE, { title: 'A "quote" <b>', description: "x & y" }, "https://e.test/?a=1&b=2");
   assert.match(html, /og:title" content="A &quot;quote&quot; &lt;b&gt;"/);
   assert.match(html, /og:description" content="x &amp; y"/);
+});
+
+test("analyze accepts only same-origin JSON, so other sites cannot spend the allowance", async () => {
+  const { post, calls } = setup();
+  assert.equal((await post({ matchId: 77, slot: 0 }, { "Content-Type": "text/plain" })).status, 415);
+  assert.equal((await post({ matchId: 77, slot: 0 }, { Origin: "https://evil.example" })).status, 403);
+  const noOrigin = new Headers({ "Content-Type": "application/json" });
+  const bare = await worker.fetch(
+    new Request("https://example.test/api/analyze", { method: "POST", headers: noOrigin, body: "{}" }),
+    setup().env,
+  );
+  assert.equal(bare.status, 403);
+  assert.equal(calls.anthropic.length, 0);
+});
+test("new reviews need a valid Turnstile token; cached reviews do not", async () => {
+  const failing = setup({ turnstileOk: false });
+  const response = await failing.post({ matchId: 77, slot: 0 });
+  assert.equal(response.status, 403);
+  assert.match((await response.json()).error, /bot check/);
+  assert.equal(failing.calls.anthropic.length, 0);
+
+  const ok = setup();
+  assert.equal((await ok.post({ matchId: 77, slot: 0 })).status, 200);
+  assert.deepEqual(ok.calls.turnstile[0], { secret: "turnstile-secret", response: "token", remoteip: "203.0.113.5" });
+  assert.equal((await ok.post({ matchId: 77, slot: 0, turnstileToken: "" })).status, 200);
+  assert.equal(ok.calls.turnstile.length, 1);
+
+  const unconfigured = setup();
+  delete unconfigured.env.TURNSTILE_SECRET;
+  assert.equal((await unconfigured.post({ matchId: 77, slot: 1 })).status, 503);
+});
+test("each visitor gets a daily allowance of new reviews, stored only as a hashed IP", async () => {
+  let runs = 0;
+  const { env, post, store } = setup({ ai: { run: async () => (runs++, { response: review }) } });
+  env.DAILY_IP_LIMIT = "1";
+  assert.equal((await post({ matchId: 77, slot: 0 })).status, 200);
+  const limited = await post({ matchId: 77, slot: 1 });
+  assert.equal(limited.status, 429);
+  assert.match((await limited.json()).error, /limit of 1 new AI review/);
+  assert.equal((await post({ matchId: 77, slot: 1 }, {}, "198.51.100.9")).status, 200);
+  assert.equal(runs, 2);
+  const keys = [...store.keys()].filter((k) => k.startsWith("ipday:"));
+  assert.equal(keys.length, 2);
+  assert.ok(keys.every((k) => !k.includes("203.0.113.5") && /^ipday:\d{4}-\d{2}-\d{2}:[0-9a-f]{24}$/.test(k)));
+});
+test("the digest route only exists in local development", async () => {
+  const { env } = setup();
+  assert.equal((await worker.fetch(new Request("https://example.test/api/digest?match=77&slot=1"), env)).status, 404);
+});
+test("previews are rate-limited per IP and fall back to the static page", async () => {
+  const { env, calls } = setup();
+  env.ASSETS = { fetch: async () => new Response(PAGE) };
+  env.PREVIEW_LIMITER = { limit: async () => ({ success: false }) };
+  assert.equal(await (await visit(env, "Discordbot/2.0")).text(), PAGE);
+  assert.equal(calls.deadlock.length, 0);
+});
+test("every Worker response carries the security headers", async () => {
+  const { env, post } = setup();
+  for (const response of [await post({ matchId: "x", slot: 0 }), await worker.fetch(new Request("https://example.test/"), env)]) {
+    assert.match(response.headers.get("Content-Security-Policy"), /frame-ancestors 'none'/);
+    assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
+  }
 });

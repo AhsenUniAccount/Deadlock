@@ -12,6 +12,39 @@ const CATALOG_TTL_MS = 3600000;
 // New reviews per UTC day across all visitors. About 25 Workers AI reviews fit
 // in Cloudflare's free daily allowance; raise it only if you accept charges.
 const DEFAULT_DAILY_LIMIT = 25;
+// New reviews per visitor (by hashed IP) per UTC day, so one person cannot use
+// the whole site-wide allowance.
+const DEFAULT_DAILY_IP_LIMIT = 5;
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
+
+// Applied to every response the Worker creates; static files get the same
+// headers from _headers. Keep the two in sync.
+export const SECURITY_HEADERS = {
+  "Content-Security-Policy": [
+    "default-src 'self'",
+    "script-src 'self' https://challenges.cloudflare.com",
+    "style-src 'self'",
+    "img-src 'self' data: https://assets-bucket.deadlock-api.com https://*.steamstatic.com https://steamcdn-a.akamaihd.net",
+    "connect-src 'self' https://api.deadlock-api.com https://challenges.cloudflare.com",
+    "frame-src https://challenges.cloudflare.com",
+    "font-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; "),
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  "Strict-Transport-Security": "max-age=31536000",
+};
+function secure(response) {
+  const copy = new Response(response.body, response);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) copy.headers.set(name, value);
+  return copy;
+}
 
 const json = (body, status = 200, headers = {}) =>
   new Response(JSON.stringify(body), {
@@ -87,7 +120,39 @@ async function handleDigest(url, signal) {
   return json({ digest: await loadDigest(target, signal) });
 }
 
-async function handleAnalyze(req, env, signal) {
+// Cloudflare Turnstile proves a real browser on this site made the request.
+// Local development without a secret skips the check; production fails closed.
+async function verifyTurnstile(token, req, env, url) {
+  if (!env.TURNSTILE_SECRET) {
+    if (LOCAL_HOSTS.has(url.hostname)) return;
+    throw new AnalysisError("AI review is not configured on this server.", 503);
+  }
+  if (typeof token !== "string" || !token || token.length > 2048)
+    throw new AnalysisError("The bot check did not complete. Reload the page and try again.", 403);
+  const form = new FormData();
+  form.append("secret", env.TURNSTILE_SECRET);
+  form.append("response", token);
+  const ip = req.headers.get("CF-Connecting-IP");
+  if (ip) form.append("remoteip", ip);
+  const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form })
+    .then((r) => r.json())
+    .catch(() => null);
+  if (!result?.success) throw new AnalysisError("The bot check failed. Reload the page and try again.", 403);
+}
+
+async function hashedIp(req, day) {
+  const ip = req.headers.get("CF-Connecting-IP") || "unknown";
+  // A one-way hash salted with the day: the stored key cannot be turned back into an IP.
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${day}:${ip}`));
+  return [...new Uint8Array(digest).slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function handleAnalyze(req, env, signal, url) {
+  // Only this site's pages may request reviews: JSON from the same origin. This
+  // stops other websites from spending the allowance through visitors' browsers.
+  if (!(req.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json"))
+    throw new AnalysisError("Requests must be JSON.", 415);
+  if (req.headers.get("Origin") !== url.origin) throw new AnalysisError("Cross-site requests are not allowed.", 403);
   const body = await req.json().catch(() => null);
   const target = parseTarget(body?.matchId, body?.slot);
   const { provider, model } = providerConfig(env);
@@ -95,7 +160,8 @@ async function handleAnalyze(req, env, signal) {
   const cached = await env.ANALYSIS_CACHE?.get(key, "json");
   if (cached) return json({ ...cached, cached: true });
 
-  // Only uncached reviews cost money, so only they count against the limit.
+  // Only uncached reviews cost anything, so only they need the bot check and limits.
+  await verifyTurnstile(body?.turnstileToken, req, env, url);
   if (env.ANALYSIS_LIMITER) {
     const ip = req.headers.get("CF-Connecting-IP") || "unknown";
     const { success } = await env.ANALYSIS_LIMITER.limit({ key: ip });
@@ -103,15 +169,22 @@ async function handleAnalyze(req, env, signal) {
   }
   // A site-wide daily cap keeps total usage inside the free allowance (or a
   // chosen budget). The KV counter is approximate under concurrent requests.
+  const day = new Date().toISOString().slice(0, 10);
   const limit = Number(env.DAILY_REVIEW_LIMIT ?? DEFAULT_DAILY_LIMIT);
-  const usageKey = `usage:${new Date().toISOString().slice(0, 10)}`;
+  const usageKey = `usage:${day}`;
   const used = Number((await env.ANALYSIS_CACHE?.get(usageKey)) ?? 0);
   if (used >= limit)
     throw new AnalysisError("Today's free AI reviews are used up. Try again after 00:00 UTC.", 429);
+  const ipLimit = Number(env.DAILY_IP_LIMIT ?? DEFAULT_DAILY_IP_LIMIT);
+  const ipKey = `ipday:${day}:${await hashedIp(req, day)}`;
+  const ipUsed = Number((await env.ANALYSIS_CACHE?.get(ipKey)) ?? 0);
+  if (ipUsed >= ipLimit)
+    throw new AnalysisError(`You've reached today's limit of ${ipLimit} new AI reviews. Saved reviews still work.`, 429);
 
   const digest = await loadDigest(target, signal);
   const result = await analyzeDigest(digest, { env, signal });
   await env.ANALYSIS_CACHE?.put(usageKey, String(used + 1), { expirationTtl: 2 * 24 * 3600 });
+  await env.ANALYSIS_CACHE?.put(ipKey, String(ipUsed + 1), { expirationTtl: 2 * 24 * 3600 });
   const record = {
     matchId: target.matchId,
     slot: target.slot,
@@ -171,11 +244,22 @@ async function matchPreview(req, env) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id") ?? "";
   if (!page.ok || !/^\d{1,15}$/.test(id)) return page;
+  // Anyone can claim to be a preview bot, so previews are rate-limited per IP;
+  // over the limit, the normal page (with generic tags) is served instead.
+  if (env.PREVIEW_LIMITER) {
+    const { success } = await env.PREVIEW_LIMITER.limit({ key: req.headers.get("CF-Connecting-IP") || "unknown" });
+    if (!success) return page;
+  }
+  const player = /^\d{1,10}$/.test(url.searchParams.get("player") ?? "") ? url.searchParams.get("player") : null;
   // Completed matches never change, so previews are cached at the edge for a day.
   const cache = globalThis.caches?.default;
   // Bump PREVIEW_VERSION when the preview text or page template changes, so
   // cached previews are replaced rather than served for another day.
-  const keyUrl = new URL(url);
+  // The key holds only the match, player and version, so extra query
+  // parameters cannot bypass the cache.
+  const keyUrl = new URL(`${url.origin}/match`);
+  keyUrl.searchParams.set("id", id);
+  if (player) keyUrl.searchParams.set("player", player);
   keyUrl.searchParams.set("preview", PREVIEW_VERSION);
   const key = new Request(keyUrl.toString());
   const hit = await cache?.match(key);
@@ -183,7 +267,7 @@ async function matchPreview(req, env) {
   const html = await page.text();
   let tags;
   try {
-    tags = await previewTags(Number(id), Number(url.searchParams.get("player")), req.signal);
+    tags = await previewTags(Number(id), Number(player), req.signal);
   } catch {
     return new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
@@ -194,20 +278,28 @@ async function matchPreview(req, env) {
   return response;
 }
 
+async function route(req, env) {
+  const url = new URL(req.url);
+  if (url.pathname === "/match" && PREVIEW_BOTS.test(req.headers.get("User-Agent") || ""))
+    return matchPreview(req, env);
+  if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(req);
+  try {
+    // The raw digest is a development aid; in production it would let anyone
+    // make the Worker download match data on demand.
+    if (url.pathname === "/api/digest" && req.method === "GET" && LOCAL_HOSTS.has(url.hostname))
+      return await handleDigest(url, req.signal);
+    if (url.pathname === "/api/analyze" && req.method === "POST")
+      return await handleAnalyze(req, env, req.signal, url);
+    return json({ error: "Not found." }, 404);
+  } catch (error) {
+    if (error instanceof AnalysisError) return json({ error: error.message }, error.status);
+    console.error("Unhandled API error", error);
+    return json({ error: "Something went wrong. Try again later." }, 500);
+  }
+}
+
 export default {
   async fetch(req, env) {
-    const url = new URL(req.url);
-    if (url.pathname === "/match" && PREVIEW_BOTS.test(req.headers.get("User-Agent") || ""))
-      return matchPreview(req, env);
-    if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(req);
-    try {
-      if (url.pathname === "/api/digest" && req.method === "GET") return await handleDigest(url, req.signal);
-      if (url.pathname === "/api/analyze" && req.method === "POST") return await handleAnalyze(req, env, req.signal);
-      return json({ error: "Not found." }, 404);
-    } catch (error) {
-      if (error instanceof AnalysisError) return json({ error: error.message }, error.status);
-      console.error("Unhandled API error", error);
-      return json({ error: "Something went wrong. Try again later." }, 500);
-    }
+    return secure(await route(req, env));
   },
 };

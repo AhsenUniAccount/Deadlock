@@ -192,7 +192,7 @@ body.home.has-player .landing-only {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: var(--fill);
+  width: 77%; /* sample value on the landing card */
   background: #a8c5a0;
 }
 .sample-stat small {

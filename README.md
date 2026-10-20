@@ -187,6 +187,15 @@ Providers, set in `wrangler.jsonc`:
 
 Reviews are cached in Workers KV for 180 days (completed matches never change), keyed by match, slot, provider, model, prompt version and digest version. Cached reviews are free and do not count toward either limit. New reviews are also limited to 3 per minute per IP. Bump `PROMPT_VERSION` (`worker/analyze.js`) or `MatchDigest.VERSION` when the prompt or digest changes. Only standard 6v6 matches with a final result can be reviewed.
 
+### Security
+
+- `/api/analyze` accepts only `application/json` POSTs whose `Origin` is the site itself, so other websites cannot trigger reviews through visitors' browsers.
+- New (uncached) reviews need a Cloudflare Turnstile token (invisible widget, site key in `review-panel.js`, secret in the `TURNSTILE_SECRET` Worker secret). Without the secret the Worker refuses reviews, except on localhost. Saved reviews need no token.
+- Limits on new reviews: 3 per minute per IP (`ANALYSIS_LIMITER`), `DAILY_IP_LIMIT` per visitor per day (keyed by a salted SHA-256 of IP and date, never the raw IP), and `DAILY_REVIEW_LIMIT` site-wide.
+- Link previews are rate-limited per IP (`PREVIEW_LIMITER`, 60/min) and cached by match, player and version only; over the limit, the static page is served.
+- `/api/digest` only answers on localhost.
+- Security headers (CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS) come from `_headers` for static files and `SECURITY_HEADERS` in `worker/index.js` for Worker responses; keep the two in sync. The CSP allows scripts only from the site and Turnstile, images from the site, `assets-bucket.deadlock-api.com` and Steam's avatar CDN, and requests to the site, `api.deadlock-api.com` and Turnstile, so avoid inline `style=` attributes and inline scripts.
+
 ### Deploying
 
 ```sh
