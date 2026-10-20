@@ -166,7 +166,25 @@ const PlayerTrends = (() => {
     });
   }
 
-  return { scoredGames, rowVerdict, patterns, comparisonScope, compare };
+  // Most-played heroes with win rate and average K/D/A, from scored standard games.
+  function topHeroes(rows, limit = 3) {
+    const byHero = new Map();
+    for (const g of scoredGames(rows)) byHero.set(g.hero_id, [...(byHero.get(g.hero_id) || []), g]);
+    const avg = (list, key) => mean(list.map((g) => g[key]).filter(valid));
+    return [...byHero]
+      .sort((a, b) => b[1].length - a[1].length || a[0] - b[0])
+      .slice(0, limit)
+      .map(([heroId, list]) => ({
+        heroId,
+        games: list.length,
+        winRate: list.filter((g) => g.player_match_outcome === 1).length / list.length,
+        kills: avg(list, "player_kills"),
+        deaths: avg(list, "player_deaths"),
+        assists: avg(list, "player_assists"),
+      }));
+  }
+
+  return { scoredGames, rowVerdict, patterns, comparisonScope, compare, topHeroes };
 })();
 
 export default PlayerTrends;

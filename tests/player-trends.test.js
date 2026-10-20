@@ -62,3 +62,17 @@ test("hero comparison uses the player's ranked tier and needs enough games on bo
   assert.deepEqual(PlayerTrends.compare(scope, cohort.slice(1)), []);
   assert.deepEqual(PlayerTrends.compare(PlayerTrends.comparisonScope(rows.slice(0, 2)), cohort), []);
 });
+test("top heroes are ranked by games played, with win rate and average K/D/A", () => {
+  const rows = [
+    game(1, { hero_id: 2, player_kills: 10 }),
+    game(2, { hero_id: 2, player_match_outcome: 2, player_kills: 4 }),
+    game(3, { hero_id: 1 }),
+    game(4, { hero_id: 3 }),
+    game(5, { hero_id: 4, game_mode: 4 }),
+  ];
+  const top = PlayerTrends.topHeroes(rows, 2);
+  assert.deepEqual(top.map((h) => [h.heroId, h.games, h.winRate, h.kills]), [
+    [2, 2, 0.5, 7],
+    [1, 1, 1, 5],
+  ]);
+});

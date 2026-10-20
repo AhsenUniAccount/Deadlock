@@ -135,30 +135,68 @@
         </article>
       </section>
 
-      <section class="profile-header player-only" aria-label="Selected player">
-        <div id="selected-player" class="profile-card-identity">
-          No player selected
-        </div>
-        <div class="profile-record">
-          <span class="profile-label">Recent win rate</span>
-          <strong id="overall-rate">—</strong>
-          <p id="record-detail">No player selected</p>
-          <span class="record-scope">Last 20 recorded matches</span>
-        </div>
-        <div class="profile-actions">
-          <span id="player-rank" class="profile-rank"></span>
-          <a
-            id="history-link"
-            class="history-button"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden
-            >Match history ↗</a
-          >
-          <button id="copy-profile" class="secondary-button" type="button">
-            Copy profile link
-          </button>
-        </div>
+      <section class="overview player-only" aria-label="Player overview">
+        <aside class="overview-side">
+          <div class="overview-card overview-player">
+            <div id="selected-player" class="overview-identity">
+              No player selected
+            </div>
+            <span id="player-rank" class="overview-rank"></span>
+            <div class="overview-record">
+              <div>
+                <span>Win rate</span><strong id="overall-rate">—</strong>
+              </div>
+              <div>
+                <span>Record · last 20</span
+                ><strong id="record-detail" class="overview-wl">—</strong>
+              </div>
+            </div>
+            <div class="overview-actions">
+              <a
+                id="history-link"
+                class="history-button"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >Match history ↗</a
+              >
+              <button id="copy-profile" class="secondary-button" type="button">
+                Copy profile link
+              </button>
+            </div>
+          </div>
+
+          <div class="overview-card">
+            <h2>Most played · last 30 days</h2>
+            <div id="top-heroes" class="overview-heroes"></div>
+          </div>
+
+          <div id="recent-card" class="overview-card overview-match">
+            <h2>Most recent match</h2>
+            <div id="recent-match"></div>
+          </div>
+        </aside>
+
+        <section
+          id="player-stats"
+          class="overview-main"
+          aria-labelledby="stats-heading"
+        >
+          <div class="overview-main-head">
+            <div>
+              <p class="eyebrow">HOW YOU STACK UP</p>
+              <h2 id="stats-heading">Stats and <em>percentiles</em></h2>
+            </div>
+            <span id="stats-badge" class="scope"></span>
+          </div>
+          <p id="stats-scope" class="overview-scope"></p>
+          <div id="percentile-grid" class="percentile-list"></div>
+          <div class="percentile-legend" aria-hidden="true">
+            <span class="tone-positive">● Top 25%</span
+            ><span class="tone-neutral">● Middle</span
+            ><span class="tone-negative">● Bottom 25%</span>
+          </div>
+        </section>
       </section>
 
       <section
@@ -188,22 +226,6 @@
         ></p>
         <h3 id="latest-headline" class="latest-headline"></h3>
         <ol id="latest-points" class="ai-moments latest-points"></ol>
-      </section>
-
-      <section
-        id="player-stats"
-        class="panel player-stats"
-        aria-labelledby="stats-heading"
-        hidden
-      >
-        <div class="toolbar">
-          <div>
-            <p class="eyebrow">HOW YOU STACK UP</p>
-            <h2 id="stats-heading">Your stats and percentiles</h2>
-          </div>
-        </div>
-        <p id="stats-scope" class="results-status"></p>
-        <div id="percentile-grid" class="percentile-grid"></div>
       </section>
 
       <section

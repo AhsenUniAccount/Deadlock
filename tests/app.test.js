@@ -12,7 +12,8 @@ async function setup(fetch) {
   class Element {
     constructor() {
       this.children = [];
-      this.style = {};
+      this.style = { setProperty() {} };
+      this.dataset = {};
       this.events = {};
       this.attributes = {};
       this.value = "";

@@ -158,6 +158,8 @@ Contents links automatically open their collapsible target section.
 
 Searching a player opens their profile at `index.html?player=ACCOUNT_ID`, which can be bookmarked or shared. **Match history ↗** opens `history.html?player=ACCOUNT_ID` in a new tab with the latest 50 matches, each with a takeaway and a link to its breakdown.
 
+The profile is two columns. On the left: the player card (avatar, rank, win rate and record over the last 20 matches, Match history and Copy profile link), their three most-played heroes over the last 30 days with win rate and average K/D/A (`PlayerTrends.topHeroes`), and their most recent standard match with its top summary point and a link to the breakdown. On the right: stats and percentiles as a list with a median tick on each bar. The full last-game summary, patterns, hero comparison and hero performance follow below.
+
 The profile uses the player's standard matches from the last 30 days:
 
 - **Your stats and percentiles**: for 11 metrics (souls and damage per minute, KDA, kills, deaths, assists, last hits, denies, objective damage per minute, accuracy, headshot rate), the player's average from `/v1/analytics/player-stats/metrics?account_ids=…` is placed on the per-game quantile curve (1st to 99th percentile) of all games at their rank tier (by match average badge), by linear interpolation. Deaths are flipped so every percentile means "better than". The API's quantiles are approximate (DDSketch, about 1% relative error), and values beyond the 1st/99th percentile are shown as Top/Bottom 1%.

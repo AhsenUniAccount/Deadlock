@@ -2116,64 +2116,6 @@ a.secondary-button {
 .history-button[hidden] {
   display: none;
 }
-.percentile-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  padding: 0 24px 24px;
-}
-.stat-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-top: 3px solid #6f7268;
-  background: #232522;
-}
-.stat-card[data-tone="positive"] {
-  border-top-color: #a8c5a0;
-}
-.stat-card[data-tone="negative"] {
-  border-top-color: #d39b90;
-}
-.stat-card h3 {
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.stat-card strong {
-  font-size: 26px;
-  font-variant-numeric: tabular-nums;
-}
-.stat-bar {
-  position: relative;
-  height: 6px;
-  background: #343730;
-}
-.stat-bar span {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--accent);
-}
-.stat-card[data-tone="positive"] .stat-bar span {
-  background: #a8c5a0;
-}
-.stat-card[data-tone="negative"] .stat-bar span {
-  background: #d39b90;
-}
-.stat-rank {
-  font-size: 14px;
-  font-weight: 650;
-  color: #e0d5b7;
-}
-.stat-card small {
-  color: var(--muted);
-  font-size: 11px;
-}
 .form-strip-wrap {
   display: flex;
   align-items: center;
@@ -2256,12 +2198,8 @@ a.secondary-button {
   margin: 8px 0 12px;
 }
 @media (max-width: 640px) {
-  .percentile-grid,
   .compare-list {
     padding: 0 16px 16px;
-  }
-  .percentile-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 /* Patterns have no game time, so the list drops the time column. */

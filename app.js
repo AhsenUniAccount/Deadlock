@@ -31,13 +31,17 @@ let suggestionsDismissed = false;
 
 // Clear statistics when the search changes so the previous player’s results cannot linger.
 function resetResults(message) {
-  for (const id of ["#latest-match", "#player-stats", "#player-patterns", "#hero-compare"])
+  for (const id of ["#latest-match", "#player-patterns", "#hero-compare"])
     document.querySelector(id).hidden = true;
+  for (const id of ["#top-heroes", "#recent-match", "#percentile-grid"])
+    document.querySelector(id).replaceChildren();
+  document.querySelector("#player-rank").textContent = "";
+  document.querySelector("#stats-scope").textContent = "";
   document.querySelector("#history-link").hidden = true;
   resultsBody.replaceChildren();
   summary.textContent = message;
   document.querySelector("#overall-rate").textContent = "—";
-  document.querySelector("#record-detail").textContent = "No match data loaded";
+  document.querySelector("#record-detail").textContent = "—";
   document.querySelector("#results-scope").textContent =
     "Latest 20 recorded matches";
   document.querySelector("#table-caption").textContent =
@@ -308,6 +312,13 @@ async function loadPlayer() {
     const link = document.querySelector("#history-link");
     link.href = `history.html?player=${player.account_id}`;
     link.hidden = false;
+    // The recent-match card shows straight away; the summary adds detail to it.
+    const latest = result.recent.find((match) => match.game_mode === 1) || result.recent[0];
+    ProfileView.renderRecentMatch(
+      latest,
+      names,
+      latest ? `match.html?id=${latest.match_id}&player=${player.account_id}` : "#",
+    );
     loadLatestSummary(player, result.recent, names, controller);
     loadProfile(player, historyResult.value.data, names, controller);
     if (!result.recent.length) {
@@ -340,9 +351,14 @@ async function loadProfile(player, history, names, controller) {
     .slice(0, 200);
   const games = PlayerTrends.scoredGames(recent).length;
   const patterns = PlayerTrends.patterns(recent, (id) => names.get(id)?.name || `Hero ${id}`);
+  ProfileView.renderTopHeroes(PlayerTrends.topHeroes(recent), names);
   ProfileView.renderPatterns(patterns);
   document.querySelector("#player-patterns").hidden = !games;
-  if (!games) return;
+  if (!games) {
+    document.querySelector("#stats-scope").textContent = "No standard matches in the last 30 days to compare.";
+    return;
+  }
+  document.querySelector("#stats-scope").textContent = "Loading percentiles…";
   // Private lobbies and bot games have no comparable population.
   const scope = PlayerTrends.comparisonScope(recent) || { mode: null, tier: null, games: [] };
   const rankRange = scope.tier
@@ -362,14 +378,16 @@ async function loadProfile(player, history, names, controller) {
     for (const rank of ranks.value.data) RANK_TIERS.set(rank.tier, rank.name);
   const peers = scope.tier ? `${RANK_TIERS.get(scope.tier) || `Tier ${scope.tier}`} players` : "players of all ranks";
   const badge = recent.find((row) => row.ranked_display_badge > 0)?.ranked_display_badge;
-  document.querySelector("#player-rank").textContent = badge ? `Rank ${rankLabel(badge)}` : "Rank unknown";
+  document.querySelector("#player-rank").textContent = badge ? rankLabel(badge) : "Unranked";
 
   if (mine.status === "fulfilled" && population.status === "fulfilled") {
     ProfileView.renderPercentiles(
       PlayerPercentiles.build(mine.value.data, population.value.data),
-      `Your average game over ${games} standard match${games === 1 ? "" : "es"} in the last 30 days, placed among all games by ${peers}.`,
+      `Your average over ${games} standard match${games === 1 ? "" : "es"}, placed among every game played by ${peers}. The tick marks the median game.`,
+      `vs ${scope.tier ? RANK_TIERS.get(scope.tier) || `Tier ${scope.tier}` : "all ranks"} · 30 days`,
     );
-    document.querySelector("#player-stats").hidden = false;
+  } else {
+    document.querySelector("#stats-scope").textContent = "Percentiles are unavailable right now. Try again later.";
   }
   if (cohort.status === "fulfilled") {
     ProfileView.renderComparison(
@@ -419,7 +437,9 @@ async function loadLatestSummary(player, recent, names, controller) {
     const match = DeadlockMatchStats.summarizeMatch(metadata.data, latest.match_id);
     const slot = match.players.find((p) => p.accountId === player.account_id)?.slot;
     if (slot === undefined) throw new Error("Player not found in match.");
-    const summary = MatchSummary.build(MatchDigest.build(match, { heroes: names, items: new Map() }, slot));
+    const digest = MatchDigest.build(match, { heroes: names, items: new Map() }, slot);
+    const summary = MatchSummary.build(digest);
+    ProfileView.addRecentSummary(digest.you, summary.points[0], digest.roster.length);
     headline.textContent = summary.headline;
     status.textContent = `Match from ${dateTime(latest.start_time)}.`;
     for (const point of summary.points.slice(0, 5)) {
@@ -472,8 +492,7 @@ function renderResults(player, { totals, heroes }, names) {
     totals.wins,
     totals.wins + totals.losses,
   );
-  document.querySelector("#record-detail").textContent =
-    `${totals.matches} matches / ${totals.wins} wins / ${totals.losses} losses${totals.other ? ` / ${totals.other} other` : ""}`;
+  document.querySelector("#record-detail").textContent = `${totals.wins}W – ${totals.losses}L`;
   document.querySelector("#results-scope").textContent =
     `${totals.matches} recorded matches · ${heroes.length} heroes`;
 }
