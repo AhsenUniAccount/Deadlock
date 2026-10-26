@@ -7,31 +7,31 @@
 .live-session .match-help, .live-section .match-help, .search-panel .match-help { padding: 0; margin: 12px 0; }
 .live-section .section-heading { padding: 0 0 18px; }
 .live-session .results-status { padding: 0; margin: 14px 0; }
-.live-status-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding: 14px 0; border-block: 1px solid #44473f; }
+.live-status-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding: 14px 0; border-block: 1px solid #2a4941; }
 .live-status-grid dt { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: .07em; }
 .live-status-grid dd { margin: 7px 0 0; font-size: 14px; }
 .live-section { padding: 24px; margin-block: 22px; }
 .live-threat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.live-card { padding: 18px; border: 1px solid #53564a; background: #20241f; min-width: 0; }
+.live-card { padding: 18px; border: 1px solid #32574e; background: #152521; min-width: 0; }
 .live-card h3 { margin: 10px 0; font-family: Georgia, serif; font-size: 19px; }
 .live-identity { display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
 .live-identity .hero-portrait { width: 40px; height: 44px; flex-shrink: 0; }
 .live-identity .hero-portrait img { object-fit: contain; }
 .live-identity strong, .live-identity small { display: block; }
 .live-identity small { color: var(--muted); margin-top: 4px; }
-.live-score { font-family: Georgia, serif; font-size: 32px; margin: 15px 0 5px; color: #e1cc94; }
+.live-score { font-family: Georgia, serif; font-size: 32px; margin: 15px 0 5px; color: #ecd29a; }
 .live-card p { font-size: 12px; line-height: 1.6; margin: 9px 0; }
 .live-card details { margin-top: 12px; font-size: 12px; }
-.live-card summary { cursor: pointer; color: #e1cc94; }
+.live-card summary { cursor: pointer; color: #ecd29a; }
 .live-card ul { padding-left: 18px; font-size: 12px; line-height: 1.6; }
-.live-badge { display: inline-block; padding: 4px 7px; border: 1px solid #636650; color: #d7d2c0; font-size: 10px; letter-spacing: .05em; }
+.live-badge { display: inline-block; padding: 4px 7px; border: 1px solid #396359; color: #c6d1cc; font-size: 10px; letter-spacing: .05em; }
 .live-muted { color: var(--muted); }
-.live-pressure { border-top: 1px solid #44473f; padding-top: 9px; color: #b9c6ca; }
+.live-pressure { border-top: 1px solid #2a4941; padding-top: 9px; color: #b9c6ca; }
 .live-roster-grid, .live-plan-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
 .live-team-heading { grid-column: 1 / -1; margin-bottom: 0; }
 .live-games { padding-left: 20px; color: var(--muted); }
 .live-games li { margin: 7px 0; font-size: 12px; }
-.live-item { display: flex; gap: 10px; border-top: 1px solid #41453b; padding: 12px 0; align-items: start; }
+.live-item { display: flex; gap: 10px; border-top: 1px solid #28463e; padding: 12px 0; align-items: start; }
 .live-item .item-portrait { flex: 0 0 32px; width: 32px; height: 32px; }
 .live-item p { margin: 3px 0 7px; }
 .live-item button { padding: 5px 8px; font-size: 11px; }
@@ -39,7 +39,7 @@
 .live-build-path li { margin: 10px 0; font-size: 12px; }
 .live-method { font-size: 13px; line-height: 1.7; }
 .live-method h3 { margin-bottom: 6px; }
-.live-method a, .live-card a { color: #e1cc94; }
+.live-method a, .live-card a { color: #ecd29a; }
 .live-card select { display: block; width: 100%; margin-top: 10px; }
 .live-card button { max-width: 100%; }
 @media (max-width: 900px) { .live-threat-grid { grid-template-columns: 1fr; } .live-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

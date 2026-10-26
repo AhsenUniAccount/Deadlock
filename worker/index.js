@@ -57,7 +57,7 @@ const json = (body, status = 200, headers = {}) =>
 const pick = (source, keys) => Object.fromEntries(keys.filter((k) => source?.[k] !== undefined).map((k) => [k, source[k]]));
 export const trimHero = (hero) => ({
   ...pick(hero, ["id", "name"]),
-  images: pick(hero.images, ["icon_image_small", "icon_image_small_webp"]),
+  images: pick(hero.images, ["icon_image_small", "icon_image_small_webp", "icon_hero_card", "icon_hero_card_webp"]),
 });
 export const trimItem = (item) =>
   pick(item, [
@@ -235,7 +235,7 @@ async function handleAnalyze(req, env, signal, url) {
 // never trigger an extra metadata download.
 const PREVIEW_BOTS =
   /discordbot|twitterbot|facebookexternalhit|slackbot|telegrambot|whatsapp|linkedinbot|redditbot|embedly|skypeuripreview|mastodon|iframely|bluesky|googlebot|bingbot/i;
-const PREVIEW_VERSION = "2";
+const PREVIEW_VERSION = "3";
 const clock = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
 const escapeAttr = (text) =>
   String(text).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

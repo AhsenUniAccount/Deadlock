@@ -37,6 +37,8 @@ function resetResults(message) {
     document.querySelector(id).replaceChildren();
   document.querySelector("#player-rank").textContent = "";
   document.querySelector("#stats-scope").textContent = "";
+  document.querySelector("#recent-when").textContent = "Latest game";
+  ProfileView.clearPlaqueSkeleton();
   document.querySelector("#history-link").hidden = true;
   resultsBody.replaceChildren();
   summary.textContent = message;
@@ -49,7 +51,7 @@ function resetResults(message) {
 }
 
 // Build the avatar, display name and account ID shared by suggestions and the selected profile.
-function profileContent(profile) {
+function profileContent(profile, large = false) {
   const identity = document.createElement("span");
   identity.className = "profile-identity";
   identity.append(
@@ -58,7 +60,9 @@ function profileContent(profile) {
   );
   return [
     portrait(
-      profile.avatarmedium || profile.avatarfull || profile.avatar,
+      large
+        ? profile.avatarfull || profile.avatarmedium || profile.avatar
+        : profile.avatarmedium || profile.avatarfull || profile.avatar,
       profile.personaname,
     ),
     identity,
@@ -123,7 +127,7 @@ async function choosePlayer(profile) {
   selectedProfile = profile;
   // "compact" stays on while searching again, so the search bar never jumps.
   document.body?.classList.add("has-player", "compact");
-  selectedPlayer.replaceChildren(...profileContent(profile));
+  selectedPlayer.replaceChildren(...profileContent(profile, true));
   searchInput.value = profile.personaname;
   closeSuggestions();
   searchStatus.textContent = `Selected ${profile.personaname} · Account ${profile.account_id}. Type another name to change player.`;
@@ -286,6 +290,7 @@ async function loadPlayer() {
     return;
   }
   resetResults(`Loading recent matches for ${player.personaname}…`);
+  ProfileView.showSkeleton();
   try {
     const [historyResult, namesResult] = await Promise.allSettled([
       request(
@@ -337,6 +342,7 @@ async function loadPlayer() {
 }
 
 const RANK_TIERS = new Map();
+const RANK_CATALOG = new Map();
 const rankLabel = (badge) =>
   `${RANK_TIERS.get(Math.floor(badge / 10)) || `Tier ${Math.floor(badge / 10)}`} ${badge % 10}`;
 
@@ -355,10 +361,11 @@ async function loadProfile(player, history, names, controller) {
   ProfileView.renderPatterns(patterns);
   document.querySelector("#player-patterns").hidden = !games;
   if (!games) {
-    document.querySelector("#stats-scope").textContent = "No standard matches in the last 30 days to compare.";
+    ProfileView.renderRank("", null);
+    ProfileView.statsMessage("No standard matches in the last 30 days to compare.");
     return;
   }
-  document.querySelector("#stats-scope").textContent = "Loading percentiles…";
+  document.querySelector("#stats-scope").textContent = "Placing your average game among players at your rank…";
   // Private lobbies and bot games have no comparable population.
   const scope = PlayerTrends.comparisonScope(recent) || { mode: null, tier: null, games: [] };
   const rankRange = scope.tier
@@ -375,10 +382,13 @@ async function loadProfile(player, history, names, controller) {
   ]);
   if (controller.signal.aborted) return;
   if (ranks.status === "fulfilled" && ranks.value)
-    for (const rank of ranks.value.data) RANK_TIERS.set(rank.tier, rank.name);
+    for (const rank of ranks.value.data) {
+      RANK_TIERS.set(rank.tier, rank.name);
+      RANK_CATALOG.set(rank.tier, rank);
+    }
   const peers = scope.tier ? `${RANK_TIERS.get(scope.tier) || `Tier ${scope.tier}`} players` : "players of all ranks";
   const badge = recent.find((row) => row.ranked_display_badge > 0)?.ranked_display_badge;
-  document.querySelector("#player-rank").textContent = badge ? rankLabel(badge) : "Unranked";
+  ProfileView.renderRank(badge ? rankLabel(badge) : "", badge ? RANK_CATALOG.get(Math.floor(badge / 10)) : null);
 
   if (mine.status === "fulfilled" && population.status === "fulfilled") {
     ProfileView.renderPercentiles(
@@ -387,7 +397,7 @@ async function loadProfile(player, history, names, controller) {
       `vs ${scope.tier ? RANK_TIERS.get(scope.tier) || `Tier ${scope.tier}` : "all ranks"} · 30 days`,
     );
   } else {
-    document.querySelector("#stats-scope").textContent = "Percentiles are unavailable right now. Try again later.";
+    ProfileView.statsMessage("Percentiles are unavailable right now. Try again later.");
   }
   if (cohort.status === "fulfilled") {
     ProfileView.renderComparison(
@@ -403,6 +413,9 @@ async function loadProfile(player, history, names, controller) {
 async function openFromUrl() {
   const id = Number(new URLSearchParams(globalThis.location?.search || "").get("player"));
   if (!Number.isSafeInteger(id) || id <= 0 || id > 4294967295) return;
+  // Show the profile layout in its loading state straight away.
+  document.body?.classList.add("has-player", "compact");
+  ProfileView.showIdentitySkeleton();
   let profile = { account_id: id, personaname: `Account ${id}` };
   try {
     const result = await request(`/v1/players/steam?account_ids=${id}`, new AbortController().signal, 300000);
@@ -495,6 +508,7 @@ function renderResults(player, { totals, heroes }, names) {
   document.querySelector("#record-detail").textContent = `${totals.wins}W – ${totals.losses}L`;
   document.querySelector("#results-scope").textContent =
     `${totals.matches} recorded matches · ${heroes.length} heroes`;
+  ProfileView.clearPlaqueSkeleton();
 }
 
 // Share the profile URL (?player=ID) as-is.

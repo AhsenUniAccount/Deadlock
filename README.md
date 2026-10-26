@@ -27,6 +27,10 @@ DeadStats is a free stats site for [Deadlock](https://store.steampowered.com/app
 | **AI coach** | **Hero meta** |
 | ![AI coach review](docs/screenshots/ai-coach.png) | ![Hero pick rate against win rate](docs/screenshots/hero-meta.png) |
 
+## Design
+
+An Art Deco noir look inspired by Deadlock's own occult 1920s city: deep green-black, gold double-line frames and chamfered plaques, a sunburst behind each player's emblem, Limelight display lettering, and hero portraits in gold arched windows. Hero art and rank crests come straight from the Deadlock API's asset library. Loading is designed too: gold shimmer skeletons stand in for each section, then content rises in, and everything respects the browser's "reduce motion" setting. Fonts are self-hosted, so the strict security policy needs no exceptions.
+
 ## How it works
 
 DeadStats is a static website plus a small [Cloudflare Worker](https://developers.cloudflare.com/workers/). All game data comes from the community-run [Deadlock API](https://api.deadlock-api.com/docs).
@@ -65,7 +69,8 @@ The Deadlock API publishes per-game quantiles (1st to 99th percentile) for metri
 ```
 public/                 The website (static files served as-is)
   *.html                Pages: profile, match, match history, hero meta, live scouting, privacy, 404
-  css/                  Shared theme, front page and per-page styles
+  css/                  Deco theme (deco.css), front page and per-page styles
+  fonts/                Self-hosted Limelight, Jost and Cormorant Garamond
   images/               Icons, share card and artwork
   js/core/              Data and calculations, no DOM: also used by the Worker and tests
   js/ui/                Page controllers and renderers
@@ -153,4 +158,5 @@ For definitions of every statistic, API details and contributor notes, see [docs
 ## Credits
 
 - **Match data:** the community [Deadlock API](https://api.deadlock-api.com/docs).
+- **Fonts:** [Limelight](https://fonts.google.com/specimen/Limelight), [Jost](https://fonts.google.com/specimen/Jost) and [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond), under the SIL Open Font License, self-hosted from Google Fonts.
 - **Disclaimer:** DeadStats is an unofficial fan project, made by Ahsen Jauhar. It is not affiliated with or endorsed by Valve. Deadlock and related names and images are trademarks of Valve Corporation.

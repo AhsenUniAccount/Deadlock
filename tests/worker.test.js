@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker, { applyPreviewTags } from "../worker/index.js";
+import worker, { applyPreviewTags, trimHero } from "../worker/index.js";
 
 // The Worker is exercised end to end with fetch mocked for both the Deadlock
 // API and the Anthropic API, so no network or API key is needed.
@@ -282,4 +282,24 @@ test("every Worker response carries the security headers", async () => {
     assert.match(response.headers.get("Content-Security-Policy"), /frame-ancestors 'none'/);
     assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
   }
+});
+
+test("trimmed hero catalog keeps names, small icons and card art, and drops the rest", () => {
+  const trimmed = trimHero({
+    id: 3,
+    name: "Haze",
+    tags: ["big", "payload"],
+    images: {
+      icon_image_small: "a.png",
+      icon_image_small_webp: "a.webp",
+      icon_hero_card: "c.png",
+      icon_hero_card_webp: "c.webp",
+      background_image: "huge.png",
+    },
+  });
+  assert.deepEqual(trimmed, {
+    id: 3,
+    name: "Haze",
+    images: { icon_image_small: "a.png", icon_image_small_webp: "a.webp", icon_hero_card: "c.png", icon_hero_card_webp: "c.webp" },
+  });
 });

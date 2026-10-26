@@ -1,0 +1,604 @@
+/* Art Deco noir theme for every page: deep green-black, gold linework, Limelight
+   display type. Loaded after the older stylesheets, so it wins on equal
+   specificity; palette-level colours are also set in those files. */
+
+@font-face {
+  font-family: "Limelight";
+  src: url("../fonts/limelight.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Jost";
+  src: url("../fonts/jost.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond-italic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --ink: #0a1210;
+  --ink-2: #0d1917;
+  --teal: #10302d;
+  --gold: #c8a15b;
+  --gold-2: #efd69e;
+  --gold-dim: rgba(200, 161, 91, 0.45);
+  --gold-faint: rgba(200, 161, 91, 0.2);
+  --cream: #f1e8d3;
+  --win: #7ff0bd;
+  --loss: #e28a7e;
+  --accent: #d9b66e;
+  --surface: #0f1d1b;
+  --line: rgba(200, 161, 91, 0.28);
+  --muted: #98a89f;
+  --display: "Limelight", "Iowan Old Style", Georgia, serif;
+  --ui: "Jost", "Avenir Next", "Segoe UI", sans-serif;
+  --flavor: "Cormorant Garamond", Georgia, serif;
+  --n: 14px; /* notch size for chamfered frames */
+  font-family: var(--ui);
+  color: var(--cream);
+  background: var(--ink);
+}
+
+html,
+body {
+  overflow-x: clip; /* decorative sunbursts may extend past the viewport edge */
+}
+body {
+  background:
+    radial-gradient(1000px 440px at 50% -80px, #1e5048, transparent 70%),
+    repeating-linear-gradient(45deg, rgba(200, 161, 91, 0.04) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(-45deg, rgba(200, 161, 91, 0.04) 0 1px, transparent 1px 28px),
+    var(--ink);
+  background-attachment: fixed;
+  font-family: var(--ui);
+}
+main {
+  animation: page-in 0.6s ease both;
+}
+
+/* Type */
+h1,
+h2,
+h3,
+.brand strong,
+.stat-big {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+h1 {
+  color: var(--cream);
+  letter-spacing: 0.01em;
+}
+.eyebrow,
+.field-label,
+label {
+  font-family: var(--ui);
+}
+.eyebrow {
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+h1 em,
+h2 em {
+  color: var(--gold-2);
+  text-shadow: 0 0 34px rgba(200, 161, 91, 0.4);
+}
+
+/* Header: centred brand under a sunburst, then the nav between double rules. */
+.masthead {
+  position: relative;
+  height: auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 26px 0 0;
+  border-bottom: 0;
+  text-align: center;
+}
+.masthead::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -150px;
+  width: min(560px, 100%);
+  height: 280px;
+  margin-left: calc(min(560px, 100%) / -2);
+  background: repeating-conic-gradient(from -90deg at 50% 100%, rgba(200, 161, 91, 0.16) 0 3deg, transparent 3deg 9deg);
+  -webkit-mask: radial-gradient(ellipse at 50% 100%, #000 10%, transparent 70%);
+  mask: radial-gradient(ellipse at 50% 100%, #000 10%, transparent 70%);
+  transform: rotate(180deg);
+  pointer-events: none;
+}
+.brand {
+  position: relative;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--gold-2);
+  letter-spacing: 0.02em;
+}
+.brand::before {
+  display: none;
+}
+.brand strong {
+  font-size: 44px;
+  line-height: 1.05;
+  color: var(--gold-2);
+  text-shadow: 0 0 28px rgba(200, 161, 91, 0.38);
+}
+.brand b {
+  color: var(--gold-2);
+}
+.brand span {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  color: var(--gold);
+}
+.masthead nav {
+  position: relative;
+  width: 100%;
+  height: auto;
+  justify-content: center;
+  gap: 46px;
+  margin-top: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--gold-dim);
+  border-bottom: 1px solid var(--gold-dim);
+}
+.masthead nav::before,
+.masthead nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gold-faint);
+}
+.masthead nav::before {
+  top: 3px;
+}
+.masthead nav::after {
+  bottom: 3px;
+}
+.masthead nav a {
+  padding: 2px 0;
+  border-bottom: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.masthead nav a:hover,
+.masthead nav .nav-current {
+  color: var(--gold-2);
+}
+.masthead nav .nav-current {
+  text-shadow: 0 0 18px rgba(239, 214, 158, 0.4);
+}
+.masthead .connection,
+.masthead > .connection {
+  display: none;
+}
+/* Pages without a nav (match, history chrome) still get the closing rule. */
+.masthead:not(:has(nav)) {
+  padding-bottom: 14px;
+  border-bottom: 3px double var(--gold-dim);
+}
+
+/* Frames: gold border with an inner hairline, on every card-like surface. */
+.panel,
+.search-panel,
+.match-details,
+.mvp-team,
+.team-scoreboard,
+#match-page,
+.feature-card,
+.overview-card,
+.data-note,
+.hero-picker,
+.purchase-card,
+.player-purchases {
+  background: linear-gradient(180deg, #0f1d1b, #0b1513);
+  border: 1px solid var(--gold-dim);
+  border-radius: 0;
+  box-shadow:
+    inset 0 0 0 5px #0d1917,
+    inset 0 0 0 6px var(--gold-faint),
+    0 22px 40px -28px #000;
+}
+.panel,
+.search-panel,
+#match-page {
+  border-top: 3px double var(--gold);
+}
+.toolbar,
+.panel > .toolbar {
+  border-bottom: 1px solid var(--gold-faint);
+}
+.mvp-team {
+  background: linear-gradient(180deg, #112321, #0b1513);
+}
+.data-note {
+  box-shadow: none;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--gold-faint);
+}
+
+/* Chamfered frame: gold edge via a clipped outer layer. For small, self-contained
+   elements only (clip-path would cut off overflowing children). */
+.notch {
+  padding: 1.5px;
+  background: var(--gold);
+  clip-path: polygon(var(--n) 0, calc(100% - var(--n)) 0, 100% var(--n), 100% calc(100% - var(--n)), calc(100% - var(--n)) 100%, var(--n) 100%, 0 calc(100% - var(--n)), 0 var(--n));
+}
+.notch > * {
+  height: 100%;
+  background: linear-gradient(180deg, #0f1d1b, #0b1513);
+  clip-path: polygon(calc(var(--n) - 1px) 0, calc(100% - var(--n) + 1px) 0, 100% calc(var(--n) - 1px), 100% calc(100% - var(--n) + 1px), calc(100% - var(--n) + 1px) 100%, calc(var(--n) - 1px) 100%, 0 calc(100% - var(--n) + 1px), 0 calc(var(--n) - 1px));
+}
+
+/* Ornamental divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 520px;
+  margin: 20px auto;
+  color: var(--gold);
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.divider::after {
+  background: linear-gradient(270deg, transparent, var(--gold));
+}
+.divider i {
+  width: 10px;
+  height: 10px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  box-shadow:
+    -18px 0 0 -3px var(--gold),
+    18px 0 0 -3px var(--gold);
+}
+
+/* Controls */
+button,
+.secondary-button,
+.history-button {
+  border-radius: 0;
+  font-family: var(--ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+button,
+.history-button {
+  border: 1px solid var(--gold-2);
+  background: linear-gradient(180deg, #ecd29a, #c8a15b);
+  color: #1a1408;
+  box-shadow: inset 0 0 0 2px transparent, inset 0 0 0 3px rgba(10, 18, 16, 0.28);
+}
+button:hover,
+.history-button:hover {
+  background: linear-gradient(180deg, #f5dfaa, #d6b068);
+  box-shadow:
+    inset 0 0 0 2px transparent,
+    inset 0 0 0 3px rgba(10, 18, 16, 0.35),
+    0 0 22px -4px rgba(239, 214, 158, 0.6);
+}
+button:active,
+.history-button:active {
+  transform: translateY(1px);
+}
+.secondary-button {
+  border: 1px solid var(--gold);
+  background: linear-gradient(180deg, rgba(200, 161, 91, 0.14), rgba(200, 161, 91, 0.04));
+  color: var(--gold-2);
+  box-shadow: inset 0 0 0 3px #0b1513, inset 0 0 0 4px var(--gold-faint);
+}
+.secondary-button:hover {
+  background: rgba(200, 161, 91, 0.2);
+  box-shadow:
+    inset 0 0 0 3px #0b1513,
+    inset 0 0 0 4px var(--gold-dim),
+    0 0 22px -6px rgba(239, 214, 158, 0.5);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+/* Time chips inside summaries: light outlined tags, not call-to-action buttons. */
+.ai-moment-time {
+  min-width: 64px;
+  border: 1px solid var(--gold-dim);
+  background: rgba(200, 161, 91, 0.08);
+  color: var(--gold-2);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  box-shadow: none;
+}
+.ai-moment-time:hover {
+  border-color: var(--gold-2);
+  background: rgba(200, 161, 91, 0.18);
+  box-shadow: 0 0 16px -4px rgba(239, 214, 158, 0.5);
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select {
+  border-radius: 0;
+  border: 1px solid var(--gold-dim);
+  background: #09110f;
+  color: var(--cream);
+  font-family: var(--ui);
+  padding-left: 16px;
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
+select:focus-visible {
+  border-color: var(--gold-2);
+  box-shadow: 0 0 0 4px rgba(200, 161, 91, 0.2);
+}
+.scope,
+.tier-count {
+  border-radius: 0;
+  border: 1px solid var(--gold-faint);
+  background: rgba(200, 161, 91, 0.06);
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+:focus-visible {
+  outline-color: var(--gold-2);
+}
+
+/* Tables */
+thead {
+  background: rgba(200, 161, 91, 0.07);
+}
+thead th {
+  font-family: var(--ui);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+tbody th {
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--cream);
+}
+tr,
+td,
+th {
+  border-color: var(--gold-faint);
+}
+tbody tr {
+  transition: background 0.2s;
+}
+tbody tr:hover {
+  background: rgba(200, 161, 91, 0.06);
+}
+.outcome-stamp {
+  border-radius: 0;
+  font-family: var(--ui);
+  letter-spacing: 0.2em;
+}
+.outcome-win {
+  color: var(--win);
+}
+.outcome-loss {
+  color: var(--loss);
+}
+
+/* Disclosure panels (match page): Limelight titles with a gold marker. */
+.match-details > summary,
+summary {
+  font-family: var(--display);
+  letter-spacing: 0.01em;
+}
+.match-details[open] > summary {
+  border-bottom: 1px solid var(--gold-faint);
+}
+.beta-tag {
+  border-radius: 0;
+  border-color: var(--gold-dim);
+  background: rgba(200, 161, 91, 0.1);
+  color: var(--gold-2);
+}
+.beta-note {
+  border-radius: 0;
+  border-color: var(--gold-dim);
+  background: rgba(200, 161, 91, 0.06);
+  color: var(--cream);
+}
+footer {
+  font-family: var(--ui);
+  letter-spacing: 0.12em;
+  border-top: 3px double var(--gold-dim);
+}
+
+/* Match numbers and score readouts use the display face. */
+.mvp-kda strong,
+.record strong,
+.scoreboard td {
+  font-family: var(--display);
+  font-weight: 400;
+}
+
+/* ----- Loading and reveal animations ----- */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes glow-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 140% 0;
+  }
+  to {
+    background-position: -40% 0;
+  }
+}
+@keyframes diamonds {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: rotate(45deg) scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Content that arrives after loading rises in, staggered by --i. */
+.reveal {
+  opacity: 0;
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+.fade {
+  animation: glow-in 0.7s ease both;
+}
+
+/* Skeletons: gold shimmer over dark shapes. */
+.skel,
+.skel-text {
+  background: linear-gradient(100deg, rgba(200, 161, 91, 0.12) 30%, rgba(239, 214, 158, 0.34) 50%, rgba(200, 161, 91, 0.12) 70%);
+  background-size: 250% 100%;
+  box-shadow: inset 0 0 0 1px rgba(200, 161, 91, 0.16);
+  animation: shimmer 1.6s linear infinite;
+  color: transparent !important;
+  text-shadow: none !important;
+  border-radius: 0;
+  pointer-events: none;
+}
+.skel-text {
+  display: inline-block;
+  min-width: 4.2ch;
+  min-height: 0.9em;
+}
+.skel * {
+  visibility: hidden;
+}
+
+/* A slow rotating sunburst marks the page while the first data loads. */
+.loading-sun {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin: 24px auto;
+}
+.loading-sun::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(var(--gold) 0 6deg, transparent 6deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 38%, #000 40%, #000 70%, transparent 72%);
+  mask: radial-gradient(circle, transparent 38%, #000 40%, #000 70%, transparent 72%);
+  animation: spin-slow 6s linear infinite;
+}
+
+/* AI review in progress: three pulsing diamonds before the status text. */
+#ai-review-button:disabled ~ #ai-review-status::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 18px 1px 8px;
+  background: var(--gold-2);
+  transform: rotate(45deg);
+  box-shadow:
+    14px 0 0 var(--gold),
+    28px 0 0 var(--gold-2);
+  animation: diamonds 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main,
+  .reveal,
+  .fade,
+  .skel,
+  .skel-text,
+  .loading-sun::before,
+  #ai-review-button:disabled ~ #ai-review-status::before {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .masthead nav {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    padding: 10px 8px;
+  }
+  .masthead nav a {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+  }
+  .brand strong {
+    font-size: 34px;
+  }
+}

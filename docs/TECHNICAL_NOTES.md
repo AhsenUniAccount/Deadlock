@@ -87,7 +87,7 @@ The Worker uses the same `public/js/core/common.js` request helper for the AI co
 - `public/sitemap.xml`, `public/robots.txt`: crawl discovery for the canonical Overview, Hero Meta and Live Scouting pages on `deadstats.ahsenjauhar.workers.dev`.
 
 - `public/css/deadlock-theme.css`: shared visual theme (period-style headings, squared panels, team accents and report stamps), loaded after the base styles.
-- `public/images/city-silhouette.svg`, `public/images/tracker-seal.svg`: original decorative header assets, stored locally.
+- `public/images/tracker-seal.svg`: the original emblem, used for the favicon and 404 page.
 
 - `public/index.html`: search form and results structure.
 - `public/404.html`, `public/images/404-character.png`: custom Cloudflare Pages not-found page and its character artwork.
@@ -239,3 +239,12 @@ Run `npm test` after changing calculations or request behavior. For a browser sm
 - Hero meta: `public/js/ui/tier-lists.js` fetches aggregates and assets, then delegates count validation and rate calculations to `public/js/core/tier-stats.js`.
 
 Function comments describe purpose and non-obvious constraints rather than each statement. When changing a calculation, preserve the distinction between unavailable (`null`) and a measured zero, and add a focused test for the changed rule. The current tests cover calculations and overview interactions; they do not replace the browser checks above for SVG layout and tooltips.
+
+
+## Design system and loading states
+
+- `public/css/deco.css` holds the design tokens (`--gold`, `--ink`, `--win`, `--loss`, fonts, notch size), the centred brand header, frames, controls, tables and every animation. Older stylesheets are retinted to the same palette; `deco.css` loads after them and wins on equal specificity. On the front page `home.css` loads last and styles the landing hero, emblem, plaques, arches, ticket and gauges.
+- `.notch` is a chamfered gold frame built with two nested `clip-path` layers; use it only on small self-contained elements, because clipping would cut off overflowing children. Cards that may contain tooltips use the box-shadow double-line frame instead.
+- **Skeletons:** `ProfileView.showSkeleton()` and `showIdentitySkeleton()` (`public/js/ui/profile-view.js`) fill each profile section with `.skel` placeholders when a player starts loading (or immediately for a shared `?player=` link). Renderers replace them with real content, adding `.reveal` and a `--i` stagger index so items rise in one after another. Gauges animate their fill and diamond with delays derived from the same index.
+- **Motion:** every animation is disabled under `prefers-reduced-motion: reduce`. When adding motion, define it in `deco.css` and include it in that media query.
+- **Images:** hero portraits use the catalog's `icon_hero_card_webp` (the Worker's trimmed catalog keeps it), and rank crests use `images.large_webp` from `/v1/assets/ranks`. Both load from `assets-bucket.deadlock-api.com`, which the content security policy allows.
