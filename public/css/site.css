@@ -17,27 +17,16 @@
   margin-left: 6px;
 }
 
-/* Page headings: centred, with a highlighted word. */
-.page-heading {
-  max-width: 880px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-.page-heading .page-title-row {
-  justify-content: center;
-}
+/* Page headings: left-aligned, with a highlighted word. */
 .page-heading .intro {
   max-width: 680px;
-  margin-left: auto;
-  margin-right: auto;
-  color: #b8c5be;
+  color: #b9bec4;
 }
 h1 em,
 h2 em {
   font-style: normal;
   color: var(--accent);
-  text-shadow: 0 0 40px #d9b66e33;
+  text-shadow: 0 0 40px color-mix(in srgb, var(--hero) 20%, transparent);
 }
 
 /* Pill controls with the brass focus glow. List-like buttons keep their shape. */
@@ -62,7 +51,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visib
 select:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px #d9b66e26;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hero) 15%, transparent);
 }
 
 /* Rounded cards with the front page's soft gradient. */
@@ -76,7 +65,7 @@ select:focus-visible {
 }
 .panel,
 .search-panel {
-  background: linear-gradient(180deg, #172824, #13211e);
+  background: linear-gradient(180deg, #191d23, #15181d);
 }
 .search-panel {
   border-top: 3px solid var(--accent);
@@ -84,8 +73,8 @@ select:focus-visible {
 #match-page {
   border-top: 3px solid var(--accent);
   background:
-    radial-gradient(ellipse at 0% 0%, #20383255, transparent 55%),
-    #152521;
+    radial-gradient(ellipse at 0% 0%, #23283155, transparent 55%),
+    #171b20;
 }
 .toolbar,
 .panel > .toolbar {
@@ -124,7 +113,7 @@ select:focus-visible {
 }
 .policy p,
 .policy li {
-  color: #bfcbc5;
+  color: #c0c4ca;
   font-size: 15px;
   line-height: 1.7;
 }

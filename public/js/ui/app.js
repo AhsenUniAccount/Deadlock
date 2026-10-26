@@ -6,6 +6,8 @@ import PlayerTrends from "../core/player-trends.js";
 import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "../core/common.js";
 import PlayerPercentiles from "../core/player-percentiles.js";
 import ProfileView from "./profile-view.js";
+import { countUp } from "./count-up.js";
+import { resetHeroTheme } from "./hero-theme.js";
 
 // Overview page controller: search suggestions, selected profile, then match history.
 // Statistics stay in stats.js so they can be tested without a browser.
@@ -39,6 +41,8 @@ function resetResults(message) {
   document.querySelector("#stats-scope").textContent = "";
   document.querySelector("#recent-when").textContent = "Latest game";
   ProfileView.clearPlaqueSkeleton();
+  // The accent returns to the site default until the next player's main hero loads.
+  resetHeroTheme();
   document.querySelector("#history-link").hidden = true;
   resultsBody.replaceChildren();
   summary.textContent = message;
@@ -501,11 +505,8 @@ function renderResults(player, { totals, heroes }, names) {
   }
   document.querySelector("#table-caption").textContent =
     `Recent hero results for ${player.personaname}`;
-  document.querySelector("#overall-rate").textContent = formatWinRate(
-    totals.wins,
-    totals.wins + totals.losses,
-  );
-  document.querySelector("#record-detail").textContent = `${totals.wins}W – ${totals.losses}L`;
+  countUp(document.querySelector("#overall-rate"), formatWinRate(totals.wins, totals.wins + totals.losses));
+  countUp(document.querySelector("#record-detail"), `${totals.wins}W – ${totals.losses}L`);
   document.querySelector("#results-scope").textContent =
     `${totals.matches} recorded matches · ${heroes.length} heroes`;
   ProfileView.clearPlaqueSkeleton();

@@ -289,6 +289,7 @@ test("trimmed hero catalog keeps names, small icons and card art, and drops the 
     id: 3,
     name: "Haze",
     tags: ["big", "payload"],
+    colors: { ui: [1, 2, 3], style_hex: "#C0FFEE" },
     images: {
       icon_image_small: "a.png",
       icon_image_small_webp: "a.webp",
@@ -301,5 +302,6 @@ test("trimmed hero catalog keeps names, small icons and card art, and drops the 
     id: 3,
     name: "Haze",
     images: { icon_image_small: "a.png", icon_image_small_webp: "a.webp", icon_hero_card: "c.png", icon_hero_card_webp: "c.webp" },
+    colors: { style_hex: "#C0FFEE" },
   });
 });

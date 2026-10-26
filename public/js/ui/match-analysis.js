@@ -283,7 +283,7 @@ const MatchAnalysis = (() => {
           x2: 955,
           y1: y(f * max),
           y2: y(f * max),
-          stroke: f === 0 ? "#d7bf83" : "#394132",
+          stroke: f === 0 ? "currentColor" : "#2a313b",
         }),
         el(
           "text",
@@ -314,7 +314,7 @@ const MatchAnalysis = (() => {
       el("polyline", {
         points: points.map((p) => `${x(p.time)},${y(p.souls)}`).join(" "),
         fill: "none",
-        stroke: "#d7bf83",
+        stroke: "currentColor",
         "stroke-width": 3,
       }),
     );

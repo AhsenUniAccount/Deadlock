@@ -29,7 +29,9 @@ DeadStats is a free stats site for [Deadlock](https://store.steampowered.com/app
 
 ## Design
 
-An Art Deco noir look inspired by Deadlock's own occult 1920s city: deep green-black, gold double-line frames and chamfered plaques, a sunburst behind each player's emblem, Limelight display lettering, and hero portraits in gold arched windows. Hero art and rank crests come straight from the Deadlock API's asset library. Loading is designed too: gold shimmer skeletons stand in for each section, then content rises in, and everything respects the browser's "reduce motion" setting. Fonts are self-hosted, so the strict security policy needs no exceptions.
+A "character select" look taken from Deadlock's own menus: angled panels, condensed italic lettering, and an accent colour that follows each player's main hero. A profile opens on a large card of that hero, the player's name, skewed stat chips and a glowing rank crest, followed by angled hero cards and a last-match card stamped Victory or Defeat. Hero art and rank crests come straight from the Deadlock API's asset library.
+
+Motion is part of the design: shimmer skeletons stand in for each section while it loads, numbers count up, bars grow in, sections slide in as you scroll, cards lift and tilt under the pointer, and the header compacts once you scroll. All of it switches off under the browser's "reduce motion" setting. Fonts are self-hosted, so the strict security policy needs no exceptions.
 
 ## How it works
 
@@ -69,8 +71,8 @@ The Deadlock API publishes per-game quantiles (1st to 99th percentile) for metri
 ```
 public/                 The website (static files served as-is)
   *.html                Pages: profile, match, match history, hero meta, live scouting, privacy, 404
-  css/                  Deco theme (deco.css), front page and per-page styles
-  fonts/                Self-hosted Limelight, Jost and Cormorant Garamond
+  css/                  Theme and motion (theme.css), front page and per-page styles
+  fonts/                Self-hosted Barlow and Barlow Condensed
   images/               Icons, share card and artwork
   js/core/              Data and calculations, no DOM: also used by the Worker and tests
   js/ui/                Page controllers and renderers
@@ -91,7 +93,7 @@ You need [Node.js](https://nodejs.org/) 22 or newer.
 ```sh
 npm install
 npm run dev:offline   # site and Worker at http://127.0.0.1:8787, no Cloudflare account needed
-npm test              # 89 tests: calculations, page behaviour and Worker routes
+npm test              # 93 tests: calculations, page behaviour and Worker routes
 npm run check         # every import, page asset and CSS url() points at a real file
 ```
 
@@ -158,5 +160,5 @@ For definitions of every statistic, API details and contributor notes, see [docs
 ## Credits
 
 - **Match data:** the community [Deadlock API](https://api.deadlock-api.com/docs).
-- **Fonts:** [Limelight](https://fonts.google.com/specimen/Limelight), [Jost](https://fonts.google.com/specimen/Jost) and [Cormorant Garamond](https://fonts.google.com/specimen/Cormorant+Garamond), under the SIL Open Font License, self-hosted from Google Fonts.
+- **Fonts:** [Barlow](https://fonts.google.com/specimen/Barlow) and [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed), under the SIL Open Font License, self-hosted from Google Fonts.
 - **Disclaimer:** DeadStats is an unofficial fan project, made by Ahsen Jauhar. It is not affiliated with or endorsed by Valve. Deadlock and related names and images are trademarks of Valve Corporation.

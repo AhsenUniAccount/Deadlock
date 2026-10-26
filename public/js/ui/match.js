@@ -2,6 +2,7 @@ import DeadlockMatchStats from "../core/match-stats.js";
 import SoulsChart from "./souls-chart.js";
 import MatchAnalysis from "./match-analysis.js";
 import ReviewPanel from "./review-panel.js";
+import { applyHeroTheme } from "./hero-theme.js";
 import { request, errorMessage, dateTime, cell, portrait, assetCatalog } from "../core/common.js";
 
 // Standalone match-page controller. Data normalization lives in match-stats.js;
@@ -289,6 +290,9 @@ document.addEventListener("match-player-select", (event) =>
 // Selection is independent of the data-loading and chart-rendering functions.
 function renderPlayerSelection() {
   const { selectedSlot } = matchView;
+  // The page accent follows the selected player's hero.
+  const selected = matchView.match.players.find((player) => player.slot === selectedSlot);
+  applyHeroTheme(matchView.heroes.get(selected?.heroId));
   for (const row of document.querySelectorAll("#match-scoreboard tbody tr")) {
     const active = row.dataset.slot === String(selectedSlot);
     row.classList.toggle("selected-row", active);

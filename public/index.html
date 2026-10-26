@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0a1210" />
+    <meta name="theme-color" content="#0a0c0f" />
     <title>Deadlock Match Analysis &amp; Player Stats | DeadStats</title>
     <meta
       name="description"
@@ -23,14 +23,15 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Deadlock Match Analysis &amp; Player Stats | DeadStats" />
     <meta name="twitter:description" content="Find out why you won or lost your last Deadlock match: lane results, lead swings, deaths and objectives in plain English, plus match history and hero win rates." />
-    <link rel="preload" href="fonts/limelight.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="fonts/jost.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/barlow-condensed-800-italic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/deadlock-theme.css" />
     <link rel="stylesheet" href="css/site.css" />
-    <link rel="stylesheet" href="css/deco.css" />
+    <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/home.css" />
     <script type="module" src="js/ui/app.js"></script>
+    <script type="module" src="js/ui/motion.js"></script>
   </head>
   <body class="home">
     <main>
@@ -139,77 +140,80 @@
       </section>
 
       <section class="profile player-only" aria-label="Player overview">
-        <div class="emblem">
-          <div class="rays" aria-hidden="true"></div>
-          <div id="selected-player" class="emblem-id">No player selected</div>
-          <div class="divider" aria-hidden="true"><i></i></div>
+        <div class="banner">
+          <div class="banner-art" data-parallax="0.12" aria-hidden="true"></div>
+          <div id="main-card" class="main-card" aria-hidden="true">
+            <div class="main-card-edge"></div>
+            <div class="main-card-art"></div>
+            <span id="main-tag" class="main-tag"></span>
+          </div>
+          <div class="who">
+            <div id="selected-player" class="who-id">No player selected</div>
+            <div class="chips">
+              <div class="chip">
+                <div><small>Win rate</small><b id="overall-rate">—</b></div>
+              </div>
+              <div class="chip">
+                <div><small>Last 20</small><b id="record-detail">—</b></div>
+              </div>
+              <div class="chip">
+                <div><small>Latest</small><b id="latest-result">—</b></div>
+              </div>
+            </div>
+            <div class="profile-actions">
+              <a
+                id="history-link"
+                class="history-button"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >Match history ↗</a
+              >
+              <button id="copy-profile" class="secondary-button" type="button">
+                Copy profile link
+              </button>
+            </div>
+          </div>
           <div class="rankline">
             <img id="rank-crest" class="rank-crest" alt="" hidden />
             <div class="rank-name">
-              <small>Rank</small>
               <span id="player-rank"></span>
+              <small>Rank</small>
             </div>
-          </div>
-          <div class="plaques">
-            <div class="notch">
-              <div class="plaque">
-                <b id="overall-rate">—</b><small>Win rate</small>
-              </div>
-            </div>
-            <div class="notch">
-              <div class="plaque">
-                <b id="record-detail">—</b><small>Last 20 matches</small>
-              </div>
-            </div>
-            <div class="notch">
-              <div class="plaque">
-                <b id="latest-result">—</b><small>Latest match</small>
-              </div>
-            </div>
-          </div>
-          <div class="profile-actions">
-            <a
-              id="history-link"
-              class="history-button"
-              target="_blank"
-              rel="noopener noreferrer"
-              hidden
-              >Match history ↗</a
-            >
-            <button id="copy-profile" class="secondary-button" type="button">
-              Copy profile link
-            </button>
           </div>
         </div>
 
-        <div class="deco-sec">
-          <p class="eyebrow">Last 30 days</p>
-          <h2>Most played</h2>
-        </div>
-        <div id="top-heroes" class="triptych" aria-live="polite"></div>
-
-        <div class="deco-sec">
-          <p id="recent-when" class="eyebrow">Latest game</p>
-          <h2>Most recent match</h2>
-        </div>
-        <div id="recent-card" class="notch ticket-frame">
-          <div id="recent-match" class="ticket"></div>
+        <div class="split">
+          <div>
+            <div class="sec-h">
+              <h2>Most played</h2>
+              <span>Last 30 days</span>
+            </div>
+            <div id="top-heroes" class="hero-cards" aria-live="polite"></div>
+          </div>
+          <div>
+            <div class="sec-h">
+              <h2>Last match</h2>
+              <span id="recent-when">Latest game</span>
+            </div>
+            <div id="recent-card" class="last-card">
+              <div id="recent-match" class="last-body"></div>
+            </div>
+          </div>
         </div>
 
         <section id="player-stats" aria-labelledby="stats-heading">
-          <div class="deco-sec">
-            <p id="stats-badge" class="eyebrow"></p>
-            <h2 id="stats-heading">How you <em>stack up</em></h2>
-            <p id="stats-scope" class="deco-note"></p>
+          <div class="sec-h">
+            <h2 id="stats-heading">How you stack up</h2>
+            <span id="stats-badge"></span>
           </div>
-          <div class="notch">
-            <div id="percentile-grid" class="gauges"></div>
-          </div>
-          <div class="gauge-legend" aria-hidden="true">
-            <span class="tone-positive">◆ Top 25%</span>
-            <span class="tone-neutral">◆ Middle</span>
-            <span class="tone-negative">◆ Bottom 25%</span>
-            <span>│ Median game</span>
+          <p id="stats-scope" class="stats-note"></p>
+          <div id="percentile-grid" class="pgrid"></div>
+          <div class="pgrid-legend" aria-hidden="true">
+            <span class="tone-positive">Top 25%</span>
+            <span class="tone-neutral">Middle</span>
+            <span class="tone-negative">Bottom 25%</span>
+            <span class="tone-median">Median game</span>
           </div>
         </section>
       </section>

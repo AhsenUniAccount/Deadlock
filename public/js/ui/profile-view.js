@@ -1,4 +1,6 @@
 import { cell, portrait } from "../core/common.js";
+import { countUp } from "./count-up.js";
+import { accentColor, applyHeroTheme } from "./hero-theme.js";
 
 // Renders the player profile sections. Calculations live in player-percentiles.js
 // and player-trends.js; this module only builds DOM from their results.
@@ -20,14 +22,14 @@ const ProfileView = (() => {
     element.append(...children);
     return element;
   };
-  // New content rises in, staggered by position (see .reveal in deco.css).
+  // New content rises in, staggered by position (see .reveal in theme.css).
   const reveal = (element, index) => {
     element.className += " reveal";
     element.style.setProperty("--i", String(index));
     return element;
   };
 
-  // ----- Loading placeholders: gold shimmer shapes in place of the real content. -----
+  // ----- Loading placeholders: shimmer shapes in place of the real content. -----
   const PLAQUES = ["overall-rate", "record-detail", "latest-result"];
   const skeletonLine = (width) => {
     const line = div("skel skel-line");
@@ -42,21 +44,18 @@ const ProfileView = (() => {
     byId("rank-crest").hidden = true;
     byId("player-rank").className = "skel-text";
     byId("player-rank").textContent = "Loading";
-    byId("top-heroes").replaceChildren(
-      ...[0, 1, 2].map((i) =>
-        div("arch skel-arch", div("arch-win skel"), div("arch-plate skel", cell("b", "Hero"), cell("small", "00 games"))),
-      ),
-    );
+    byId("main-card").className = "main-card is-loading";
+    byId("main-tag").textContent = "";
+    byId("top-heroes").replaceChildren(...[0, 1, 2].map(() => div("hero-card skel-card skel")));
     byId("top-heroes").setAttribute("aria-busy", "true");
+    byId("recent-card").className = "last-card";
     byId("recent-match").replaceChildren(
-      div("skel skel-crest"),
-      div("", ...[70, 95, 60].map(skeletonLine)),
-      div("skel skel-line"),
+      div("skel skel-stamp"),
+      ...[45, 70, 55].map(skeletonLine),
+      div("skel skel-button"),
     );
     byId("percentile-grid").replaceChildren(
-      ...Array.from({ length: 10 }, (_, i) =>
-        div("gauge skel-gauge", div("skel skel-line"), div("skel skel-line")),
-      ),
+      ...Array.from({ length: 10 }, () => div("p skel-row", skeletonLine(80), div("skel skel-bar"))),
     );
     byId("percentile-grid").setAttribute("aria-busy", "true");
   }
@@ -86,8 +85,8 @@ const ProfileView = (() => {
     }
   }
 
-  // One gauge per stat: name and value, a gold track with a diamond at your
-  // percentile and a tick at the median game, then the typical value and rank.
+  // One row per stat: name and typical value, your value (counting up), a skewed
+  // bar with a tick at the median game, and the percentile chip.
   function renderPercentiles(rows, scope, badge = "") {
     const list = byId("percentile-grid");
     list.replaceChildren();
@@ -95,28 +94,35 @@ const ProfileView = (() => {
     byId("stats-scope").textContent = scope;
     byId("stats-badge").textContent = badge;
     rows.forEach((row, index) => {
-      const item = div(`gauge tone-${row.tone}`);
-      item.style.setProperty("--p", `${Math.max(2, Math.min(98, row.percentile))}%`);
+      const tone = { positive: "pos", negative: "neg" }[row.tone] || "mid";
+      const item = div(`p ${tone}`);
       item.setAttribute("role", "group");
       item.setAttribute("aria-label", `${row.label}: ${row.value}, ${row.display} of games at this rank`);
-      const track = div("gauge-track", div("gauge-fill"), div("gauge-median"), div("gauge-diamond"));
-      track.setAttribute("aria-hidden", "true");
+      const value = cell("div", "");
+      value.className = "p-value";
+      const bar = div("p-bar", document.createElement("i"));
+      bar.setAttribute("aria-hidden", "true");
+      bar.style.setProperty("--p", `${Math.max(2, Math.min(100, row.percentile))}%`);
+      const chip = div("p-chip", cell("span", row.display));
       item.append(
-        div("gauge-head", cell("b", row.label), cell("span", row.value)),
-        track,
         div(
-          "gauge-sub",
-          cell("span", `Typical ${row.typical}${row.key === "deaths" ? " · lower is better" : ""}`),
-          cell("i", row.display),
+          "p-label",
+          cell("b", row.label),
+          cell("small", `Typical ${row.typical}${row.key === "deaths" ? " · lower is better" : ""}`),
         ),
+        value,
+        bar,
+        chip,
       );
-      // The gauge fill and diamond animate with their own delays.
-      item.style.setProperty("--i", String(Math.floor(index / 2)));
-      list.append(reveal(item, Math.floor(index / 2)));
+      // Rows fill two columns, so neighbours share a stagger step.
+      const step = Math.floor(index / 2);
+      item.style.setProperty("--i", String(step));
+      list.append(reveal(item, step));
+      countUp(value, row.value, 900);
     });
   }
 
-  // Replaces the gauges with a message when the comparison is unavailable.
+  // Replaces the stat rows with a message when the comparison is unavailable.
   function statsMessage(text) {
     const list = byId("percentile-grid");
     list.removeAttribute("aria-busy");
@@ -124,31 +130,51 @@ const ProfileView = (() => {
     byId("stats-scope").textContent = "";
   }
 
+  // Most-played heroes as angled cards in each hero's own colour. The first is
+  // the player's main hero: its art fills the banner and its colour themes the page.
   function renderTopHeroes(heroes, names) {
     const list = byId("top-heroes");
     list.removeAttribute("aria-busy");
     list.replaceChildren();
+    const mainCard = byId("main-card");
+    mainCard.className = "main-card";
     if (!heroes.length) {
+      mainCard.className = "main-card is-empty";
+      byId("main-tag").textContent = "";
       list.append(cell("p", "No standard matches in the last 30 days."));
       return;
     }
+    const main = names.get(heroes[0].heroId);
+    const mainArt = heroCard(main);
+    if (mainArt) {
+      mainCard.querySelector?.(".main-card-art")?.style.setProperty("background-image", `url("${mainArt}")`);
+      document.querySelector(".banner-art")?.style.setProperty("background-image", `url("${mainArt}")`);
+    }
+    byId("main-tag").textContent = `Main · ${main?.name || `Hero ${heroes[0].heroId}`}`;
+    mainCard.className = "main-card fade";
+    applyHeroTheme(main);
     heroes.forEach((hero, index) => {
       const info = names.get(hero.heroId);
       const name = info?.name || `Hero ${hero.heroId}`;
       const kda = [hero.kills, hero.deaths, hero.assists].every((n) => n !== null)
         ? ` · ${hero.kills.toFixed(1)} / ${hero.deaths.toFixed(1)} / ${hero.assists.toFixed(1)}`
         : "";
-      const win = div(
-        "arch-win",
-        portrait(heroCard(info), name, "arch-pic"),
-        div("arch-big", document.createTextNode(`${Math.round(hero.winRate * 100)}%`)),
+      const rate = `${Math.round(hero.winRate * 100)}%`;
+      const card = div(
+        "hero-card",
+        div("hc-edge"),
+        portrait(heroCard(info), name, "hc-art"),
+        div("hc-rate", document.createTextNode(rate)),
+        div(
+          "hc-text",
+          cell("b", name),
+          cell("small", `${hero.games} game${hero.games === 1 ? "" : "s"}${kda}`),
+          div("hc-bar", document.createElement("i")),
+        ),
       );
-      const plate = div(
-        "arch-plate",
-        cell("b", name),
-        cell("small", `${hero.games} game${hero.games === 1 ? "" : "s"}${kda}`),
-      );
-      list.append(reveal(div("arch", win, plate), index));
+      card.style.setProperty("--c", accentColor(info?.colors?.style_hex) || "var(--hero)");
+      card.style.setProperty("--w", rate);
+      list.append(reveal(card, index));
     });
   }
 
@@ -156,6 +182,7 @@ const ProfileView = (() => {
   // and top finding once the match metadata loads.
   function renderRecentMatch(match, names, url) {
     const container = byId("recent-match");
+    const card = byId("recent-card");
     container.replaceChildren();
     const result = byId("latest-result");
     result.className = "";
@@ -167,48 +194,55 @@ const ProfileView = (() => {
     const info = names.get(match.hero_id);
     const name = info?.name || `Hero ${match.hero_id}`;
     const outcome = match.player_match_outcome === 1 ? "win" : match.player_match_outcome === 2 ? "loss" : "other";
-    const label = { win: "Victory", loss: "Defeat", other: "Played" }[outcome];
     result.textContent = { win: "Win", loss: "Loss", other: "—" }[outcome];
     result.dataset.result = outcome;
-    const when = new Date(match.start_time * 1000).toLocaleString([], { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    card.className = "last-card fade";
+    card.dataset.result = outcome;
+    const art = heroCard(info);
+    if (art) card.style.setProperty("--art", `url("${art}")`);
+    const when = new Date(match.start_time * 1000).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     byId("recent-when").textContent = `${when}${Number.isFinite(match.match_duration_s) ? ` · ${clock(match.match_duration_s)}` : ""}`;
     const kda = [match.player_kills, match.player_deaths, match.player_assists]
       .map((n) => (Number.isFinite(n) ? n : "—"))
       .join(" / ");
-    const title = cell("h3", `${name} `);
-    title.append(cell("small", kda));
+    const stamp = div("last-stamp", cell("span", { win: "Victory", loss: "Defeat", other: "Played" }[outcome]));
     // Until the match's detailed data loads, describe the game from history alone.
     const perMinute =
       Number.isFinite(match.net_worth) && match.match_duration_s > 0
-        ? ` ${Math.round(match.net_worth / (match.match_duration_s / 60)).toLocaleString("en-US")} souls per minute.`
+        ? ` · ${Math.round(match.net_worth / (match.match_duration_s / 60)).toLocaleString("en-US")} souls/min`
         : "";
-    const line = cell("div", `Played for ${Number.isFinite(match.match_duration_s) ? clock(match.match_duration_s) : "an unknown time"}.${perMinute}`);
-    line.id = "recent-line";
-    line.className = "ticket-line";
-    const link = cell("a", "View breakdown");
+    const detail = cell("small", `${Number.isFinite(match.match_duration_s) ? clock(match.match_duration_s) : "Unknown length"}${perMinute}`);
+    detail.id = "recent-detail";
+    const point = div("last-point");
+    point.id = "recent-point";
+    point.hidden = true;
+    const link = cell("a", "View breakdown ↗");
     link.className = "history-button";
     link.href = url;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    const verdict = cell("b", label);
-    verdict.dataset.result = outcome;
-    container.append(
-      portrait(heroCard(info), name, "ticket-crest"),
-      div("", title, line),
-      div("ticket-result", verdict, cell("small", `Match #${match.match_id}`), link),
-    );
-    container.className = "ticket fade";
+    const kdaLine = cell("div", "");
+    kdaLine.className = "last-kda";
+    container.append(stamp, cell("h3", name), kdaLine, detail, point, link);
+    countUp(kdaLine, kda, 800);
   }
 
   function addRecentSummary(you, point, lobbySize) {
-    const line = document.querySelector("#recent-line");
-    if (!line) return;
+    const detail = document.querySelector("#recent-detail");
+    const box = document.querySelector("#recent-point");
+    if (!detail || !box) return;
     const parts = [];
-    if (point) parts.push(`${point.title}${point.timeS === null ? "" : ` at ${clock(point.timeS)}`}.`);
-    if (you.finalSoulsRankInLobby)
-      parts.push(`${ordinal(you.finalSoulsRankInLobby)}${lobbySize ? ` of ${lobbySize}` : ""} in souls${you.mvpRank ? `, and Match MVP number ${you.mvpRank}` : ""}.`);
-    else if (you.mvpRank) parts.push(`Match MVP number ${you.mvpRank}.`);
-    line.textContent = parts.join(" ");
+    if (you.finalSoulsRankInLobby) parts.push(`${ordinal(you.finalSoulsRankInLobby)}${lobbySize ? ` of ${lobbySize}` : ""} in souls`);
+    if (you.mvpRank) parts.push(`MVP #${you.mvpRank}`);
+    if (parts.length) detail.textContent = parts.join(" · ");
+    if (point) {
+      box.replaceChildren();
+      box.dataset.impact = point.tone;
+      if (point.timeS !== null) box.append(cell("b", clock(point.timeS)));
+      box.append(cell("span", point.title));
+      box.hidden = false;
+      box.className = "last-point fade";
+    }
   }
 
   function renderPatterns(result) {

@@ -58,6 +58,7 @@ const pick = (source, keys) => Object.fromEntries(keys.filter((k) => source?.[k]
 export const trimHero = (hero) => ({
   ...pick(hero, ["id", "name"]),
   images: pick(hero.images, ["icon_image_small", "icon_image_small_webp", "icon_hero_card", "icon_hero_card_webp"]),
+  colors: pick(hero.colors, ["style_hex"]),
 });
 export const trimItem = (item) =>
   pick(item, [

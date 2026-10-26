@@ -1,6 +1,7 @@
 import DeadlockStats from "../core/stats.js";
 import PlayerTrends from "../core/player-trends.js";
 import { request, errorMessage, dateTime, cell, portrait, heroCell, assetCatalog } from "../core/common.js";
+import { applyHeroTheme } from "./hero-theme.js";
 
 // Match history tab, opened from the player profile as history.html?player=ID.
 // Each row links to the match breakdown with this player selected.
@@ -87,6 +88,9 @@ async function load() {
     return;
   }
   const games = PlayerTrends.scoredGames(recent);
+  // The page accent follows the player's most-played hero in these games.
+  const [main] = PlayerTrends.topHeroes(recent, 1);
+  if (main) applyHeroTheme(names.get(main.heroId));
   body.replaceChildren(...recent.map((match) => renderRow(match, names, id, games)));
   document.querySelector("#history-scope").textContent = `Latest ${recent.length} recorded matches`;
   status.textContent = recent.length

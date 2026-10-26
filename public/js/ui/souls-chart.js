@@ -292,7 +292,7 @@ const SoulsChart = (() => {
           y1: y(souls),
           x2: right,
           y2: y(souls),
-          stroke: "#394132",
+          stroke: "#2a313b",
         }),
       );
       svg.append(
@@ -420,7 +420,7 @@ const SoulsChart = (() => {
               d: "M2 3h2l2 10h9l3-7H5 M7 16h.01 M14 16h.01",
               transform: `translate(${centerX - 10} ${centerY - 10})`,
               fill: "none",
-              stroke: "#d7bf83",
+              stroke: "currentColor",
               "stroke-width": 2,
               "stroke-linecap": "round",
               "stroke-linejoin": "round",
