@@ -793,3 +793,15 @@ footer a:hover,
 #advantage-chart {
   color: var(--hero);
 }
+
+/* Open dropdowns always sit in front. Revealed and hovered sections each form
+   their own layer, so the section holding an open list is lifted above the
+   sections after it (the sticky header stays on top). */
+.player-suggestions,
+.hero-picker-options {
+  z-index: 100;
+}
+:is(.home-search, .search-panel, .panel, .match-details, .sr):has(.player-suggestions:not([hidden]), .hero-picker[open]) {
+  position: relative;
+  z-index: 50;
+}

@@ -40,6 +40,8 @@ body.home.has-player .landing-only {
   margin: 34px auto 0;
   padding: 7px 7px 7px 14px;
   isolation: isolate;
+  /* Its own layer, so the suggestion list sits above the cards that follow. */
+  z-index: 40;
 }
 .home-search::before {
   content: "";
